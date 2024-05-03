@@ -57,5 +57,14 @@ in {
                 protocol: TCP
       ''
     ];
+
+    resources = {
+      "apps/v1".Deployment.sops-sops-secrets-operator = {
+        metadata.namespace = namespace;
+      };
+      v1.ServiceAccount.sops-sops-secrets-operator = {
+        metadata.namespace = namespace;
+      };
+    };
   };
 }
