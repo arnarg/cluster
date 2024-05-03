@@ -8,7 +8,7 @@
 
   namespace = "sops";
 in {
-  applications.sops = {
+  applications.sops-secrets-operator = {
     inherit namespace;
     createNamespace = true;
 
