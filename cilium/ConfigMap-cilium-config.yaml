@@ -76,7 +76,7 @@ data:
   node-port-bind-protection: "true"
   nodes-gc-interval: 5m0s
   operator-api-serve-addr: 127.0.0.1:9234
-  policy-audit-mode: "true"
+  policy-audit-mode: "false"
   preallocate-bpf-maps: "false"
   procfs: /host/proc
   proxy-connect-timeout: "2"
