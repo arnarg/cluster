@@ -23,7 +23,7 @@
 
       # Policy enforcement.
       policyEnforcementMode = "always";
-      policyAuditMode = true;
+      policyAuditMode = false;
 
       # Set Cilium as a kube-proxy replacement.
       kubeProxyReplacement = true;
