@@ -1,0 +1,172 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: csi-driver-nfs
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: csi-driver-nfs
+    app.kubernetes.io/version: v4.5.0
+    helm.sh/chart: csi-driver-nfs-v4.5.0
+  name: csi-nfs-controller
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: csi-nfs-controller
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: csi-nfs-controller
+        app.kubernetes.io/instance: csi-driver-nfs
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: csi-driver-nfs
+        app.kubernetes.io/version: v4.5.0
+        helm.sh/chart: csi-driver-nfs-v4.5.0
+    spec:
+      containers:
+        - args:
+            - -v=2
+            - --csi-address=$(ADDRESS)
+            - --leader-election
+            - --leader-election-namespace=kube-system
+            - --extra-create-metadata=true
+            - --timeout=1200s
+          env:
+            - name: ADDRESS
+              value: /csi/csi.sock
+          image: registry.k8s.io/sig-storage/csi-provisioner:v3.6.1
+          imagePullPolicy: IfNotPresent
+          name: csi-provisioner
+          resources:
+            limits:
+              memory: 400Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
+          securityContext:
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - mountPath: /csi
+              name: socket-dir
+        - args:
+            - --v=2
+            - --csi-address=$(ADDRESS)
+            - --leader-election-namespace=kube-system
+            - --leader-election
+            - --timeout=1200s
+          env:
+            - name: ADDRESS
+              value: /csi/csi.sock
+          image: registry.k8s.io/sig-storage/csi-snapshotter:v6.3.1
+          imagePullPolicy: IfNotPresent
+          name: csi-snapshotter
+          resources:
+            limits:
+              memory: 200Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
+          volumeMounts:
+            - mountPath: /csi
+              name: socket-dir
+        - args:
+            - --csi-address=/csi/csi.sock
+            - --probe-timeout=3s
+            - --health-port=29652
+            - --v=2
+          image: registry.k8s.io/sig-storage/livenessprobe:v2.11.0
+          imagePullPolicy: IfNotPresent
+          name: liveness-probe
+          resources:
+            limits:
+              memory: 100Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
+          securityContext:
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - mountPath: /csi
+              name: socket-dir
+        - args:
+            - --v=5
+            - --nodeid=$(NODE_ID)
+            - --endpoint=$(CSI_ENDPOINT)
+            - --drivername=nfs.csi.k8s.io
+            - --mount-permissions=0
+            - --working-mount-dir=/tmp
+            - --default-ondelete-policy=delete
+          env:
+            - name: NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: CSI_ENDPOINT
+              value: unix:///csi/csi.sock
+          image: registry.k8s.io/sig-storage/nfsplugin:v4.5.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /healthz
+              port: healthz
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+          name: nfs
+          ports:
+            - containerPort: 29652
+              name: healthz
+              protocol: TCP
+          resources:
+            limits:
+              memory: 200Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
+          securityContext:
+            allowPrivilegeEscalation: true
+            capabilities:
+              add:
+                - SYS_ADMIN
+            privileged: true
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - mountPath: /var/lib/kubelet/pods
+              mountPropagation: Bidirectional
+              name: pods-mount-dir
+            - mountPath: /csi
+              name: socket-dir
+            - mountPath: /tmp
+              name: tmp-dir
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+      nodeSelector:
+        kubernetes.io/os: linux
+      priorityClassName: system-cluster-critical
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: csi-nfs-controller-sa
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+          operator: Exists
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/controlplane
+          operator: Exists
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane
+          operator: Exists
+      volumes:
+        - hostPath:
+            path: /var/lib/kubelet/pods
+            type: Directory
+          name: pods-mount-dir
+        - emptyDir: {}
+          name: socket-dir
+        - emptyDir: {}
+          name: tmp-dir

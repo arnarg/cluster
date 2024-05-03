@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: shiori
+  name: shiori
+  namespace: shiori
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: shiori
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: shiori
+    spec:
+      containers:
+        - args:
+            - serve
+            - --address
+            - 0.0.0.0
+            - --port
+            - "8080"
+          env:
+            - name: SHIORI_DIR
+              value: /data
+            - name: SHIORI_DBMS
+              value: postgresql
+            - name: SHIORI_PG_USER
+              valueFrom:
+                secretKeyRef:
+                  key: dbUser
+                  name: shiori-creds
+            - name: SHIORI_PG_PASS
+              valueFrom:
+                secretKeyRef:
+                  key: dbPass
+                  name: shiori-creds
+            - name: SHIORI_PG_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: dbName
+                  name: shiori-creds
+            - name: SHIORI_PG_HOST
+              valueFrom:
+                secretKeyRef:
+                  key: dbHost
+                  name: shiori-creds
+            - name: SHIORI_PG_PORT
+              valueFrom:
+                secretKeyRef:
+                  key: dbPort
+                  name: shiori-creds
+          image: ghcr.io/go-shiori/shiori:v1.5.5
+          name: shiori
+          ports:
+            - containerPort: 8080
+              name: http
+          volumeMounts:
+            - mountPath: /data
+              name: data
+      securityContext:
+        fsGroup: 2000
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: shiori

@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cilium
+  namespace: argocd
+spec:
+  destination:
+    namespace: kube-system
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: cilium
+    repoURL: https://github.com/arnarg/cluster.git
+    targetRevision: env/prod
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

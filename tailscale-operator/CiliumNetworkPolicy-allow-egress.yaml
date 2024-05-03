@@ -1,0 +1,27 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-egress
+  namespace: tailscale
+spec:
+  description: Policy for egress to allow tailscale components to talk to traefik, k8s-gateway and tailscale required traffic
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: k8s-gateway
+            k8s:io.kubernetes.pod.namespace: k8s-gateway
+      toPorts:
+        - ports:
+            - port: "1053"
+              protocol: UDP
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+            - port: "3478"
+              protocol: UDP
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.pod.namespace: tailscale
