@@ -1,0 +1,23 @@
+name: Generate Kubernetes manifests
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: cachix/install-nix-action@v20
+      with:
+        extra_nix_config: |
+          extra-experimental-features = nix-command flakes
+
+    - uses: DeterminateSystems/magic-nix-cache-action@v2
+
+    - uses: arnarg/nixidy@main
+      with:
+        environment: prod
