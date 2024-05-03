@@ -5,8 +5,6 @@ metadata:
     app.kubernetes.io/instance: csi-driver-nfs
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-nfs
-    app.kubernetes.io/version: v4.5.0
-    helm.sh/chart: csi-driver-nfs-v4.5.0
   name: csi-nfs-controller
   namespace: kube-system
 spec:

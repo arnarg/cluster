@@ -38,7 +38,5 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: argocd-cmd-params-cm
     app.kubernetes.io/part-of: argocd
-    app.kubernetes.io/version: v2.9.2
-    helm.sh/chart: argo-cd-5.51.4
   name: argocd-cmd-params-cm
   namespace: argocd

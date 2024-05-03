@@ -5,8 +5,6 @@ metadata:
     app.kubernetes.io/instance: k8s-gateway
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: k8s-gateway
-    app.kubernetes.io/version: 0.3.4
-    helm.sh/chart: k8s-gateway-2.0.4
   name: k8s-gateway
 roleRef:
   apiGroup: rbac.authorization.k8s.io
