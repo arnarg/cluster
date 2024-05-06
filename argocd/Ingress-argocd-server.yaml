@@ -10,8 +10,9 @@ metadata:
   name: argocd-server
   namespace: argocd
 spec:
+  ingressClassName: traefik
   rules:
-    - host: argocd.example.com
+    - host: argocd.cdbrdr.com
       http:
         paths:
           - backend:
