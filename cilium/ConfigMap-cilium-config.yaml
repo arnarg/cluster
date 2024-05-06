@@ -22,7 +22,7 @@ data:
   custom-cni-conf: "false"
   debug: "false"
   debug-verbose: ""
-  dnsproxy-enable-transparent-mode: "true"
+  dnsproxy-enable-transparent-mode: "false"
   egress-gateway-reconciliation-trigger-interval: 1s
   enable-auto-protect-node-port-range: "true"
   enable-bgp-control-plane: "false"
