@@ -19,7 +19,8 @@
       operator.replicas = 1;
 
       # Having this enabled breaks DNS proxying in
-      # my cluster.
+      # my cluster because the hosts are IPv6 enabled
+      # but Cilium isn't.
       dnsProxy.enableTransparentMode = false;
 
       # Default CIDR in k3s.
@@ -27,7 +28,7 @@
 
       # Policy enforcement.
       policyEnforcementMode = "always";
-      policyAuditMode = true;
+      policyAuditMode = false;
 
       # Set Cilium as a kube-proxy replacement.
       kubeProxyReplacement = true;
