@@ -87,37 +87,37 @@ in {
                 - protocol: TCP
                   port: 8080
         ''
-        # ''
-        #   apiVersion: cilium.io/v2
-        #   kind: CiliumNetworkPolicy
-        #   metadata:
-        #     name: allow-world-egress
-        #     namespace: ${namespace}
-        #   spec:
-        #     endpointSelector:
-        #       matchLabels:
-        #         app.kubernetes.io/name: argocd-repo-server
-        #     egress:
-        #     # Enable DNS proxying
-        #     - toEndpoints:
-        #       - matchLabels:
-        #          "k8s:io.kubernetes.pod.namespace": kube-system
-        #          "k8s:k8s-app": kube-dns
-        #       toPorts:
-        #       - ports:
-        #         - port: "53"
-        #           protocol: ANY
-        #         rules:
-        #           dns:
-        #           - matchPattern: "*"
-        #     # Allow HTTPS to github
-        #     - toFQDNs:
-        #       - matchName: github.com.
-        #       toPorts:
-        #       - ports:
-        #         - port: "443"
-        #           protocol: TCP
-        # ''
+        ''
+          apiVersion: cilium.io/v2
+          kind: CiliumNetworkPolicy
+          metadata:
+            name: allow-world-egress
+            namespace: ${namespace}
+          spec:
+            endpointSelector:
+              matchLabels:
+                app.kubernetes.io/name: argocd-repo-server
+            egress:
+            # Enable DNS proxying
+            - toEndpoints:
+              - matchLabels:
+                 "k8s:io.kubernetes.pod.namespace": kube-system
+                 "k8s:k8s-app": kube-dns
+              toPorts:
+              - ports:
+                - port: "53"
+                  protocol: ANY
+                rules:
+                  dns:
+                  - matchPattern: "*"
+            # Allow HTTPS to github
+            - toFQDNs:
+              - matchName: github.com
+              toPorts:
+              - ports:
+                - port: "443"
+                  protocol: TCP
+        ''
         ''
           apiVersion: cilium.io/v2
           kind: CiliumNetworkPolicy
