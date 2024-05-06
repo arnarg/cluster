@@ -83,7 +83,7 @@ data:
   nodes-gc-interval: 5m0s
   operator-api-serve-addr: 127.0.0.1:9234
   operator-prometheus-serve-addr: :9963
-  policy-audit-mode: "true"
+  policy-audit-mode: "false"
   policy-cidr-match-mode: ""
   preallocate-bpf-maps: "false"
   procfs: /host/proc
