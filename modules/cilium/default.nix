@@ -21,6 +21,7 @@
       # Having this enabled breaks DNS proxying in
       # my cluster because the hosts are IPv6 enabled
       # but Cilium isn't.
+      # See: https://github.com/cilium/cilium/issues/31197
       dnsProxy.enableTransparentMode = false;
 
       # Default CIDR in k3s.
