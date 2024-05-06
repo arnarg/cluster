@@ -10,4 +10,4 @@ spec:
     requests:
       storage: 10Gi
   storageClassName: nfs-csi
-  volumeMode: FileSystem
+  volumeMode: Filesystem
