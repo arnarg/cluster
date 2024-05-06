@@ -41,7 +41,7 @@
       # Setup cert resolver for lets encrypt.
       certResolvers.letsencrypt = {
         email = "acme@codedbearder.com";
-        dnsChallence.provider = "cloudflare";
+        dnsChallenge.provider = "cloudflare";
         storage = "/data/acme.json";
       };
 
