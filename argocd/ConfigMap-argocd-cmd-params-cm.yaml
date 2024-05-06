@@ -6,6 +6,7 @@ data:
   applicationsetcontroller.log.format: text
   applicationsetcontroller.log.level: info
   applicationsetcontroller.policy: sync
+  controller.ignore.normalizer.jq.timeout: 1s
   controller.log.format: text
   controller.log.level: info
   controller.operation.processors: "10"

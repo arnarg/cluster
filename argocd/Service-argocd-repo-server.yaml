@@ -11,7 +11,7 @@ metadata:
   namespace: argocd
 spec:
   ports:
-    - name: https-repo-server
+    - name: tcp-repo-server
       port: 8081
       protocol: TCP
       targetPort: repo-server

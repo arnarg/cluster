@@ -20,16 +20,16 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cm: 1afb3d914267739607736a4be3e47393bfe3df922a7fe9657c584ad8c33c4e13
-        checksum/cmd-params: 6700b9033ba0ed63a2588af44dc9b3615e686246fed392b4f2f085c17c6178ab
+        checksum/cm: 184119ca465b49de297c1679586bc7a3f85536a814b19972cb2b84e4cc78dfb5
+        checksum/cmd-params: 79feaac42bc2f9660d7df9448bd05900d3f8bbac546dba65ea481d4b8aa05a5b
       labels:
         app.kubernetes.io/component: application-controller
         app.kubernetes.io/instance: argocd
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: argocd-application-controller
         app.kubernetes.io/part-of: argocd
-        app.kubernetes.io/version: v2.9.2
-        helm.sh/chart: argo-cd-5.51.4
+        app.kubernetes.io/version: v2.10.9
+        helm.sh/chart: argo-cd-6.7.18
     spec:
       affinity:
         podAntiAffinity:
@@ -40,6 +40,7 @@ spec:
                     app.kubernetes.io/name: argocd-application-controller
                 topologyKey: kubernetes.io/hostname
               weight: 100
+      automountServiceAccountToken: true
       containers:
         - args:
             - /usr/local/bin/argocd-application-controller
@@ -47,6 +48,8 @@ spec:
           env:
             - name: ARGOCD_CONTROLLER_REPLICAS
               value: "1"
+            - name: ARGOCD_APPLICATION_CONTROLLER_NAME
+              value: argocd-application-controller
             - name: ARGOCD_RECONCILIATION_TIMEOUT
               valueFrom:
                 configMapKeyRef:
@@ -58,6 +61,18 @@ spec:
                 configMapKeyRef:
                   key: timeout.hard.reconciliation
                   name: argocd-cm
+                  optional: true
+            - name: ARGOCD_RECONCILIATION_JITTER
+              valueFrom:
+                configMapKeyRef:
+                  key: timeout.reconciliation.jitter
+                  name: argocd-cm
+                  optional: true
+            - name: ARGOCD_REPO_ERROR_GRACE_PERIOD_SECONDS
+              valueFrom:
+                configMapKeyRef:
+                  key: controller.repo.error.grace.period.seconds
+                  name: argocd-cmd-params-cm
                   optional: true
             - name: ARGOCD_APPLICATION_CONTROLLER_REPO_SERVER
               valueFrom:
@@ -173,6 +188,18 @@ spec:
                   key: otlp.address
                   name: argocd-cmd-params-cm
                   optional: true
+            - name: ARGOCD_APPLICATION_CONTROLLER_OTLP_INSECURE
+              valueFrom:
+                configMapKeyRef:
+                  key: otlp.insecure
+                  name: argocd-cmd-params-cm
+                  optional: true
+            - name: ARGOCD_APPLICATION_CONTROLLER_OTLP_HEADERS
+              valueFrom:
+                configMapKeyRef:
+                  key: otlp.headers
+                  name: argocd-cmd-params-cm
+                  optional: true
             - name: ARGOCD_APPLICATION_NAMESPACES
               valueFrom:
                 configMapKeyRef:
@@ -191,7 +218,31 @@ spec:
                   key: controller.kubectl.parallelism.limit
                   name: argocd-cmd-params-cm
                   optional: true
-          image: quay.io/argoproj/argocd:v2.9.2
+            - name: ARGOCD_K8SCLIENT_RETRY_MAX
+              valueFrom:
+                configMapKeyRef:
+                  key: controller.k8sclient.retry.max
+                  name: argocd-cmd-params-cm
+                  optional: true
+            - name: ARGOCD_K8SCLIENT_RETRY_BASE_BACKOFF
+              valueFrom:
+                configMapKeyRef:
+                  key: controller.k8sclient.retry.base.backoff
+                  name: argocd-cmd-params-cm
+                  optional: true
+            - name: ARGOCD_APPLICATION_CONTROLLER_SERVER_SIDE_DIFF
+              valueFrom:
+                configMapKeyRef:
+                  key: controller.diff.server.side
+                  name: argocd-cmd-params-cm
+                  optional: true
+            - name: ARGOCD_IGNORE_NORMALIZER_JQ_TIMEOUT
+              valueFrom:
+                configMapKeyRef:
+                  key: controller.ignore.normalizer.jq.timeout
+                  name: argocd-cmd-params-cm
+                  optional: true
+          image: quay.io/argoproj/argocd:v2.10.9
           imagePullPolicy: IfNotPresent
           name: application-controller
           ports:

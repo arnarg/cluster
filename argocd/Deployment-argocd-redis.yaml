@@ -23,8 +23,8 @@ spec:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: argocd-redis
         app.kubernetes.io/part-of: argocd
-        app.kubernetes.io/version: v2.9.2
-        helm.sh/chart: argo-cd-5.51.4
+        app.kubernetes.io/version: v2.10.9
+        helm.sh/chart: argo-cd-6.7.18
     spec:
       affinity:
         podAntiAffinity:
@@ -35,13 +35,14 @@ spec:
                     app.kubernetes.io/name: argocd-redis
                 topologyKey: kubernetes.io/hostname
               weight: 100
+      automountServiceAccountToken: true
       containers:
         - args:
             - --save
             - ""
             - --appendonly
             - "no"
-          image: public.ecr.aws/docker/library/redis:7.0.13-alpine
+          image: public.ecr.aws/docker/library/redis:7.2.4-alpine
           imagePullPolicy: IfNotPresent
           name: redis
           ports:
@@ -55,6 +56,9 @@ spec:
               drop:
                 - ALL
             readOnlyRootFilesystem: true
+          volumeMounts:
+            - mountPath: /health
+              name: health
       dnsPolicy: ClusterFirst
       securityContext:
         runAsNonRoot: true
@@ -63,3 +67,8 @@ spec:
           type: RuntimeDefault
       serviceAccountName: default
       terminationGracePeriodSeconds: 30
+      volumes:
+        - configMap:
+            defaultMode: 493
+            name: argocd-redis-health-configmap
+          name: health

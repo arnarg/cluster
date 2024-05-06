@@ -11,7 +11,7 @@ metadata:
   namespace: argocd
 spec:
   ports:
-    - name: webhook
+    - name: http-webhook
       port: 7000
       targetPort: webhook
   selector:

@@ -49,11 +49,16 @@ spec:
                   fieldPath: metadata.namespace
             - name: CILIUM_CLUSTERMESH_CONFIG
               value: /var/lib/cilium/clustermesh/
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  divisor: "1"
+                  resource: limits.memory
             - name: KUBERNETES_SERVICE_HOST
               value: localhost
             - name: KUBERNETES_SERVICE_PORT
               value: "6444"
-          image: quay.io/cilium/cilium:v1.14.4@sha256:4981767b787c69126e190e33aee93d5a076639083c21f0e7c29596a519c64a2e
+          image: quay.io/cilium/cilium:v1.15.4@sha256:b760a4831f5aab71c711f7537a107b751d0d0ce90dd32d8b358df3c5da385426
           imagePullPolicy: IfNotPresent
           lifecycle:
             postStart:
@@ -75,10 +80,10 @@ spec:
                     # dependencies on anything that is part of the startup script
                     # itself, and can be safely run multiple times per node (e.g. in
                     # case of a restart).
-                    if [[ "$(iptables-save | grep -c 'AWS-SNAT-CHAIN|AWS-CONNMARK-CHAIN')" != "0" ]];
+                    if [[ "$(iptables-save | grep -E -c 'AWS-SNAT-CHAIN|AWS-CONNMARK-CHAIN')" != "0" ]];
                     then
                         echo 'Deleting iptables rules created by the AWS CNI VPC plugin'
-                        iptables-save | grep -v 'AWS-SNAT-CHAIN|AWS-CONNMARK-CHAIN' | iptables-restore
+                        iptables-save | grep -E -v 'AWS-SNAT-CHAIN|AWS-CONNMARK-CHAIN' | iptables-restore
                     fi
                     echo 'Done!'
             preStop:
@@ -142,6 +147,7 @@ spec:
               path: /healthz
               port: 9879
               scheme: HTTP
+            initialDelaySeconds: 5
             periodSeconds: 2
             successThreshold: 1
           terminationMessagePolicy: FallbackToLogsOnError
@@ -173,7 +179,7 @@ spec:
       hostNetwork: true
       initContainers:
         - command:
-            - cilium
+            - cilium-dbg
             - build-config
           env:
             - name: K8S_NODE_NAME
@@ -190,7 +196,7 @@ spec:
               value: localhost
             - name: KUBERNETES_SERVICE_PORT
               value: "6444"
-          image: quay.io/cilium/cilium:v1.14.4@sha256:4981767b787c69126e190e33aee93d5a076639083c21f0e7c29596a519c64a2e
+          image: quay.io/cilium/cilium:v1.15.4@sha256:b760a4831f5aab71c711f7537a107b751d0d0ce90dd32d8b358df3c5da385426
           imagePullPolicy: IfNotPresent
           name: config
           terminationMessagePolicy: FallbackToLogsOnError
@@ -209,7 +215,7 @@ spec:
               value: /run/cilium/cgroupv2
             - name: BIN_PATH
               value: /opt/cni/bin
-          image: quay.io/cilium/cilium:v1.14.4@sha256:4981767b787c69126e190e33aee93d5a076639083c21f0e7c29596a519c64a2e
+          image: quay.io/cilium/cilium:v1.15.4@sha256:b760a4831f5aab71c711f7537a107b751d0d0ce90dd32d8b358df3c5da385426
           imagePullPolicy: IfNotPresent
           name: mount-cgroup
           securityContext:
@@ -239,7 +245,7 @@ spec:
           env:
             - name: BIN_PATH
               value: /opt/cni/bin
-          image: quay.io/cilium/cilium:v1.14.4@sha256:4981767b787c69126e190e33aee93d5a076639083c21f0e7c29596a519c64a2e
+          image: quay.io/cilium/cilium:v1.15.4@sha256:b760a4831f5aab71c711f7537a107b751d0d0ce90dd32d8b358df3c5da385426
           imagePullPolicy: IfNotPresent
           name: apply-sysctl-overwrites
           securityContext:
@@ -265,7 +271,7 @@ spec:
             - /bin/bash
             - -c
             - --
-          image: quay.io/cilium/cilium:v1.14.4@sha256:4981767b787c69126e190e33aee93d5a076639083c21f0e7c29596a519c64a2e
+          image: quay.io/cilium/cilium:v1.15.4@sha256:b760a4831f5aab71c711f7537a107b751d0d0ce90dd32d8b358df3c5da385426
           imagePullPolicy: IfNotPresent
           name: mount-bpf-fs
           securityContext:
@@ -290,17 +296,19 @@ spec:
                   key: clean-cilium-bpf-state
                   name: cilium-config
                   optional: true
+            - name: WRITE_CNI_CONF_WHEN_READY
+              valueFrom:
+                configMapKeyRef:
+                  key: write-cni-conf-when-ready
+                  name: cilium-config
+                  optional: true
             - name: KUBERNETES_SERVICE_HOST
               value: localhost
             - name: KUBERNETES_SERVICE_PORT
               value: "6444"
-          image: quay.io/cilium/cilium:v1.14.4@sha256:4981767b787c69126e190e33aee93d5a076639083c21f0e7c29596a519c64a2e
+          image: quay.io/cilium/cilium:v1.15.4@sha256:b760a4831f5aab71c711f7537a107b751d0d0ce90dd32d8b358df3c5da385426
           imagePullPolicy: IfNotPresent
           name: clean-cilium-state
-          resources:
-            requests:
-              cpu: 100m
-              memory: 100Mi
           securityContext:
             capabilities:
               add:
@@ -324,7 +332,7 @@ spec:
               name: cilium-run
         - command:
             - /install-plugin.sh
-          image: quay.io/cilium/cilium:v1.14.4@sha256:4981767b787c69126e190e33aee93d5a076639083c21f0e7c29596a519c64a2e
+          image: quay.io/cilium/cilium:v1.15.4@sha256:b760a4831f5aab71c711f7537a107b751d0d0ce90dd32d8b358df3c5da385426
           imagePullPolicy: IfNotPresent
           name: install-cni-binaries
           resources:

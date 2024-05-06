@@ -19,15 +19,16 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cmd-params: 6700b9033ba0ed63a2588af44dc9b3615e686246fed392b4f2f085c17c6178ab
+        checksum/cm: 184119ca465b49de297c1679586bc7a3f85536a814b19972cb2b84e4cc78dfb5
+        checksum/cmd-params: 79feaac42bc2f9660d7df9448bd05900d3f8bbac546dba65ea481d4b8aa05a5b
       labels:
         app.kubernetes.io/component: server
         app.kubernetes.io/instance: argocd
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: argocd-server
         app.kubernetes.io/part-of: argocd
-        app.kubernetes.io/version: v2.9.2
-        helm.sh/chart: argo-cd-5.51.4
+        app.kubernetes.io/version: v2.10.9
+        helm.sh/chart: argo-cd-6.7.18
     spec:
       affinity:
         podAntiAffinity:
@@ -38,12 +39,15 @@ spec:
                     app.kubernetes.io/name: argocd-server
                 topologyKey: kubernetes.io/hostname
               weight: 100
+      automountServiceAccountToken: true
       containers:
         - args:
             - /usr/local/bin/argocd-server
             - --port=8080
             - --metrics-port=8083
           env:
+            - name: ARGOCD_SERVER_NAME
+              value: argocd-server
             - name: ARGOCD_SERVER_INSECURE
               valueFrom:
                 configMapKeyRef:
@@ -248,6 +252,18 @@ spec:
                   key: otlp.address
                   name: argocd-cmd-params-cm
                   optional: true
+            - name: ARGOCD_SERVER_OTLP_INSECURE
+              valueFrom:
+                configMapKeyRef:
+                  key: otlp.insecure
+                  name: argocd-cmd-params-cm
+                  optional: true
+            - name: ARGOCD_SERVER_OTLP_HEADERS
+              valueFrom:
+                configMapKeyRef:
+                  key: otlp.headers
+                  name: argocd-cmd-params-cm
+                  optional: true
             - name: ARGOCD_APPLICATION_NAMESPACES
               valueFrom:
                 configMapKeyRef:
@@ -260,7 +276,25 @@ spec:
                   key: server.enable.proxy.extension
                   name: argocd-cmd-params-cm
                   optional: true
-          image: quay.io/argoproj/argocd:v2.9.2
+            - name: ARGOCD_K8SCLIENT_RETRY_MAX
+              valueFrom:
+                configMapKeyRef:
+                  key: server.k8sclient.retry.max
+                  name: argocd-cmd-params-cm
+                  optional: true
+            - name: ARGOCD_K8SCLIENT_RETRY_BASE_BACKOFF
+              valueFrom:
+                configMapKeyRef:
+                  key: server.k8sclient.retry.base.backoff
+                  name: argocd-cmd-params-cm
+                  optional: true
+            - name: ARGOCD_API_CONTENT_TYPES
+              valueFrom:
+                configMapKeyRef:
+                  key: server.api.content.types
+                  name: argocd-cmd-params-cm
+                  optional: true
+          image: quay.io/argoproj/argocd:v2.10.9
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3

@@ -11,7 +11,7 @@ metadata:
   namespace: argocd
 spec:
   rules:
-    - host: argocd.cdbrdr.com
+    - host: argocd.example.com
       http:
         paths:
           - backend:
