@@ -49,7 +49,7 @@ spec:
             - --entrypoints.web.http.redirections.entryPoint.scheme=https
             - --entrypoints.websecure.http.tls=true
             - --entrypoints.websecure.http.tls.certResolver=letsencrypt
-            - --certificatesresolvers.letsencrypt.acme.dnsChallence.provider=cloudflare
+            - --certificatesresolvers.letsencrypt.acme.dnsChallenge.provider=cloudflare
             - --certificatesresolvers.letsencrypt.acme.email=acme@codedbearder.com
             - --certificatesresolvers.letsencrypt.acme.storage=/data/acme.json
           env:
