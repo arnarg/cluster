@@ -15,11 +15,11 @@ in {
 
     resources = {
       # Persitent volume for shiori.
-      v1.PersistentVolumeClaim.shiori.spec = {
+      v1.PersistentVolumeClaim.shiori = {
         metadata.namespace = namespace;
         spec = {
           storageClassName = config.storage.csi.nfs.storageClassName;
-          volumeMode = "FileSystem";
+          volumeMode = "Filesystem";
           accessModes = ["ReadWriteOnce"];
           resources.requests.storage = "10Gi";
         };
