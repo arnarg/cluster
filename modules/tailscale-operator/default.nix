@@ -56,38 +56,38 @@ in {
       };
 
       yamls = [
-        ''
-          apiVersion: cilium.io/v2
-          kind: CiliumNetworkPolicy
-          metadata:
-            name: allow-tailscale-https-egress
-            namespace: ${namespace}
-          spec:
-            description: "Policy to allow egress HTTPS traffic to tailscale coordination servers and derp servers."
-            endpointSelector: {}
-            egress:
-            # Enable DNS proxying
-            - toEndpoints:
-              - matchLabels:
-                 "k8s:io.kubernetes.pod.namespace": kube-system
-                 "k8s:k8s-app": kube-dns
-              toPorts:
-              - ports:
-                - port: "53"
-                  protocol: ANY
-                rules:
-                  dns:
-                  - matchPattern: "*"
-            # Allow HTTPS to coordination and derp servers
-            - toFQDNs:
-              - matchPattern: "*.tailscale.com"
-              toPorts:
-              - ports:
-                - port: "443"
-                  protocol: TCP
-                - port: "80"
-                  protocol: TCP
-        ''
+        # ''
+        #   apiVersion: cilium.io/v2
+        #   kind: CiliumNetworkPolicy
+        #   metadata:
+        #     name: allow-tailscale-https-egress
+        #     namespace: ${namespace}
+        #   spec:
+        #     description: "Policy to allow egress HTTPS traffic to tailscale coordination servers and derp servers."
+        #     endpointSelector: {}
+        #     egress:
+        #     # Enable DNS proxying
+        #     - toEndpoints:
+        #       - matchLabels:
+        #          "k8s:io.kubernetes.pod.namespace": kube-system
+        #          "k8s:k8s-app": kube-dns
+        #       toPorts:
+        #       - ports:
+        #         - port: "53"
+        #           protocol: ANY
+        #         rules:
+        #           dns:
+        #           - matchPattern: "*"
+        #     # Allow HTTPS to coordination and derp servers
+        #     - toFQDNs:
+        #       - matchPattern: "*.tailscale.com"
+        #       toPorts:
+        #       - ports:
+        #         - port: "443"
+        #           protocol: TCP
+        #         - port: "80"
+        #           protocol: TCP
+        # ''
         ''
           apiVersion: cilium.io/v2
           kind: CiliumNetworkPolicy

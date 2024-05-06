@@ -8,8 +8,8 @@
   chart = lib.helm.downloadHelmChart {
     repo = "https://argoproj.github.io/argo-helm/";
     chart = "argo-cd";
-    version = "5.51.4";
-    chartHash = "sha256-LOEJ5mYaHEA0RztDkgM9DGTA0P5eNd0SzSlwJIgpbWY=";
+    version = "6.7.18";
+    chartHash = "sha256-FWk0b9QyxC2dXuB9uK6A5OO999JghFucS4iOu2QNNNY=";
   };
 
   namespace = "argocd";
@@ -21,6 +21,13 @@
         hosts = ["argocd.${config.networking.domain}"];
         ingressClass = config.networking.traefik.ingressClassName;
       };
+
+      repoServer.dnsConfig.options = [
+        {
+          name = "ndots";
+          value = "1";
+        }
+      ];
 
       configs = {
         # Leave here until migration to nixidy is done.
@@ -80,47 +87,37 @@ in {
                 - protocol: TCP
                   port: 8080
         ''
-        ''
-          apiVersion: cilium.io/v2
-          kind: CiliumNetworkPolicy
-          metadata:
-            name: allow-world-egress
-            namespace: ${namespace}
-          spec:
-            endpointSelector:
-              matchLabels:
-                app.kubernetes.io/name: argocd-repo-server
-            egress:
-            # Enable DNS proxying
-            - toEndpoints:
-              - matchLabels:
-                 "k8s:io.kubernetes.pod.namespace": kube-system
-                 "k8s:k8s-app": kube-dns
-              toPorts:
-              - ports:
-                - port: "53"
-                  protocol: ANY
-                rules:
-                  dns:
-                  - matchPattern: "*"
-            # Allow SSH to github.com
-            - toFQDNs:
-              - matchName: github.com
-              toPorts:
-              - ports:
-                - port: "22"
-                  protocol: TCP
-            # Allow HTTPS to github and various helm repositories
-            - toFQDNs:
-              - matchName: github.com
-              - matchName: raw.githubusercontent.com
-              - matchName: helm.cilium.io
-              - matchPattern: "*.github.io"
-              toPorts:
-              - ports:
-                - port: "443"
-                  protocol: TCP
-        ''
+        # ''
+        #   apiVersion: cilium.io/v2
+        #   kind: CiliumNetworkPolicy
+        #   metadata:
+        #     name: allow-world-egress
+        #     namespace: ${namespace}
+        #   spec:
+        #     endpointSelector:
+        #       matchLabels:
+        #         app.kubernetes.io/name: argocd-repo-server
+        #     egress:
+        #     # Enable DNS proxying
+        #     - toEndpoints:
+        #       - matchLabels:
+        #          "k8s:io.kubernetes.pod.namespace": kube-system
+        #          "k8s:k8s-app": kube-dns
+        #       toPorts:
+        #       - ports:
+        #         - port: "53"
+        #           protocol: ANY
+        #         rules:
+        #           dns:
+        #           - matchPattern: "*"
+        #     # Allow HTTPS to github
+        #     - toFQDNs:
+        #       - matchName: github.com.
+        #       toPorts:
+        #       - ports:
+        #         - port: "443"
+        #           protocol: TCP
+        # ''
         ''
           apiVersion: cilium.io/v2
           kind: CiliumNetworkPolicy

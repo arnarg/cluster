@@ -8,8 +8,8 @@
   chart = lib.helm.downloadHelmChart {
     repo = "https://helm.cilium.io/";
     chart = "cilium";
-    version = "1.14.4";
-    chartHash = "sha256-Rd1KmIB5uYrSQ/aCBqmX/zFv9FwX0svD2+lcqV4yoEM=";
+    version = "1.15.4";
+    chartHash = "sha256-zge93cptvS6Qpd6hN3L76AfI4BqynXSwn+Fv/v0Zpgw=";
   };
 
   namespace = "kube-system";
@@ -23,7 +23,7 @@
 
       # Policy enforcement.
       policyEnforcementMode = "always";
-      policyAuditMode = false;
+      policyAuditMode = true;
 
       # Set Cilium as a kube-proxy replacement.
       kubeProxyReplacement = true;
