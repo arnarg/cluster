@@ -18,6 +18,10 @@
     lib.attrsets.recursiveUpdate {
       operator.replicas = 1;
 
+      # Having this enabled breaks DNS proxying in
+      # my cluster.
+      dnsProxy.enableTransparentMode = false;
+
       # Default CIDR in k3s.
       ipam.operator.clusterPoolIPv4PodCIDRList = ["10.42.0.0/16"];
 
