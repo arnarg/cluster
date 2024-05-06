@@ -18,8 +18,8 @@
     lib.attrsets.recursiveUpdate {
       server.ingress = {
         enabled = true;
-        hosts = ["argocd.${config.networking.domain}"];
-        ingressClass = config.networking.traefik.ingressClassName;
+        hostname = "argocd.${config.networking.domain}";
+        ingressClassName = config.networking.traefik.ingressClassName;
       };
 
       repoServer.dnsConfig.options = [
