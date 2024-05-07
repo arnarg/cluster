@@ -18,16 +18,16 @@ spec:
         app.kubernetes.io/instance: csi-driver-nfs
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: csi-driver-nfs
-        app.kubernetes.io/version: v4.5.0
-        helm.sh/chart: csi-driver-nfs-v4.5.0
+        app.kubernetes.io/version: v4.7.0
+        helm.sh/chart: csi-driver-nfs-v4.7.0
     spec:
       containers:
         - args:
             - --csi-address=/csi/csi.sock
             - --probe-timeout=3s
-            - --health-port=29653
+            - --http-endpoint=localhost:29653
             - --v=2
-          image: registry.k8s.io/sig-storage/livenessprobe:v2.11.0
+          image: registry.k8s.io/sig-storage/livenessprobe:v2.12.0
           imagePullPolicy: IfNotPresent
           name: liveness-probe
           resources:
@@ -52,7 +52,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
-          image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.9.0
+          image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.10.0
           imagePullPolicy: IfNotPresent
           livenessProbe:
             exec:
@@ -87,21 +87,18 @@ spec:
                   fieldPath: spec.nodeName
             - name: CSI_ENDPOINT
               value: unix:///csi/csi.sock
-          image: registry.k8s.io/sig-storage/nfsplugin:v4.5.0
+          image: registry.k8s.io/sig-storage/nfsplugin:v4.7.0
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
             httpGet:
+              host: localhost
               path: /healthz
-              port: healthz
+              port: 29653
             initialDelaySeconds: 30
             periodSeconds: 30
             timeoutSeconds: 10
           name: nfs
-          ports:
-            - containerPort: 29653
-              name: healthz
-              protocol: TCP
           resources:
             limits:
               memory: 300Mi
