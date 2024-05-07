@@ -6,33 +6,18 @@
 }: let
   cfg = config.networking.tailscale-operator;
 
-  # Tailscale doesn't have a helm repository so we just need to clone
-  # the tailscale git repository and pass the folder.
-  version = "1.64.2";
-  chart = pkgs.stdenv.mkDerivation {
-    inherit version;
-    pname = "tailscale-operator-chart";
-
-    src = pkgs.fetchFromGitHub {
-      owner = "tailscale";
-      repo = "tailscale";
-      rev = "v${version}";
-      hash = "sha256-DS7C/G1Nj9gIjYwXaEeCLbtH9HbB0tRoJBDjZc/nq5g=";
-    };
-
-    phases = ["unpackPhase" "installPhase"];
-
-    installPhase = ''
-      cp -r $src/cmd/k8s-operator/deploy/chart $out
-    '';
+  chart = lib.helm.downloadHelmChart {
+    repo = "https://pkgs.tailscale.com/helmcharts/";
+    chart = "tailscale-operator";
+    version = "1.64.2";
+    chartHash = "sha256-ofxAFDVcA1h0RB1W7lRd9fUgT0pE0YNpAYl/fszpKIo=";
   };
 
   namespace = "tailscale";
 
   values =
     lib.attrsets.recursiveUpdate {
-      operatorConfig.image.tag = "v${version}";
-      proxyConfig.image.tag = "v${version}";
+      # Default values
     }
     cfg.values;
 in {
