@@ -38,7 +38,7 @@ in {
             spec:
               containers:
               - name: miniflux
-                image: ghcr.io/miniflux/miniflux:2.0.50-distroless
+                image: ghcr.io/miniflux/miniflux:2.1.3-distroless
                 ports:
                 - containerPort: ${port}
                   name: http
