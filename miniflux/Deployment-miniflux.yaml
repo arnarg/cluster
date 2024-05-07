@@ -38,7 +38,7 @@ spec:
               value: "1"
             - name: CREATE_ADMIN
               value: "1"
-          image: ghcr.io/miniflux/miniflux:2.0.50-distroless
+          image: ghcr.io/miniflux/miniflux:2.1.3-distroless
           name: miniflux
           ports:
             - containerPort: 8080
