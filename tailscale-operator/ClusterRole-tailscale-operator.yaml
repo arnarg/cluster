@@ -18,3 +18,23 @@ rules:
       - ingresses/status
     verbs:
       - '*'
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingressclasses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - tailscale.com
+    resources:
+      - connectors
+      - connectors/status
+      - proxyclasses
+      - proxyclasses/status
+    verbs:
+      - get
+      - list
+      - watch
+      - update

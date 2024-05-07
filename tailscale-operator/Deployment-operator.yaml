@@ -17,6 +17,8 @@ spec:
     spec:
       containers:
         - env:
+            - name: OPERATOR_INITIAL_TAGS
+              value: tag:k8s-operator
             - name: OPERATOR_HOSTNAME
               value: tailscale-operator
             - name: OPERATOR_SECRET
@@ -32,15 +34,15 @@ spec:
             - name: CLIENT_SECRET_FILE
               value: /oauth/client_secret
             - name: PROXY_IMAGE
-              value: tailscale/tailscale:v1.54
+              value: tailscale/tailscale:v1.64.2
             - name: PROXY_TAGS
               value: tag:k8s
             - name: APISERVER_PROXY
               value: "false"
             - name: PROXY_FIREWALL_MODE
               value: auto
-          image: tailscale/k8s-operator:v1.54
-          imagePullPolicy: null
+          image: tailscale/k8s-operator:v1.64.2
+          imagePullPolicy: Always
           name: operator
           volumeMounts:
             - mountPath: /oauth
