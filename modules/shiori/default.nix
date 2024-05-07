@@ -51,7 +51,7 @@ in {
             spec:
               containers:
               - name: shiori
-                image: ghcr.io/go-shiori/shiori:v1.5.5
+                image: ghcr.io/go-shiori/shiori:v1.6.3
                 args:
                 - serve
                 - --address
@@ -64,33 +64,16 @@ in {
                 env:
                 - name: SHIORI_DIR
                   value: /data
-                - name: SHIORI_DBMS
-                  value: postgresql
-                - name: SHIORI_PG_USER
+                - name: SHIORI_HTTP_SECRET_KEY
                   valueFrom:
                     secretKeyRef:
                       name: shiori-creds
-                      key: dbUser
-                - name: SHIORI_PG_PASS
+                      key: secretKey
+                - name: SHIORI_DATABASE_URL
                   valueFrom:
                     secretKeyRef:
                       name: shiori-creds
-                      key: dbPass
-                - name: SHIORI_PG_NAME
-                  valueFrom:
-                    secretKeyRef:
-                      name: shiori-creds
-                      key: dbName
-                - name: SHIORI_PG_HOST
-                  valueFrom:
-                    secretKeyRef:
-                      name: shiori-creds
-                      key: dbHost
-                - name: SHIORI_PG_PORT
-                  valueFrom:
-                    secretKeyRef:
-                      name: shiori-creds
-                      key: dbPort
+                      key: databaseConn
                 volumeMounts:
                 - mountPath: /data
                   name: data
