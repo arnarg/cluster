@@ -30,14 +30,14 @@ spec:
         app.kubernetes.io/instance: traefik-traefik
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: traefik
-        helm.sh/chart: traefik-25.0.0
+        helm.sh/chart: traefik-28.0.0
     spec:
       containers:
         - args:
-            - --entrypoints.metrics.address=:9100/tcp
-            - --entrypoints.traefik.address=:9000/tcp
-            - --entrypoints.web.address=:8000/tcp
-            - --entrypoints.websecure.address=:8443/tcp
+            - --entryPoints.metrics.address=:9100/tcp
+            - --entryPoints.traefik.address=:9000/tcp
+            - --entryPoints.web.address=:8000/tcp
+            - --entryPoints.websecure.address=:8443/tcp
             - --api.dashboard=true
             - --ping=true
             - --metrics.prometheus=true
@@ -45,10 +45,11 @@ spec:
             - --providers.kubernetescrd
             - --providers.kubernetesingress
             - --providers.kubernetesingress.ingressendpoint.publishedservice=traefik/traefik
-            - --entrypoints.web.http.redirections.entryPoint.to=:443
-            - --entrypoints.web.http.redirections.entryPoint.scheme=https
-            - --entrypoints.websecure.http.tls=true
-            - --entrypoints.websecure.http.tls.certResolver=letsencrypt
+            - --entryPoints.web.http.redirections.entryPoint.to=:443
+            - --entryPoints.web.http.redirections.entryPoint.scheme=https
+            - --entryPoints.websecure.http.tls=true
+            - --entryPoints.websecure.http.tls.certResolver=letsencrypt
+            - --log.level=INFO
             - --certificatesresolvers.letsencrypt.acme.dnsChallenge.provider=cloudflare
             - --certificatesresolvers.letsencrypt.acme.email=acme@codedbearder.com
             - --certificatesresolvers.letsencrypt.acme.storage=/data/acme.json
@@ -64,7 +65,7 @@ spec:
           envFrom:
             - secretRef:
                 name: acme-env
-          image: docker.io/traefik:v2.10.5
+          image: docker.io/traefik:v3.0.0
           imagePullPolicy: IfNotPresent
           lifecycle: null
           livenessProbe:
