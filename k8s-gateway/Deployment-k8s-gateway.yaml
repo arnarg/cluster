@@ -15,16 +15,19 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: acbcba7c052504d00c4c4e4ddb910556a0d3821d9becd5d51eb9c1c433529f28
+        checksum/config: 019434ebbda2a95778cb8e1d9b4b86c1dcad106047882b5f0d1dc0b7cab7ab95
       labels:
         app.kubernetes.io/instance: k8s-gateway
+        app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: k8s-gateway
+        app.kubernetes.io/version: 0.4.0
+        helm.sh/chart: k8s-gateway-2.4.0
     spec:
       containers:
         - args:
             - -conf
             - /etc/coredns/Corefile
-          image: quay.io/oriedge/k8s_gateway:v0.3.4
+          image: quay.io/oriedge/k8s_gateway:v0.4.0
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
