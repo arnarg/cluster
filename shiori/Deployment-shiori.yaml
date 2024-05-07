@@ -25,34 +25,17 @@ spec:
           env:
             - name: SHIORI_DIR
               value: /data
-            - name: SHIORI_DBMS
-              value: postgresql
-            - name: SHIORI_PG_USER
+            - name: SHIORI_HTTP_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  key: dbUser
+                  key: secretKey
                   name: shiori-creds
-            - name: SHIORI_PG_PASS
+            - name: SHIORI_DATABASE_URL
               valueFrom:
                 secretKeyRef:
-                  key: dbPass
+                  key: databaseConn
                   name: shiori-creds
-            - name: SHIORI_PG_NAME
-              valueFrom:
-                secretKeyRef:
-                  key: dbName
-                  name: shiori-creds
-            - name: SHIORI_PG_HOST
-              valueFrom:
-                secretKeyRef:
-                  key: dbHost
-                  name: shiori-creds
-            - name: SHIORI_PG_PORT
-              valueFrom:
-                secretKeyRef:
-                  key: dbPort
-                  name: shiori-creds
-          image: ghcr.io/go-shiori/shiori:v1.5.5
+          image: ghcr.io/go-shiori/shiori:v1.6.3
           name: shiori
           ports:
             - containerPort: 8080
