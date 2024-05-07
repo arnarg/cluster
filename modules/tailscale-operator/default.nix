@@ -8,7 +8,7 @@
 
   # Tailscale doesn't have a helm repository so we just need to clone
   # the tailscale git repository and pass the folder.
-  version = "1.54.0";
+  version = "1.64.2";
   chart = pkgs.stdenv.mkDerivation {
     inherit version;
     pname = "tailscale-operator-chart";
@@ -16,8 +16,8 @@
     src = pkgs.fetchFromGitHub {
       owner = "tailscale";
       repo = "tailscale";
-      rev = version;
-      hash = "sha256-/l3csuj1AZQo7C0BzkhqvkMNEQxc6Ers0KtZvxWS96Q=";
+      rev = "v${version}";
+      hash = "sha256-DS7C/G1Nj9gIjYwXaEeCLbtH9HbB0tRoJBDjZc/nq5g=";
     };
 
     phases = ["unpackPhase" "installPhase"];
@@ -31,8 +31,8 @@
 
   values =
     lib.attrsets.recursiveUpdate {
-      operatorConfig.image.tag = "v1.54";
-      proxyConfig.image.tag = "v1.54";
+      operatorConfig.image.tag = "v${version}";
+      proxyConfig.image.tag = "v${version}";
     }
     cfg.values;
 in {
