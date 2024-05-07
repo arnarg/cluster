@@ -6,8 +6,8 @@
   chart = lib.helm.downloadHelmChart {
     repo = "https://ori-edge.github.io/k8s_gateway/";
     chart = "k8s-gateway";
-    version = "2.0.4";
-    chartHash = "sha256-emRR9XA32zJgIqexIekwXcLAkuPpJmaaerJt4QEVvF0=";
+    version = "2.4.0";
+    chartHash = "sha256-Csj8/HKh8umXd2hyfF5svKxY5d1SnKAvpuEPCSijloo=";
   };
 
   namespace = "k8s-gateway";
@@ -52,6 +52,9 @@ in {
               tls_servername cloudflare-dns.com
             '';
           }
+          {name = "loop";}
+          {name = "reload";}
+          {name = "loadbalance";}
         ];
       };
     };
