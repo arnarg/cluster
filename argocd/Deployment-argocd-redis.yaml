@@ -23,8 +23,8 @@ spec:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: argocd-redis
         app.kubernetes.io/part-of: argocd
-        app.kubernetes.io/version: v2.10.9
-        helm.sh/chart: argo-cd-6.7.18
+        app.kubernetes.io/version: v2.11.2
+        helm.sh/chart: argo-cd-6.11.1
     spec:
       affinity:
         podAntiAffinity:
@@ -42,6 +42,13 @@ spec:
             - ""
             - --appendonly
             - "no"
+            - --requirepass $(REDIS_PASSWORD)
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: auth
+                  name: argocd-redis
           image: public.ecr.aws/docker/library/redis:7.2.4-alpine
           imagePullPolicy: IfNotPresent
           name: redis
