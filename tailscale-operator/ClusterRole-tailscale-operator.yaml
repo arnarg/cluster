@@ -38,3 +38,13 @@ rules:
       - list
       - watch
       - update
+  - apiGroups:
+      - tailscale.com
+    resources:
+      - dnsconfigs
+      - dnsconfigs/status
+    verbs:
+      - get
+      - list
+      - watch
+      - update
