@@ -9,11 +9,17 @@
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
+  inputs.nixhelm = {
+    url = "github:farcaller/nixhelm";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+
   outputs = {
     self,
     nixpkgs,
     flake-utils,
     nixidy,
+    nixhelm,
   }: (flake-utils.lib.eachDefaultSystem (system: let
     pkgs = import nixpkgs {
       inherit system;
@@ -25,6 +31,7 @@
         ./modules
         ./configuration.nix
         {
+          nixidy.charts = nixhelm.chartsDerivations.${system};
           nixidy.chartsDir = ./charts;
         }
       ];
