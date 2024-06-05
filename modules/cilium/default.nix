@@ -1,16 +1,10 @@
 {
   lib,
   config,
+  charts,
   ...
 }: let
   cfg = config.networking.cilium;
-
-  chart = lib.helm.downloadHelmChart {
-    repo = "https://helm.cilium.io/";
-    chart = "cilium";
-    version = "1.15.4";
-    chartHash = "sha256-zge93cptvS6Qpd6hN3L76AfI4BqynXSwn+Fv/v0Zpgw=";
-  };
 
   namespace = "kube-system";
 
@@ -71,7 +65,8 @@ in {
       inherit namespace;
 
       helm.releases.cilium = {
-        inherit chart values;
+        inherit values;
+        chart = charts.cilium.cilium;
       };
 
       yamls = [

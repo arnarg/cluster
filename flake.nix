@@ -24,6 +24,9 @@
       modules = [
         ./modules
         ./configuration.nix
+        {
+          nixidy.chartsDir = ./charts;
+        }
       ];
     };
 

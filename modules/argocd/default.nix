@@ -1,16 +1,10 @@
 {
   lib,
   config,
+  charts,
   ...
 }: let
   cfg = config.services.argocd;
-
-  chart = lib.helm.downloadHelmChart {
-    repo = "https://argoproj.github.io/argo-helm/";
-    chart = "argo-cd";
-    version = "6.11.1";
-    chartHash = "sha256-jyTfFYQipr2kzRIQxpPIupMiwu8qcQSn3Y5c7eS320I=";
-  };
 
   namespace = "argocd";
 
@@ -58,7 +52,8 @@ in {
       inherit namespace;
 
       helm.releases.argocd = {
-        inherit chart values;
+        inherit values;
+        chart = charts.argoproj.argo-cd;
       };
 
       # Network policies
