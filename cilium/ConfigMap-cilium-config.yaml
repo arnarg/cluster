@@ -88,9 +88,12 @@ data:
   preallocate-bpf-maps: "false"
   procfs: /host/proc
   proxy-connect-timeout: "2"
+  proxy-idle-timeout-seconds: "60"
   proxy-max-connection-duration-seconds: "0"
   proxy-max-requests-per-connection: "0"
   proxy-prometheus-port: "9964"
+  proxy-xff-num-trusted-hops-egress: "0"
+  proxy-xff-num-trusted-hops-ingress: "0"
   remove-cilium-node-taints: "true"
   routing-mode: tunnel
   service-no-backend-response: reject

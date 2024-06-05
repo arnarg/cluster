@@ -30,7 +30,7 @@ spec:
                 - --hubble-relay-client-cert-validity-duration=94608000s
               command:
                 - /usr/bin/cilium-certgen
-              image: quay.io/cilium/certgen:v0.1.11@sha256:5586de5019abc104637a9818a626956cd9b1e827327b958186ec412ae3d5dea6
+              image: quay.io/cilium/certgen:v0.1.12@sha256:bbc5e65e9dc65bc6b58967fe536b7f3b54e12332908aeb0a96a36866b4372b4e
               imagePullPolicy: IfNotPresent
               name: certgen
           hostNetwork: true
