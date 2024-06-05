@@ -1,11 +1,4 @@
-{lib, ...}: let
-  chart = lib.helm.downloadHelmChart {
-    repo = "https://isindir.github.io/sops-secrets-operator/";
-    chart = "sops-secrets-operator";
-    version = "0.19.0";
-    chartHash = "sha256-90b7Q2hJ91EDrwNJv0vY6iIfztdhLnur0i5SBJCTjXQ=";
-  };
-
+{charts, ...}: let
   namespace = "sops";
 in {
   applications.sops-secrets-operator = {
@@ -13,7 +6,7 @@ in {
     createNamespace = true;
 
     helm.releases.sops = {
-      inherit chart;
+      chart = charts.isindir.sops-secrets-operator;
 
       values = {
         # Mount secret with age keys to operator pod.

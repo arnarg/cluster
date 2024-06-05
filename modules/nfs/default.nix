@@ -1,18 +1,14 @@
 {
   lib,
   config,
+  charts,
   ...
 }: let
   cfg = config.storage.csi.nfs;
 
-  chart = lib.helm.downloadHelmChart {
-    repo = "https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts";
-    chart = "csi-driver-nfs";
-    version = "4.7.0";
-    chartHash = "sha256-HXj2NwivxhMpOXwXuj/9VMqy/MQyVYPdKC3bSj90VIc=";
-  };
-
   namespace = "kube-system";
+
+  chart = charts.kubernetes-csi.csi-driver-nfs;
 
   # Parse default values in the chart
   values = lib.head (lib.kube.fromYAML (builtins.readFile "${chart}/values.yaml"));

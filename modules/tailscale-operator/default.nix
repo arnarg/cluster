@@ -1,17 +1,10 @@
 {
   lib,
-  pkgs,
   config,
+  charts,
   ...
 }: let
   cfg = config.networking.tailscale-operator;
-
-  chart = lib.helm.downloadHelmChart {
-    repo = "https://pkgs.tailscale.com/helmcharts/";
-    chart = "tailscale-operator";
-    version = "1.66.3";
-    chartHash = "sha256-FpCYOxS8sLUA3mkGMk5Sr8bln4NnMFncPYGrJL+V78A=";
-  };
 
   namespace = "tailscale";
 
@@ -37,7 +30,8 @@ in {
       inherit namespace;
 
       helm.releases.tailscale-operator = {
-        inherit chart values;
+        inherit values;
+        chart = charts.tailscale.tailscale-operator;
       };
 
       yamls = [

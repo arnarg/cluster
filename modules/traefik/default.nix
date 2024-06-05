@@ -1,16 +1,10 @@
 {
   lib,
   config,
+  charts,
   ...
 }: let
   cfg = config.networking.traefik;
-
-  chart = lib.helm.downloadHelmChart {
-    repo = "https://traefik.github.io/charts/";
-    chart = "traefik";
-    version = "28.0.0";
-    chartHash = "sha256-RdYed3KGGy0mGpVzbtuQyAAScVt5L15dfHU+O6wIj9w=";
-  };
 
   namespace = "traefik";
 
@@ -88,7 +82,8 @@ in {
       inherit namespace;
 
       helm.releases.traefik = {
-        inherit chart values;
+        inherit values;
+        chart = charts.traefik.traefik;
       };
 
       yamls = [

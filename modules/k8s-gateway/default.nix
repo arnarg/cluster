@@ -1,15 +1,8 @@
 {
-  lib,
   config,
+  charts,
   ...
 }: let
-  chart = lib.helm.downloadHelmChart {
-    repo = "https://ori-edge.github.io/k8s_gateway/";
-    chart = "k8s-gateway";
-    version = "2.4.0";
-    chartHash = "sha256-Csj8/HKh8umXd2hyfF5svKxY5d1SnKAvpuEPCSijloo=";
-  };
-
   namespace = "k8s-gateway";
 in {
   applications.k8s-gateway = {
@@ -17,7 +10,7 @@ in {
     createNamespace = true;
 
     helm.releases.k8s-gateway = {
-      inherit chart;
+      chart = charts.ori-edge.k8s-gateway;
 
       values = {
         domain = config.networking.domain;
