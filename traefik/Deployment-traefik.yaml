@@ -30,7 +30,7 @@ spec:
         app.kubernetes.io/instance: traefik-traefik
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: traefik
-        helm.sh/chart: traefik-28.0.0
+        helm.sh/chart: traefik-28.2.0
     spec:
       containers:
         - args:
@@ -65,7 +65,7 @@ spec:
           envFrom:
             - secretRef:
                 name: acme-env
-          image: docker.io/traefik:v3.0.0
+          image: docker.io/traefik:v3.0.1
           imagePullPolicy: IfNotPresent
           lifecycle: null
           livenessProbe:
@@ -118,7 +118,6 @@ spec:
       hostNetwork: false
       securityContext:
         fsGroup: 2000
-        fsGroupChangePolicy: OnRootMismatch
         runAsGroup: 65532
         runAsNonRoot: true
         runAsUser: 65532
