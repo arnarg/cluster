@@ -49,11 +49,11 @@ rules:
       - ingressrouteudps
       - middlewares
       - middlewaretcps
+      - serverstransports
+      - serverstransporttcps
       - tlsoptions
       - tlsstores
       - traefikservices
-      - serverstransports
-      - serverstransporttcps
     verbs:
       - get
       - list
