@@ -51,7 +51,7 @@ in {
             spec:
               containers:
               - name: shiori
-                image: ghcr.io/go-shiori/shiori:v1.6.3
+                image: ghcr.io/go-shiori/shiori:v1.7.0
                 args:
                 - serve
                 - --address
