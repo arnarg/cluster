@@ -18,6 +18,7 @@ jobs:
 
     - uses: DeterminateSystems/magic-nix-cache-action@v2
 
-    - uses: arnarg/nixidy@main
+    - uses: arnarg/nixidy@update-action
       with:
         environment: prod
+        pr: 'true'
