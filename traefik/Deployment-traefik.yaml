@@ -116,8 +116,19 @@ spec:
             - mountPath: /tmp
               name: tmp
       hostNetwork: false
+      initContainers:
+        - command:
+            - sh
+            - -c
+            - touch /data/acme.json; chmod -v 600 /data/acme.json
+          image: busybox:1.36
+          name: volume-permissions
+          volumeMounts:
+            - mountPath: /data
+              name: data
       securityContext:
         fsGroup: 2000
+        fsGroupChangePolicy: OnRootMismatch
         runAsGroup: 65532
         runAsNonRoot: true
         runAsUser: 65532
