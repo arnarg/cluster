@@ -48,7 +48,7 @@
 
       # Setup fs group for file system permissions.
       podSecurityContext.fsGroup = 2000;
-      podSecurityContext.fsGroupChangePOlicy = "OnRootMismatch";
+      podSecurityContext.fsGroupChangePolicy = "OnRootMismatch";
 
       # Kubernetes changes permissions of `/data/acme.json`
       # during pod creation to `0660` but traefik needs it
