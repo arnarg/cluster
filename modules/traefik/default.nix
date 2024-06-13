@@ -56,7 +56,7 @@
       deployment.initContainers = [
         {
           name = "volume-permissions";
-          image = "busybox:latest";
+          image = "busybox:1.36";
           command = [
             "sh"
             "-c"
