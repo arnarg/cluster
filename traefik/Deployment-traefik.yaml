@@ -126,6 +126,7 @@ spec:
           volumeMounts:
             - mountPath: /data
               name: data
+              subPath: traefik
       securityContext:
         fsGroup: 2000
         fsGroupChangePolicy: OnRootMismatch
