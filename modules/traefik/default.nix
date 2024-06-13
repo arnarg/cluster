@@ -48,6 +48,28 @@
 
       # Setup fs group for file system permissions.
       podSecurityContext.fsGroup = 2000;
+      podSecurityContext.fsGroupChangePOlicy = "OnRootMismatch";
+
+      # Kubernetes changes permissions of `/data/acme.json`
+      # during pod creation to `0660` but traefik needs it
+      # to be `0600`.
+      deployment.initContainers = [
+        {
+          name = "volume-permissions";
+          image = "busybox:latest";
+          command = [
+            "sh"
+            "-c"
+            "touch /data/acme.json; chmod -v 600 /data/acme.json"
+          ];
+          volumeMounts = [
+            {
+              mountPath = "/data";
+              name = "data";
+            }
+          ];
+        }
+      ];
 
       # Traefik needs to get credentials for cloudflare API.
       # This secret needs to be created before deploying this
