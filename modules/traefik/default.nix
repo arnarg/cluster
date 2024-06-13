@@ -66,6 +66,7 @@
             {
               mountPath = "/data";
               name = "data";
+              subPath = "traefik";
             }
           ];
         }
