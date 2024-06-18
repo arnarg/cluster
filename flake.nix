@@ -5,7 +5,7 @@
   inputs.flake-utils.url = "github:numtide/flake-utils";
 
   inputs.nixidy = {
-    url = "github:arnarg/nixidy/typed";
+    url = "github:arnarg/nixidy";
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
