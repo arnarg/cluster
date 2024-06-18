@@ -9,4 +9,3 @@ metadata:
     app.kubernetes.io/part-of: argocd
   name: argocd-repo-server
   namespace: argocd
-rules: null

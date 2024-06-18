@@ -16,7 +16,6 @@ spec:
           labels:
             k8s-app: hubble-generate-certs
         spec:
-          affinity: null
           automountServiceAccountToken: true
           containers:
             - args:
