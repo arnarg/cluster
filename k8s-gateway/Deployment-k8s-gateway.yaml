@@ -6,6 +6,7 @@ metadata:
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: k8s-gateway
   name: k8s-gateway
+  namespace: k8s-gateway
 spec:
   replicas: 1
   selector:
