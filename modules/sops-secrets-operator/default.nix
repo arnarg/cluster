@@ -1,6 +1,8 @@
 {charts, ...}: let
   namespace = "sops";
 in {
+  nixidy.resourceImports = [./resource.nix];
+
   applications.sops-secrets-operator = {
     inherit namespace;
     createNamespace = true;
@@ -52,12 +54,8 @@ in {
     ];
 
     resources = {
-      "apps/v1".Deployment.sops-sops-secrets-operator = {
-        metadata.namespace = namespace;
-      };
-      v1.ServiceAccount.sops-sops-secrets-operator = {
-        metadata.namespace = namespace;
-      };
+      deployments.sops-sops-secrets-operator.metadata.namespace = namespace;
+      serviceAccounts.sops-sops-secrets-operator.metadata.namespace = namespace;
     };
   };
 }

@@ -70,7 +70,7 @@ in {
 
       # Create a storage class
       resources = {
-        "storage.k8s.io/v1".StorageClass.${cfg.storageClassName} = {
+        storageClasses.${cfg.storageClassName} = {
           provisioner = values.driver.name;
           parameters.server = cfg.server;
           parameters.share = cfg.share;

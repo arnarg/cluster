@@ -199,9 +199,7 @@ in {
 
       # Patch SOPS secret to include namespace
       resources = {
-        "isindir.github.com/v1alpha3".SopsSecret.traefik-secrets = {
-          metadata.namespace = namespace;
-        };
+        sopsSecrets.traefik-secrets.metadata.namespace = namespace;
       };
     };
   };

@@ -153,13 +153,11 @@ in {
       resources = {
         # The tailscale namespace needs a privileged pod security
         # policy.
-        v1.Namespace."${namespace}" = {
-          metadata.labels."pod-security.kubernetes.io/enforce" = "privileged";
+        namespaces."${namespace}" = {
+          metadata.labels."pod-security.kubernetes.io/enforce" = lib.mkForce "privileged";
         };
         # Make sure the SOPS secret has correct namespace
-        "isindir.github.com/v1alpha3".SopsSecret.tailscale-secrets = {
-          metadata.namespace = namespace;
-        };
+        sopsSecrets.tailscale-secrets.metadata.namespace = namespace;
       };
     };
 
@@ -173,14 +171,12 @@ in {
     };
 
     # Set k8s-gateway's service to use tailscale-operator
-    applications.k8s-gateway.resources = {
-      v1.Service.k8s-gateway = {
-        metadata.annotations = {
-          "tailscale.com/hostname" = "k8s-dns";
-          "tailscale.com/tags" = "tag:dns";
-        };
-        spec.loadBalancerClass = "tailscale";
+    applications.k8s-gateway.resources.services.k8s-gateway = {
+      metadata.annotations = {
+        "tailscale.com/hostname" = "k8s-dns";
+        "tailscale.com/tags" = "tag:dns";
       };
+      spec.loadBalancerClass = "tailscale";
     };
   };
 }
