@@ -113,9 +113,6 @@ in {
           }
         ];
       };
-
-      # Make sure the SOPS secret has correct namespace
-      sopsSecrets.shiori-secrets.metadata.namespace = lib.mkForce namespace;
     };
 
     yamls = [

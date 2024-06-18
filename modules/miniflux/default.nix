@@ -99,9 +99,6 @@ in {
           }
         ];
       };
-
-      # Make sure the SOPS secret has correct namespace
-      sopsSecrets.miniflux-secrets.metadata.namespace = lib.mkForce namespace;
     };
 
     yamls = [

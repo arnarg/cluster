@@ -196,11 +196,6 @@ in {
         # Load SOPS encrypted secret
         (builtins.readFile ./traefik-secret.sops.yaml)
       ];
-
-      # Patch SOPS secret to include namespace
-      resources = {
-        sopsSecrets.traefik-secrets.metadata.namespace = namespace;
-      };
     };
   };
 }

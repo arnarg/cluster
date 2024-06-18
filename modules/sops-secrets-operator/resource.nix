@@ -88,6 +88,8 @@ in {
   };
 
   config = {
+    inherit definitions;
+
     types = [
       {
         name = "sopssecrets";
@@ -101,5 +103,15 @@ in {
     resources = {
       "isindir.github.com"."v1alpha3"."SopsSecret" = lib.mkAliasDefinitions options.resources.sopsSecrets;
     };
+
+    # Add default namespace to all SopsSecret
+    defaults = [
+      {
+        group = "isindir.github.com";
+        version = "v1alpha3";
+        kind = "SopsSecret";
+        default.metadata.namespace = lib.mkDefault config.namespace;
+      }
+    ];
   };
 }

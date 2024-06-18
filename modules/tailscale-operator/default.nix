@@ -156,8 +156,6 @@ in {
         namespaces."${namespace}" = {
           metadata.labels."pod-security.kubernetes.io/enforce" = lib.mkForce "privileged";
         };
-        # Make sure the SOPS secret has correct namespace
-        sopsSecrets.tailscale-secrets.metadata.namespace = namespace;
       };
     };
 
