@@ -18,7 +18,6 @@ spec:
     type: RollingUpdate
   template:
     metadata:
-      annotations: null
       labels:
         app.kubernetes.io/name: hubble-relay
         app.kubernetes.io/part-of: cilium
@@ -74,7 +73,6 @@ spec:
               readOnly: true
       nodeSelector:
         kubernetes.io/os: linux
-      priorityClassName: null
       restartPolicy: Always
       securityContext:
         fsGroup: 65532

@@ -23,17 +23,17 @@ spec:
             - --port
             - "8080"
           env:
+            - name: SHIORI_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  key: databaseConn
+                  name: shiori-creds
             - name: SHIORI_DIR
               value: /data
             - name: SHIORI_HTTP_SECRET_KEY
               valueFrom:
                 secretKeyRef:
                   key: secretKey
-                  name: shiori-creds
-            - name: SHIORI_DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  key: databaseConn
                   name: shiori-creds
           image: ghcr.io/go-shiori/shiori:v1.7.0
           name: shiori

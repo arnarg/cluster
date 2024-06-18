@@ -18,7 +18,6 @@ spec:
     type: RollingUpdate
   template:
     metadata:
-      annotations: null
       labels:
         app.kubernetes.io/name: hubble-ui
         app.kubernetes.io/part-of: cilium
@@ -59,10 +58,8 @@ spec:
             - containerPort: 8090
               name: grpc
           terminationMessagePolicy: FallbackToLogsOnError
-          volumeMounts: null
       nodeSelector:
         kubernetes.io/os: linux
-      priorityClassName: null
       securityContext:
         fsGroup: 1001
         runAsGroup: 1001

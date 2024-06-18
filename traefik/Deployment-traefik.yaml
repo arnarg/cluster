@@ -1,7 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations: null
   labels:
     app.kubernetes.io/instance: traefik-traefik
     app.kubernetes.io/managed-by: Helm
@@ -67,7 +66,6 @@ spec:
                 name: acme-env
           image: docker.io/traefik:v3.0.1
           imagePullPolicy: IfNotPresent
-          lifecycle: null
           livenessProbe:
             failureThreshold: 3
             httpGet:
@@ -102,7 +100,6 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 2
-          resources: null
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
