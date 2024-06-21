@@ -153,8 +153,6 @@ in {
             namespace: ${namespace}
           spec:
             statefulSet:
-              labels:
-                argocd.argoproj.io/instance: tailscale-operator
               pod:
                 labels:
                   argocd.argoproj.io/instance: tailscale-operator
