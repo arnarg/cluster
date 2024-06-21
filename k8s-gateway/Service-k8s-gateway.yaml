@@ -10,6 +10,7 @@ metadata:
     app.kubernetes.io/instance: k8s-gateway
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: k8s-gateway
+    tailscale.com/proxy-class: prod
   name: k8s-gateway
   namespace: k8s-gateway
 spec:

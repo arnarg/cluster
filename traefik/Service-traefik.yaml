@@ -8,6 +8,7 @@ metadata:
     app.kubernetes.io/instance: traefik-traefik
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: traefik
+    tailscale.com/proxy-class: prod
   name: traefik
   namespace: traefik
 spec:
