@@ -145,6 +145,21 @@ in {
                   protocol: UDP
         ''
 
+        ''
+          apiVersion: tailscale.com/v1alpha1
+          kind: ProxyClass
+          metadata:
+            name: prod
+            namespace: ${namespace}
+          spec:
+            statefulSet:
+              labels:
+                argocd.argoproj.io/instance: tailscale-operator
+              pod:
+                labels:
+                  argocd.argoproj.io/instance: tailscale-operator
+        ''
+
         # Load SOPS encrypted secret
         (builtins.readFile ./tailscale-secret.sops.yaml)
       ];
@@ -166,6 +181,9 @@ in {
         "tailscale.com/hostname" = "k8s-ingress";
         "tailscale.com/tags" = "tag:web";
       };
+      labels = {
+        "tailscale.com/proxy-class" = "prod";
+      };
     };
 
     # Set k8s-gateway's service to use tailscale-operator
@@ -173,6 +191,9 @@ in {
       metadata.annotations = {
         "tailscale.com/hostname" = "k8s-dns";
         "tailscale.com/tags" = "tag:dns";
+      };
+      metadata.labels = {
+        "tailscale.com/proxy-class" = "prod";
       };
       spec.loadBalancerClass = "tailscale";
     };
