@@ -52,51 +52,54 @@ in {
       };
     };
 
+    resources = {
+      # Network policy allowing k8s-gateway to make
+      # DNS over TLS requests to 1.1.1.1 and 1.0.0.1.
+      networkPolicies.allow-upstream-tls-dns-egress.spec = {
+        podSelector.matchLabels."app.kubernetes.io/name" = "k8s-gateway";
+        policyTypes = ["Egress"];
+        egress = [
+          {
+            to = [
+              {ipBlock.cidr = "1.1.1.1/32";}
+              {ipBlock.cidr = "1.0.0.1/32";}
+            ];
+            ports = [
+              {
+                protocol = "TCP";
+                port = 853;
+              }
+            ];
+          }
+        ];
+      };
+
+      # Network policy allowing tailscale proxy to
+      # make DNS requests to k8s-gateway.
+      networkPolicies.allow-tailscale-ingress.spec = {
+        podSelector.matchLabels."app.kubernetes.io/name" = "k8s-gateway";
+        policyTypes = ["Ingress"];
+        ingress = [
+          {
+            from = [
+              {
+                namespaceSelector.matchLabels."kubernetes.io/metadata.name" = "tailscale";
+                podSelector.matchLabels."tailscale.com/parent-resource" = "k8s-gateway";
+              }
+            ];
+            ports = [
+              {
+                protocol = "UDP";
+                port = 1053;
+              }
+            ];
+          }
+        ];
+      };
+    };
+
     # Network policies
     yamls = [
-      ''
-        apiVersion: networking.k8s.io/v1
-        kind: NetworkPolicy
-        metadata:
-          name: allow-tailscale-ingress
-          namespace: ${namespace}
-        spec:
-          podSelector:
-            matchLabels:
-              app.kubernetes.io/name: k8s-gateway
-          policyTypes:
-          - Ingress
-          ingress:
-          - from:
-            - namespaceSelector:
-                matchLabels:
-                  kubernetes.io/metadata.name: tailscale
-            ports:
-            - protocol: UDP
-              port: 1053
-      ''
-      ''
-        apiVersion: networking.k8s.io/v1
-        kind: NetworkPolicy
-        metadata:
-          name: allow-upstream-tls-dns-egress
-          namespace: ${namespace}
-        spec:
-          podSelector:
-            matchLabels:
-              app.kubernetes.io/name: k8s-gateway
-          policyTypes:
-          - Egress
-          egress:
-          - to:
-            - ipBlock:
-                cidr: 1.1.1.1/32
-            - ipBlock:
-                cidr: 1.0.0.1/32
-            ports:
-            - protocol: TCP
-              port: 853
-      ''
       ''
         apiVersion: cilium.io/v2
         kind: CiliumNetworkPolicy
