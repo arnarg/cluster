@@ -1,0 +1,24 @@
+name: Update nixhelm
+
+on:
+  # If you want to run this workflow manually.
+  workflow_dispatch:
+
+  # Run every saturday at 9:00
+  schedule:
+    - cron: '0 9 * * 6'
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: cachix/install-nix-action@v20
+        with:
+          extra_nix_config: |
+            extra-experimental-features = nix-command flakes
+
+      - uses: snowfallorg/thaw-action@v1
+        with:
+          inputs: nixhelm
