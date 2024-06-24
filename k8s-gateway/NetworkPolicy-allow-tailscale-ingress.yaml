@@ -9,6 +9,9 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: tailscale
+          podSelector:
+            matchLabels:
+              tailscale.com/parent-resource: k8s-gateway
       ports:
         - port: 1053
           protocol: UDP
