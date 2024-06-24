@@ -109,31 +109,36 @@ in {
         chart = charts.traefik.traefik;
       };
 
-      yamls = [
-        ''
-          apiVersion: networking.k8s.io/v1
-          kind: NetworkPolicy
-          metadata:
-            name: allow-tailscale-ingress
-            namespace: ${namespace}
-          spec:
-            podSelector:
-              matchLabels:
-                app.kubernetes.io/name: traefik
-            policyTypes:
-            - Ingress
-            ingress:
-            - from:
-              - namespaceSelector:
-                  matchLabels:
-                    kubernetes.io/metadata.name: tailscale
-              ports:
-              - protocol: TCP
-                port: 8000
-              - protocol: TCP
-                port: 8443
-        ''
+      resources = {
+        # Network policy allowing tailscale proxy to
+        # make DNS requests to traefik.
+        networkPolicies.allow-tailscale-ingress.spec = {
+          podSelector.matchLabels."app.kubernetes.io/name" = "traefik";
+          policyTypes = ["Ingress"];
+          ingress = [
+            {
+              from = [
+                {
+                  namespaceSelector.matchLabels."kubernetes.io/metadata.name" = "tailscale";
+                  podSelector.matchLabels."tailscale.com/parent-resource" = "traefik";
+                }
+              ];
+              ports = [
+                {
+                  protocol = "TCP";
+                  port = 8000;
+                }
+                {
+                  protocol = "TCP";
+                  port = 8443;
+                }
+              ];
+            }
+          ];
+        };
+      };
 
+      yamls = [
         ''
           apiVersion: cilium.io/v2
           kind: CiliumNetworkPolicy
