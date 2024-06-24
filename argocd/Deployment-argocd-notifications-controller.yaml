@@ -27,7 +27,7 @@ spec:
         app.kubernetes.io/name: argocd-notifications-controller
         app.kubernetes.io/part-of: argocd
         app.kubernetes.io/version: v2.11.3
-        helm.sh/chart: argo-cd-7.2.0
+        helm.sh/chart: argo-cd-7.2.1
     spec:
       affinity:
         podAntiAffinity:
