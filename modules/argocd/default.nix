@@ -56,32 +56,33 @@ in {
         chart = charts.argoproj.argo-cd;
       };
 
+      resources = {
+        # Allow ingress traffic from traefik to
+        # argocd-server.
+        networkPolicies.allow-traefik-ingress.spec = {
+          podSelector.matchLabels."app.kubernetes.io/name" = "argocd-server";
+          policyTypes = ["Ingress"];
+          ingress = [
+            {
+              from = [
+                {
+                  namespaceSelector.matchLabels."kubernetes.io/metadata.name" = "traefik";
+                  podSelector.matchLabels."app.kubernetes.io/name" = "traefik";
+                }
+              ];
+              ports = [
+                {
+                  protocol = "TCP";
+                  port = 8080;
+                }
+              ];
+            }
+          ];
+        };
+      };
+
       # Network policies
       yamls = [
-        ''
-          apiVersion: networking.k8s.io/v1
-          kind: NetworkPolicy
-          metadata:
-            name: allow-traefik-ingress
-            namespace: ${namespace}
-          spec:
-            podSelector:
-              matchLabels:
-                app.kubernetes.io/name: argocd-server
-            policyTypes:
-            - Ingress
-            ingress:
-            - from:
-              - namespaceSelector:
-                  matchLabels:
-                    kubernetes.io/metadata.name: traefik
-                podSelector:
-                  matchLabels:
-                    app.kubernetes.io/name: traefik
-              ports:
-                - protocol: TCP
-                  port: 8080
-        ''
         ''
           apiVersion: cilium.io/v2
           kind: CiliumNetworkPolicy
