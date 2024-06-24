@@ -9,6 +9,9 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: tailscale
+          podSelector:
+            matchLabels:
+              tailscale.com/parent-resource: traefik
       ports:
         - port: 8000
           protocol: TCP
