@@ -37,7 +37,19 @@
       ];
     };
 
-    packages.nixidy = nixidy.packages.${system}.default;
+    packages = {
+      nixidy = nixidy.packages.${system}.default;
+      generators.sops = nixidy.packages.${system}.generators.fromCRD {
+        name = "sops";
+        src = pkgs.fetchFromGitHub {
+          owner = "isindir";
+          repo = "sops-secrets-operator";
+          rev = "0.13.0";
+          hash = "sha256-wPGpbmT/KBPKaloDrYOxdsmQqe6FjDBWS+0M/egb5UA=";
+        };
+        crds = ["config/crd/bases/isindir.github.com_sopssecrets.yaml"];
+      };
+    };
 
     devShells.default = pkgs.mkShell {
       buildInputs = [
