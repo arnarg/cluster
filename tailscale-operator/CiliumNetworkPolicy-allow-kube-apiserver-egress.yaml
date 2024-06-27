@@ -12,4 +12,6 @@ spec:
         - ports:
             - port: "6443"
               protocol: TCP
-  endpointSelector: {}
+  endpointSelector:
+    matchLabels:
+      argocd.argoproj.io/part-of: tailscale-operator

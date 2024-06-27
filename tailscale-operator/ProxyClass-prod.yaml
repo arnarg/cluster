@@ -7,4 +7,4 @@ spec:
   statefulSet:
     pod:
       labels:
-        argocd.argoproj.io/instance: tailscale-operator
+        argocd.argoproj.io/part-of: tailscale-operator
