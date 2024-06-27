@@ -45,31 +45,8 @@ in {
         inherit chart values;
       };
 
-      # Network policies
-      yamls = [
-        ''
-          apiVersion: cilium.io/v2
-          kind: CiliumNetworkPolicy
-          metadata:
-            name: allow-kube-apiserver-egress
-            namespace: ${namespace}
-          spec:
-            description: "Allow snapshot controller to talk to kube-apiserver"
-            endpointSelector:
-              matchLabels:
-                app: snapshot-controller
-            egress:
-            - toEntities:
-              - kube-apiserver
-              toPorts:
-              - ports:
-                - port: "6443"
-                  protocol: TCP
-        ''
-      ];
-
-      # Create a storage class
       resources = {
+        # Create a storage class
         storageClasses.${cfg.storageClassName} = {
           provisioner = values.driver.name;
           parameters.server = cfg.server;
@@ -77,6 +54,27 @@ in {
           reclaimPolicy = "Retain";
           volumeBindingMode = "Immediate";
           mountOptions = ["nfsvers=4.1"];
+        };
+
+        # Allow csi-driver-nfs access to kube-apiserver
+        ciliumnetworkpolicies.allow-kube-apiserver-egress.spec = {
+          description = "Allow snapshot controller to talk to kube-apiserver.";
+          endpointSelector.matchLabels.app = "snapshot-controller";
+          egress = [
+            {
+              toEntities = ["kube-apiserver"];
+              toPorts = [
+                {
+                  ports = [
+                    {
+                      port = "6443";
+                      protocol = "TCP";
+                    }
+                  ];
+                }
+              ];
+            }
+          ];
         };
       };
     };

@@ -79,58 +79,74 @@ in {
             }
           ];
         };
-      };
 
-      # Network policies
-      yamls = [
-        ''
-          apiVersion: cilium.io/v2
-          kind: CiliumNetworkPolicy
-          metadata:
-            name: allow-world-egress
-            namespace: ${namespace}
-          spec:
-            endpointSelector:
-              matchLabels:
-                app.kubernetes.io/name: argocd-repo-server
-            egress:
+        # Allow argocd-repo-server egress access to github.com
+        ciliumnetworkpolicies.allow-world-egress.spec = {
+          endpointSelector.matchLabels."app.kubernetes.io/name" = "argocd-repo-server";
+          egress = [
             # Enable DNS proxying
-            - toEndpoints:
-              - matchLabels:
-                 "k8s:io.kubernetes.pod.namespace": kube-system
-                 "k8s:k8s-app": kube-dns
-              toPorts:
-              - ports:
-                - port: "53"
-                  protocol: ANY
-                rules:
-                  dns:
-                  - matchPattern: "*"
-            # Allow HTTPS to github
-            - toFQDNs:
-              - matchName: github.com
-              toPorts:
-              - ports:
-                - port: "443"
-                  protocol: TCP
-        ''
-        ''
-          apiVersion: cilium.io/v2
-          kind: CiliumNetworkPolicy
-          metadata:
-            name: allow-kube-apiserver-egress
-            namespace: ${namespace}
-          spec:
-            endpointSelector: {}
-            egress:
-            - toEntities:
-              - kube-apiserver
-              toPorts:
-              - ports:
-                - port: "6443"
-                  protocol: TCP
-        ''
-      ];
+            {
+              toEndpoints = [
+                {
+                  matchLabels = {
+                    "k8s:io.kubernetes.pod.namespace" = "kube-system";
+                    "k8s:k8s-app" = "kube-dns";
+                  };
+                }
+              ];
+              toPorts = [
+                {
+                  ports = [
+                    {
+                      port = "53";
+                      protocol = "ANY";
+                    }
+                  ];
+                  rules.dns = [
+                    {matchPattern = "*";}
+                  ];
+                }
+              ];
+            }
+            # Allow HTTPS to github.com
+            {
+              toFQDNs = [
+                {matchName = "github.com";}
+              ];
+              toPorts = [
+                {
+                  ports = [
+                    {
+                      port = "443";
+                      protocol = "TCP";
+                    }
+                  ];
+                }
+              ];
+            }
+          ];
+        };
+
+        # Allow all ArgoCD pods to access kube-apiserver
+        ciliumnetworkpolicies.allow-kube-apiserver-egress.spec = {
+          endpointSelector.matchLabels."app.kubernetes.io/part-of" = "argocd";
+          egress = [
+            {
+              toEntities = ["kube-apiserver"];
+              toPorts = [
+                {
+                  ports = [
+                    {
+                      port = "6443";
+                      protocol = "TCP";
+                    }
+                  ];
+                }
+              ];
+            }
+          ];
+        };
+      };
     };
   };
 }

@@ -99,52 +99,56 @@ in {
           }
         ];
       };
+
+      # Allow miniflux to talk to postgres
+      ciliumnetworkpolicies.allow-postgres-egress.spec = {
+        endpointSelector.matchLabels = labels;
+        egress = [
+          {
+            toEntities = [
+              # The PostgreSQL server is hosted on the same
+              # node as the kubernetes API server.
+              # Cilium will always match this as the entity
+              # `kube-apiserver` instead of the CIDR.
+              # See: https://github.com/cilium/cilium/issues/16308
+              "kube-apiserver"
+            ];
+            toPorts = [
+              {
+                ports = [
+                  {
+                    port = "5432";
+                    protocol = "TCP";
+                  }
+                ];
+              }
+            ];
+          }
+        ];
+      };
+
+      # Allow egress HTTPS to the internet
+      ciliumnetworkpolicies.allow-rss-feeds-egress.spec = {
+        endpointSelector.matchLabels = labels;
+        egress = [
+          {
+            toEntities = ["world"];
+            toPorts = [
+              {
+                ports = [
+                  {
+                    port = "443";
+                    protocol = "TCP";
+                  }
+                ];
+              }
+            ];
+          }
+        ];
+      };
     };
 
     yamls = [
-      ''
-        apiVersion: cilium.io/v2
-        kind: CiliumNetworkPolicy
-        metadata:
-          name: allow-postgres-egress
-          namespace: ${namespace}
-        spec:
-          endpointSelector:
-            matchLabels: ${toJSON labels}
-          # Allow egress traffic to postgresql
-          egress:
-          - toEntities:
-            # The PostgreSQL server is hosted on the same
-            # node as the kubernetes API server.
-            # Cilium will always match this as the entity
-            # `kube-apiserver` instead of the CIDR.
-            # See: https://github.com/cilium/cilium/issues/16308
-            - kube-apiserver
-            toPorts:
-            - ports:
-              - port: "5432"
-                protocol: TCP
-      ''
-
-      ''
-        apiVersion: cilium.io/v2
-        kind: CiliumNetworkPolicy
-        metadata:
-          name: allow-rss-feeds-egress
-          namespace: ${namespace}
-        spec:
-          endpointSelector:
-            matchLabels: ${toJSON labels}
-          # Allow egress traffic to https on the internet
-          egress:
-          - toEntities:
-            - world
-            toPorts:
-            - ports:
-              - port: "443"
-                protocol: TCP
-      ''
-
       # Read SOPS encrypted secret
       (builtins.readFile ./miniflux-secret.sops.yaml)
     ];

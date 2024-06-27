@@ -96,28 +96,26 @@ in {
           }
         ];
       };
-    };
 
-    # Network policies
-    yamls = [
-      ''
-        apiVersion: cilium.io/v2
-        kind: CiliumNetworkPolicy
-        metadata:
-          name: allow-kube-apiserver-egress
-          namespace: ${namespace}
-        spec:
-          endpointSelector:
-            matchLabels:
-              app.kubernetes.io/name: k8s-gateway
-          egress:
-          - toEntities:
-            - kube-apiserver
-            toPorts:
-            - ports:
-              - port: "6443"
-                protocol: TCP
-      ''
-    ];
+      # Allow k8s-gateway to access kube-apiserver
+      ciliumnetworkpolicies.allow-kube-apiserver-egress.spec = {
+        endpointSelector.matchLabels."app.kubernetes.io/name" = "k8s-gateway";
+        egress = [
+          {
+            toEntities = ["kube-apiserver"];
+            toPorts = [
+              {
+                ports = [
+                  {
+                    port = "6443";
+                    protocol = "TCP";
+                  }
+                ];
+              }
+            ];
+          }
+        ];
+      };
+    };
   };
 }

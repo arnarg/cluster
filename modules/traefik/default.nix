@@ -136,68 +136,93 @@ in {
             }
           ];
         };
+
+        # Allow traefik to talk to kube-apiserver
+        ciliumnetworkpolicies.allow-kube-apiserver-egress.spec = {
+          endpointSelector.matchLabels."app.kubernetes.io/name" = "traefik";
+          egress = [
+            {
+              toEntities = ["kube-apiserver"];
+              toPorts = [
+                {
+                  ports = [
+                    {
+                      port = "6443";
+                      protocol = "TCP";
+                    }
+                  ];
+                }
+              ];
+            }
+          ];
+        };
+
+        # Allow traefik external access to cloudflare and let's encrypt
+        ciliumnetworkpolicies.allow-world-egress.spec = {
+          endpointSelector.matchLabels."app.kubernetes.io/name" = "traefik";
+          egress = [
+            # Enable DNS proxying
+            {
+              toEndpoints = [
+                {
+                  matchLabels = {
+                    "k8s:io.kubernetes.pod.namespace" = "kube-system";
+                    "k8s:k8s-app" = "kube-dns";
+                  };
+                }
+              ];
+              toPorts = [
+                {
+                  ports = [
+                    {
+                      port = "53";
+                      protocol = "ANY";
+                    }
+                  ];
+                  rules.dns = [
+                    {matchPattern = "*";}
+                  ];
+                }
+              ];
+            }
+            # Allow HTTPS to cloudflare and let's encrypt
+            {
+              toFQDNs = [
+                {matchName = "api.cloudflare.com";}
+                {matchName = "acme-v02.api.letsencrypt.com";}
+              ];
+              toPorts = [
+                {
+                  ports = [
+                    {
+                      port = "443";
+                      protocol = "TCP";
+                    }
+                  ];
+                }
+              ];
+            }
+            # Allow DNS lookups with cloudflare
+            {
+              toFQDNs = [
+                {matchPattern = "*.ns.cloudflare.com";}
+              ];
+              toPorts = [
+                {
+                  ports = [
+                    {
+                      port = "53";
+                      protocol = "UDP";
+                    }
+                  ];
+                }
+              ];
+            }
+          ];
+        };
       };
 
       yamls = [
-        ''
-          apiVersion: cilium.io/v2
-          kind: CiliumNetworkPolicy
-          metadata:
-            name: allow-kube-apiserver-egress
-            namespace: ${namespace}
-          spec:
-            endpointSelector:
-              matchLabels:
-                app.kubernetes.io/name: traefik
-            egress:
-            - toEntities:
-              - kube-apiserver
-              toPorts:
-              - ports:
-                - port: "6443"
-                  protocol: TCP
-        ''
-
-        ''
-          apiVersion: cilium.io/v2
-          kind: CiliumNetworkPolicy
-          metadata:
-            name: allow-world-egress
-            namespace: ${namespace}
-          spec:
-            endpointSelector:
-              matchLabels:
-                app.kubernetes.io/name: traefik
-            egress:
-            # Enable DNS proxying
-            - toEndpoints:
-              - matchLabels:
-                 "k8s:io.kubernetes.pod.namespace": kube-system
-                 "k8s:k8s-app": kube-dns
-              toPorts:
-              - ports:
-                - port: "53"
-                  protocol: ANY
-                rules:
-                  dns:
-                  - matchPattern: "*"
-            # Allow HTTPS to cloudflare and let's encrypt
-            - toFQDNs:
-              - matchName: api.cloudflare.com
-              - matchName: acme-v02.api.letsencrypt.com
-              toPorts:
-              - ports:
-                - port: "443"
-                  protocol: TCP
-            # Allow DNS lookups with cloudflare
-            - toFQDNs:
-              - matchPattern: "*.ns.cloudflare.com"
-              toPorts:
-              - ports:
-                - port: "53"
-                  protocol: UDP
-        ''
-
         # Load SOPS encrypted secret
         (builtins.readFile ./traefik-secret.sops.yaml)
       ];

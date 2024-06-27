@@ -39,82 +39,6 @@ in {
           apiVersion: cilium.io/v2
           kind: CiliumNetworkPolicy
           metadata:
-            name: allow-tailscale-https-egress
-            namespace: ${namespace}
-          spec:
-            description: "Policy to allow egress HTTPS traffic to tailscale coordination servers and derp servers."
-            endpointSelector: {}
-            egress:
-            # Enable DNS proxying
-            - toEndpoints:
-              - matchLabels:
-                 "k8s:io.kubernetes.pod.namespace": kube-system
-                 "k8s:k8s-app": kube-dns
-              toPorts:
-              - ports:
-                - port: "53"
-                  protocol: ANY
-                rules:
-                  dns:
-                  - matchPattern: "*"
-            # Allow HTTPS to coordination and derp servers
-            - toFQDNs:
-              - matchPattern: "*.tailscale.com"
-              toPorts:
-              - ports:
-                - port: "443"
-                  protocol: TCP
-                - port: "80"
-                  protocol: TCP
-        ''
-        ''
-          apiVersion: cilium.io/v2
-          kind: CiliumNetworkPolicy
-          metadata:
-            name: allow-kube-apiserver-egress
-            namespace: ${namespace}
-          spec:
-            description: "Policy to allow pods to talk to kube apiserver"
-            endpointSelector: {}
-            egress:
-            - toEntities:
-              - kube-apiserver
-              toPorts:
-              - ports:
-                - port: "6443"
-                  protocol: TCP
-        ''
-        ''
-          apiVersion: cilium.io/v2
-          kind: CiliumNetworkPolicy
-          metadata:
-            name: allow-tailscale-traffic-egress
-            namespace: ${namespace}
-          spec:
-            description: "Policy to allow pods to send necessary UDP traffic to work."
-            endpointSelector: {}
-            egress:
-            # All UDP traffic for tailscale to work.
-            # I have only observed  ports in this range
-            - toEntities:
-              - world
-              toPorts:
-              - ports:
-                - port: "0"
-                  protocol: UDP
-            egressDeny:
-            # Deny attempt to use SSDP
-            - toEntities:
-              - world
-              toPorts:
-              - ports:
-                - port: "1900"
-                  protocol: UDP
-        ''
-        ''
-          apiVersion: cilium.io/v2
-          kind: CiliumNetworkPolicy
-          metadata:
             name: allow-egress
             namespace: ${namespace}
           spec:
@@ -155,19 +79,132 @@ in {
             statefulSet:
               pod:
                 labels:
-                  argocd.argoproj.io/instance: tailscale-operator
+                  argocd.argoproj.io/part-of: tailscale-operator
         ''
 
         # Load SOPS encrypted secret
         (builtins.readFile ./tailscale-secret.sops.yaml)
       ];
 
-      # Patch some extra resources
       resources = {
         # The tailscale namespace needs a privileged pod security
         # policy.
         namespaces."${namespace}" = {
           metadata.labels."pod-security.kubernetes.io/enforce" = lib.mkForce "privileged";
+        };
+
+        # Add labels to tailscale-operator pod
+        deployments.operator.spec.template.metadata.labels."argocd.argoproj.io/part-of" = "tailscale-operator";
+
+        # Allow tailscale-operator access to kube-apiserver
+        ciliumnetworkpolicies.allow-kube-apiserver-egress.spec = {
+          description = "Policy to allow pods to talk to kube apiserver";
+          endpointSelector.matchLabels."argocd.argoproj.io/part-of" = "tailscale-operator";
+          egress = [
+            {
+              toEntities = ["kube-apiserver"];
+              toPorts = [
+                {
+                  ports = [
+                    {
+                      port = "6443";
+                      protocol = "TCP";
+                    }
+                  ];
+                }
+              ];
+            }
+          ];
+        };
+
+        # Allow tailscale-operator pods HTTPS egress access
+        ciliumnetworkpolicies.allow-tailscale-https-egress.spec = {
+          description = "Policy to allow egress HTTPS traffic to tailscale coordination servers and derp servers.";
+          endpointSelector.matchLabels."argocd.argoproj.io/part-of" = "tailscale-operator";
+          egress = [
+            # Enable DNS proxying
+            {
+              toEndpoints = [
+                {
+                  matchLabels = {
+                    "k8s:io.kubernetes.pod.namespace" = "kube-system";
+                    "k8s:k8s-app" = "kube-dns";
+                  };
+                }
+              ];
+              toPorts = [
+                {
+                  ports = [
+                    {
+                      port = "53";
+                      protocol = "ANY";
+                    }
+                  ];
+                  rules.dns = [
+                    {matchPattern = "*";}
+                  ];
+                }
+              ];
+            }
+            # Allow HTTPS to coordination and derp servers
+            {
+              toFQDNs = [
+                {matchPattern = "*.tailscale.com";}
+              ];
+              toPorts = [
+                {
+                  ports = [
+                    {
+                      port = "443";
+                      protocol = "TCP";
+                    }
+                    {
+                      port = "80";
+                      protocol = "TCP";
+                    }
+                  ];
+                }
+              ];
+            }
+          ];
+        };
+
+        # Allow tailscale-operator pods necessary UDP traffic
+        ciliumnetworkpolicies.allow-tailscale-traffic-egress.spec = {
+          description = "Policy to allow pods to send necessary UDP traffic to work.";
+          endpointSelector.matchLabels."argocd.argoproj.io/part-of" = "tailscale-operator";
+          # Allow all UDP ports
+          egress = [
+            {
+              toEntities = ["world"];
+              toPorts = [
+                {
+                  ports = [
+                    {
+                      port = "0";
+                      protocol = "UDP";
+                    }
+                  ];
+                }
+              ];
+            }
+          ];
+          # Deny SSDP
+          egressDeny = [
+            {
+              toEntities = ["world"];
+              toPorts = [
+                {
+                  ports = [
+                    {
+                      port = "1900";
+                      protocol = "UDP";
+                    }
+                  ];
+                }
+              ];
+            }
+          ];
         };
       };
     };
