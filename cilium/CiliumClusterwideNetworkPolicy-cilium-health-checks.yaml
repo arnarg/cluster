@@ -2,7 +2,6 @@ apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
 metadata:
   name: cilium-health-checks
-  namespace: kube-system
 spec:
   egress:
     - toEntities:

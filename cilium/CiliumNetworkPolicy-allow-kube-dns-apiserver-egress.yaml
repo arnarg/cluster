@@ -4,7 +4,7 @@ metadata:
   name: allow-kube-dns-apiserver-egress
   namespace: kube-system
 spec:
-  description: Allow coredns to talk to kube-apiserver
+  description: Allow coredns to talk to kube-apiserver.
   egress:
     - toEntities:
         - kube-apiserver
