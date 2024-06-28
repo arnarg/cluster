@@ -98,7 +98,7 @@ in {
       };
 
       # Allow k8s-gateway to access kube-apiserver
-      ciliumnetworkpolicies.allow-kube-apiserver-egress.spec = {
+      ciliumNetworkPolicies.allow-kube-apiserver-egress.spec = {
         endpointSelector.matchLabels."app.kubernetes.io/name" = "k8s-gateway";
         egress = [
           {

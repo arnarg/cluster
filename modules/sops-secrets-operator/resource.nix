@@ -492,7 +492,7 @@ in {
         };
       }
       // {
-        "sopssecrets" = mkOption {
+        "sopsSecrets" = mkOption {
           description = "SopsSecret is the Schema for the sopssecrets API";
           type = types.attrsOf (submoduleForDefinition "isindir.github.com.v1alpha3.SopsSecret" "sopssecrets" "SopsSecret" "isindir.github.com" "v1alpha3");
           default = {};
@@ -511,13 +511,13 @@ in {
         group = "isindir.github.com";
         version = "v1alpha3";
         kind = "SopsSecret";
-        attrName = "sopssecrets";
+        attrName = "sopsSecrets";
       }
     ];
 
     resources = {
       "isindir.github.com"."v1alpha3"."SopsSecret" =
-        mkAliasDefinitions options.resources."sopssecrets";
+        mkAliasDefinitions options.resources."sopsSecrets";
     };
 
     defaults = [

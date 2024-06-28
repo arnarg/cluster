@@ -101,7 +101,7 @@ in {
       };
 
       # Allow miniflux to talk to postgres
-      ciliumnetworkpolicies.allow-postgres-egress.spec = {
+      ciliumNetworkPolicies.allow-postgres-egress.spec = {
         endpointSelector.matchLabels = labels;
         egress = [
           {
@@ -128,7 +128,7 @@ in {
       };
 
       # Allow egress HTTPS to the internet
-      ciliumnetworkpolicies.allow-rss-feeds-egress.spec = {
+      ciliumNetworkPolicies.allow-rss-feeds-egress.spec = {
         endpointSelector.matchLabels = labels;
         egress = [
           {

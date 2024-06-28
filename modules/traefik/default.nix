@@ -138,7 +138,7 @@ in {
         };
 
         # Allow traefik to talk to kube-apiserver
-        ciliumnetworkpolicies.allow-kube-apiserver-egress.spec = {
+        ciliumNetworkPolicies.allow-kube-apiserver-egress.spec = {
           endpointSelector.matchLabels."app.kubernetes.io/name" = "traefik";
           egress = [
             {
@@ -158,7 +158,7 @@ in {
         };
 
         # Allow traefik external access to cloudflare and let's encrypt
-        ciliumnetworkpolicies.allow-world-egress.spec = {
+        ciliumNetworkPolicies.allow-world-egress.spec = {
           endpointSelector.matchLabels."app.kubernetes.io/name" = "traefik";
           egress = [
             # Enable DNS proxying

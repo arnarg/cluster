@@ -97,7 +97,7 @@ in {
         deployments.operator.spec.template.metadata.labels."argocd.argoproj.io/part-of" = "tailscale-operator";
 
         # Allow tailscale-operator access to kube-apiserver
-        ciliumnetworkpolicies.allow-kube-apiserver-egress.spec = {
+        ciliumNetworkPolicies.allow-kube-apiserver-egress.spec = {
           description = "Policy to allow pods to talk to kube apiserver";
           endpointSelector.matchLabels."argocd.argoproj.io/part-of" = "tailscale-operator";
           egress = [
@@ -118,7 +118,7 @@ in {
         };
 
         # Allow tailscale-operator pods HTTPS egress access
-        ciliumnetworkpolicies.allow-tailscale-https-egress.spec = {
+        ciliumNetworkPolicies.allow-tailscale-https-egress.spec = {
           description = "Policy to allow egress HTTPS traffic to tailscale coordination servers and derp servers.";
           endpointSelector.matchLabels."argocd.argoproj.io/part-of" = "tailscale-operator";
           egress = [
@@ -170,7 +170,7 @@ in {
         };
 
         # Allow tailscale-operator pods necessary UDP traffic
-        ciliumnetworkpolicies.allow-tailscale-traffic-egress.spec = {
+        ciliumNetworkPolicies.allow-tailscale-traffic-egress.spec = {
           description = "Policy to allow pods to send necessary UDP traffic to work.";
           endpointSelector.matchLabels."argocd.argoproj.io/part-of" = "tailscale-operator";
           # Allow all UDP ports

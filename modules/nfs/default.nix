@@ -57,7 +57,7 @@ in {
         };
 
         # Allow csi-driver-nfs access to kube-apiserver
-        ciliumnetworkpolicies.allow-kube-apiserver-egress.spec = {
+        ciliumNetworkPolicies.allow-kube-apiserver-egress.spec = {
           description = "Allow snapshot controller to talk to kube-apiserver.";
           endpointSelector.matchLabels.app = "snapshot-controller";
           egress = [

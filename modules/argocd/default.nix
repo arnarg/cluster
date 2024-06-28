@@ -81,7 +81,7 @@ in {
         };
 
         # Allow argocd-repo-server egress access to github.com
-        ciliumnetworkpolicies.allow-world-egress.spec = {
+        ciliumNetworkPolicies.allow-world-egress.spec = {
           endpointSelector.matchLabels."app.kubernetes.io/name" = "argocd-repo-server";
           egress = [
             # Enable DNS proxying
@@ -128,7 +128,7 @@ in {
         };
 
         # Allow all ArgoCD pods to access kube-apiserver
-        ciliumnetworkpolicies.allow-kube-apiserver-egress.spec = {
+        ciliumNetworkPolicies.allow-kube-apiserver-egress.spec = {
           endpointSelector.matchLabels."app.kubernetes.io/part-of" = "argocd";
           egress = [
             {

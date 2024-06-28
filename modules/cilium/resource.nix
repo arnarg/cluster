@@ -7609,12 +7609,12 @@ in {
         };
       }
       // {
-        "ciliumclusterwidenetworkpolicies" = mkOption {
+        "ciliumClusterwideNetworkPolicies" = mkOption {
           description = "CiliumClusterwideNetworkPolicy is a Kubernetes third-party resource with an modified version of CiliumNetworkPolicy which is cluster scoped rather than namespace scoped.";
           type = types.attrsOf (submoduleForDefinition "cilium.io.v2.CiliumClusterwideNetworkPolicy" "ciliumclusterwidenetworkpolicies" "CiliumClusterwideNetworkPolicy" "cilium.io" "v2");
           default = {};
         };
-        "ciliumnetworkpolicies" = mkOption {
+        "ciliumNetworkPolicies" = mkOption {
           description = "CiliumNetworkPolicy is a Kubernetes third-party resource with an extended version of NetworkPolicy.";
           type = types.attrsOf (submoduleForDefinition "cilium.io.v2.CiliumNetworkPolicy" "ciliumnetworkpolicies" "CiliumNetworkPolicy" "cilium.io" "v2");
           default = {};
@@ -7633,22 +7633,22 @@ in {
         group = "cilium.io";
         version = "v2";
         kind = "CiliumClusterwideNetworkPolicy";
-        attrName = "ciliumclusterwidenetworkpolicies";
+        attrName = "ciliumClusterwideNetworkPolicies";
       }
       {
         name = "ciliumnetworkpolicies";
         group = "cilium.io";
         version = "v2";
         kind = "CiliumNetworkPolicy";
-        attrName = "ciliumnetworkpolicies";
+        attrName = "ciliumNetworkPolicies";
       }
     ];
 
     resources = {
       "cilium.io"."v2"."CiliumClusterwideNetworkPolicy" =
-        mkAliasDefinitions options.resources."ciliumclusterwidenetworkpolicies";
+        mkAliasDefinitions options.resources."ciliumClusterwideNetworkPolicies";
       "cilium.io"."v2"."CiliumNetworkPolicy" =
-        mkAliasDefinitions options.resources."ciliumnetworkpolicies";
+        mkAliasDefinitions options.resources."ciliumNetworkPolicies";
     };
 
     defaults = [

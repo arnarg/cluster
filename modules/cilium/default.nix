@@ -73,7 +73,7 @@ in {
 
       resources = {
         # Allow all cilium endpoints to talk egress to each other
-        ciliumclusterwidenetworkpolicies.allow-internal-egress.spec = {
+        ciliumClusterwideNetworkPolicies.allow-internal-egress.spec = {
           description = "Policy to allow all Cilium managed endpoint to talk to all other cilium managed endpoints on egress";
           endpointSelector = {};
           egress = [
@@ -84,7 +84,7 @@ in {
         };
 
         # Allow all health checks
-        ciliumclusterwidenetworkpolicies.cilium-health-checks.spec = {
+        ciliumClusterwideNetworkPolicies.cilium-health-checks.spec = {
           endpointSelector.matchLabels."reserved:health" = "";
           ingress = [
             {
@@ -99,7 +99,7 @@ in {
         };
 
         # Allow hubble relay server egress to nodes
-        ciliumnetworkpolicies.allow-hubble-relay-server-egress.spec = {
+        ciliumNetworkPolicies.allow-hubble-relay-server-egress.spec = {
           description = "Policy for egress from hubble relay to hubble server in Cilium agent.";
           endpointSelector.matchLabels."app.kubernetes.io/name" = "hubble-relay";
           egress = [
@@ -120,7 +120,7 @@ in {
         };
 
         # Allow hubble UI to talk to hubble relay
-        ciliumnetworkpolicies.allow-hubble-ui-relay-ingress.spec = {
+        ciliumNetworkPolicies.allow-hubble-ui-relay-ingress.spec = {
           description = "Policy for ingress from hubble UI to hubble relay.";
           endpointSelector.matchLabels."app.kubernetes.io/name" = "hubble-relay";
           ingress = [
@@ -145,7 +145,7 @@ in {
         };
 
         # Allow hubble UI to talk to kube-apiserver
-        ciliumnetworkpolicies.allow-hubble-ui-kube-apiserver-egress.spec = {
+        ciliumNetworkPolicies.allow-hubble-ui-kube-apiserver-egress.spec = {
           description = "Allow Hubble UI to talk to kube-apiserver";
           endpointSelector.matchLabels."app.kubernetes.io/name" = "hubble-ui";
           egress = [
@@ -166,7 +166,7 @@ in {
         };
 
         # Allow all cilium managed endpoints to talk to cluster dns
-        ciliumclusterwidenetworkpolicies.allow-kube-dns-cluster-ingress.spec = {
+        ciliumClusterwideNetworkPolicies.allow-kube-dns-cluster-ingress.spec = {
           description = "Policy for ingress allow to kube-dns from all Cilium managed endpoints in the cluster.";
           endpointSelector.matchLabels = {
             "k8s:io.kubernetes.pod.namespace" = "kube-system";
@@ -190,7 +190,7 @@ in {
         };
 
         # Allow kube-dns to talk to upstream DNS
-        ciliumnetworkpolicies.allow-kube-dns-upstream-egress.spec = {
+        ciliumNetworkPolicies.allow-kube-dns-upstream-egress.spec = {
           description = "Policy for egress to allow kube-dns to talk to upstream DNS.";
           endpointSelector.matchLabels.k8s-app = "kube-dns";
           egress = [
@@ -211,7 +211,7 @@ in {
         };
 
         # Allow CoreDNS to talk to kube-apiserver
-        ciliumnetworkpolicies.allow-kube-dns-apiserver-egress.spec = {
+        ciliumNetworkPolicies.allow-kube-dns-apiserver-egress.spec = {
           description = "Allow coredns to talk to kube-apiserver.";
           endpointSelector.matchLabels.k8s-app = "kube-dns";
           egress = [

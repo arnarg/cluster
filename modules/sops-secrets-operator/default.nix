@@ -33,7 +33,7 @@ in {
 
     resources = {
       # Allow access to kube-apiserver
-      ciliumnetworkpolicies.allow-kube-apiserver-egress.spec = {
+      ciliumNetworkPolicies.allow-kube-apiserver-egress.spec = {
         endpointSelector.matchLabels."app.kubernetes.io/name" = "sops-secrets-operator";
         egress = [
           {

@@ -115,7 +115,7 @@ in {
       };
 
       # Allow shiori to talk to postgres
-      ciliumnetworkpolicies.allow-postgres-egress.spec = {
+      ciliumNetworkPolicies.allow-postgres-egress.spec = {
         endpointSelector.matchLabels = labels;
         egress = [
           {
@@ -142,7 +142,7 @@ in {
       };
 
       # Allow egress HTTPS to the internet
-      ciliumnetworkpolicies.allow-https-world-egress.spec = {
+      ciliumNetworkPolicies.allow-https-world-egress.spec = {
         endpointSelector.matchLabels = labels;
         egress = [
           {
