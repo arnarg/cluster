@@ -39,38 +39,60 @@
 
     packages = {
       nixidy = nixidy.packages.${system}.default;
-      generators.sops = nixidy.packages.${system}.generators.fromCRD {
-        name = "sops";
-        src = pkgs.fetchFromGitHub {
-          owner = "isindir";
-          repo = "sops-secrets-operator";
-          rev = "0.13.0";
-          hash = "sha256-wPGpbmT/KBPKaloDrYOxdsmQqe6FjDBWS+0M/egb5UA=";
+      generators = {
+        sops = nixidy.packages.${system}.generators.fromCRD {
+          name = "sops";
+          src = pkgs.fetchFromGitHub {
+            owner = "isindir";
+            repo = "sops-secrets-operator";
+            rev = "0.13.0";
+            hash = "sha256-wPGpbmT/KBPKaloDrYOxdsmQqe6FjDBWS+0M/egb5UA=";
+          };
+          crds = ["config/crd/bases/isindir.github.com_sopssecrets.yaml"];
         };
-        crds = ["config/crd/bases/isindir.github.com_sopssecrets.yaml"];
+        cilium = nixidy.packages.${system}.generators.fromCRD {
+          name = "cilium";
+          src = pkgs.fetchFromGitHub {
+            owner = "cilium";
+            repo = "cilium";
+            rev = "v1.15.6";
+            hash = "sha256-oC6pjtiS8HvqzzRQsE+2bm6JP7Y3cbupXxCKSvP6/kU=";
+          };
+          crds = [
+            "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml"
+            "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml"
+          ];
+        };
+        tailscale = nixidy.packages.${system}.generators.fromCRD {
+          name = "tailscale";
+          src = pkgs.fetchFromGitHub {
+            owner = "tailscale";
+            repo = "tailscale";
+            rev = "v1.68.1";
+            hash = "sha256-ZAzro69F7ovfdqzRss/U7puh1T37bkEtUXabCYc5LwU=";
+          };
+          crds = ["cmd/k8s-operator/deploy/crds/tailscale.com_proxyclasses.yaml"];
+        };
       };
-      generators.cilium = nixidy.packages.${system}.generators.fromCRD {
-        name = "cilium";
-        src = pkgs.fetchFromGitHub {
-          owner = "cilium";
-          repo = "cilium";
-          rev = "v1.15.6";
-          hash = "sha256-oC6pjtiS8HvqzzRQsE+2bm6JP7Y3cbupXxCKSvP6/kU=";
-        };
-        crds = [
-          "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml"
-          "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml"
-        ];
-      };
-      generators.tailscale = nixidy.packages.${system}.generators.fromCRD {
-        name = "tailscale";
-        src = pkgs.fetchFromGitHub {
-          owner = "tailscale";
-          repo = "tailscale";
-          rev = "v1.68.1";
-          hash = "sha256-ZAzro69F7ovfdqzRss/U7puh1T37bkEtUXabCYc5LwU=";
-        };
-        crds = ["cmd/k8s-operator/deploy/crds/tailscale.com_proxyclasses.yaml"];
+    };
+
+    apps = {
+      generate = {
+        type = "app";
+        program =
+          (pkgs.writeShellScript "generate-modules" ''
+            set -eo pipefail
+
+            echo "generate sops"
+            cat ${self.packages.${system}.generators.sops} > modules/sops-secrets-operator/generated.nix
+
+            echo "generate cilium"
+            cat ${self.packages.${system}.generators.cilium} > modules/cilium/generated.nix
+
+            echo "generate tailscale"
+            cat ${self.packages.${system}.generators.tailscale} > modules/tailscale-operator/generated.nix
+          '')
+          .outPath;
       };
     };
 
