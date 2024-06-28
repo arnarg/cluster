@@ -9,7 +9,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: tailscale-operator
+    path: ./tailscale-operator
     repoURL: https://github.com/arnarg/cluster.git
     targetRevision: env/prod
   syncPolicy:

@@ -9,7 +9,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: argocd
+    path: ./argocd
     repoURL: https://github.com/arnarg/cluster.git
     targetRevision: env/prod
   syncPolicy:

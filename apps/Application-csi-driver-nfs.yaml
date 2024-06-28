@@ -9,7 +9,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: csi-driver-nfs
+    path: ./csi-driver-nfs
     repoURL: https://github.com/arnarg/cluster.git
     targetRevision: env/prod
   syncPolicy:
