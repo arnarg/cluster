@@ -1,0 +1,24 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-tailscale-traffic-egress
+  namespace: tailscale
+spec:
+  description: Policy to allow pods to send necessary UDP traffic to work.
+  egress:
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "0"
+              protocol: UDP
+  egressDeny:
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "1900"
+              protocol: UDP
+  endpointSelector:
+    matchLabels:
+      argocd.argoproj.io/part-of: tailscale-operator

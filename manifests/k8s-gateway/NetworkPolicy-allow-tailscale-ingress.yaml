@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-tailscale-ingress
+  namespace: k8s-gateway
+spec:
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: tailscale
+          podSelector:
+            matchLabels:
+              tailscale.com/parent-resource: k8s-gateway
+      ports:
+        - port: 1053
+          protocol: UDP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: k8s-gateway
+  policyTypes:
+    - Ingress

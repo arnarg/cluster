@@ -1,0 +1,12 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-csi
+mountOptions:
+  - nfsvers=4.1
+parameters:
+  server: 192.168.0.10
+  share: /exports/kubernetes
+provisioner: nfs.csi.k8s.io
+reclaimPolicy: Retain
+volumeBindingMode: Immediate

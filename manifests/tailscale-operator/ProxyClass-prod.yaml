@@ -1,0 +1,9 @@
+apiVersion: tailscale.com/v1alpha1
+kind: ProxyClass
+metadata:
+  name: prod
+spec:
+  statefulSet:
+    pod:
+      labels:
+        argocd.argoproj.io/part-of: tailscale-operator

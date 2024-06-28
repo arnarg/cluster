@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: k8s-gateway
+  namespace: argocd
+spec:
+  destination:
+    namespace: k8s-gateway
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: ./manifests/k8s-gateway
+    repoURL: https://github.com/arnarg/cluster.git
+    targetRevision: main
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

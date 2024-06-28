@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-upstream-tls-dns-egress
+  namespace: k8s-gateway
+spec:
+  egress:
+    - ports:
+        - port: 853
+          protocol: TCP
+      to:
+        - ipBlock:
+            cidr: 1.1.1.1/32
+        - ipBlock:
+            cidr: 1.0.0.1/32
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: k8s-gateway
+  policyTypes:
+    - Egress

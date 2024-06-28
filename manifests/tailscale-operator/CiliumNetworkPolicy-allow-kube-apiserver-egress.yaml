@@ -1,0 +1,17 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-kube-apiserver-egress
+  namespace: tailscale
+spec:
+  description: Policy to allow pods to talk to kube apiserver
+  egress:
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+  endpointSelector:
+    matchLabels:
+      argocd.argoproj.io/part-of: tailscale-operator

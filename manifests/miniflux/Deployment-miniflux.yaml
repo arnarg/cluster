@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: miniflux
+  name: miniflux
+  namespace: miniflux
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: miniflux
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: miniflux
+    spec:
+      containers:
+        - env:
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: adminPassword
+                  name: miniflux-creds
+            - name: ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: adminUser
+                  name: miniflux-creds
+            - name: CREATE_ADMIN
+              value: "1"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  key: databaseConn
+                  name: miniflux-creds
+            - name: LISTEN_ADDR
+              value: 0.0.0.0:8080
+            - name: RUN_MIGRATIONS
+              value: "1"
+          image: ghcr.io/miniflux/miniflux:2.1.3-distroless
+          name: miniflux
+          ports:
+            - containerPort: 8080
+              name: http

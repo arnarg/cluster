@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: miniflux
+  namespace: argocd
+spec:
+  destination:
+    namespace: miniflux
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: ./manifests/miniflux
+    repoURL: https://github.com/arnarg/cluster.git
+    targetRevision: main
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
