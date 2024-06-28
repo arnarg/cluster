@@ -2,7 +2,6 @@ apiVersion: tailscale.com/v1alpha1
 kind: ProxyClass
 metadata:
   name: prod
-  namespace: tailscale
 spec:
   statefulSet:
     pod:
