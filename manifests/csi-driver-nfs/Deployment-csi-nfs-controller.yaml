@@ -45,6 +45,9 @@ spec:
               cpu: 10m
               memory: 20Mi
           securityContext:
+            capabilities:
+              drop:
+                - ALL
             readOnlyRootFilesystem: true
           volumeMounts:
             - mountPath: /csi
@@ -67,6 +70,10 @@ spec:
             requests:
               cpu: 10m
               memory: 20Mi
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
           volumeMounts:
             - mountPath: /csi
               name: socket-dir
@@ -85,6 +92,9 @@ spec:
               cpu: 10m
               memory: 20Mi
           securityContext:
+            capabilities:
+              drop:
+                - ALL
             readOnlyRootFilesystem: true
           volumeMounts:
             - mountPath: /csi
@@ -127,8 +137,9 @@ spec:
             capabilities:
               add:
                 - SYS_ADMIN
+              drop:
+                - ALL
             privileged: true
-            readOnlyRootFilesystem: true
           volumeMounts:
             - mountPath: /var/lib/kubelet/pods
               mountPropagation: Bidirectional

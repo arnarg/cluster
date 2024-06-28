@@ -20,8 +20,8 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cm: af38eb210dce3630a07d9b99b378899ccae5c7752a84e7e7139f183f25fbb4e7
-        checksum/cmd-params: f5c812e945d1e02eba9260e601efec090a6cfde2865f87ea5fd51677f355ba50
+        checksum/cm: 8f36adafdf3cf4adfa2c6ee3e7be50b0f6e6ea4182e02969b0c67178149acaf5
+        checksum/cmd-params: 1d9e3813557c58cd17c254ad0c60d3f99923ae919e817356827e1ba209a0636a
       labels:
         app.kubernetes.io/component: application-controller
         app.kubernetes.io/instance: argocd
@@ -29,7 +29,7 @@ spec:
         app.kubernetes.io/name: argocd-application-controller
         app.kubernetes.io/part-of: argocd
         app.kubernetes.io/version: v2.11.3
-        helm.sh/chart: argo-cd-7.2.1
+        helm.sh/chart: argo-cd-7.3.2
     spec:
       affinity:
         podAntiAffinity:
@@ -175,6 +175,18 @@ spec:
                 secretKeyRef:
                   key: auth
                   name: argocd-redis
+            - name: REDIS_SENTINEL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: redis-sentinel-username
+                  name: argocd-redis
+                  optional: true
+            - name: REDIS_SENTINEL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: redis-sentinel-password
+                  name: argocd-redis
+                  optional: true
             - name: ARGOCD_DEFAULT_CACHE_EXPIRATION
               valueFrom:
                 configMapKeyRef:
