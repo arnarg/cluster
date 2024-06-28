@@ -27,7 +27,7 @@ jobs:
         nix run .#generate
 
         echo "BRANCH=promote/env/prod" >> "$GITHUB_ENV"
-        echo "COMMIT_MESSAGE=chore(prod): promote to ${{inputs.environment}} ${{github.sha}}" >> "$GITHUB_ENV"
+        echo "COMMIT_MESSAGE=chore(prod): promote to prod ${{github.sha}}" >> "$GITHUB_ENV"
 
     - uses: EndBug/add-and-commit@v9
       id: commit
