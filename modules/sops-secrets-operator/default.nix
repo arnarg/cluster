@@ -1,7 +1,7 @@
 {charts, ...}: let
   namespace = "sops";
 in {
-  nixidy.resourceImports = [./resource.nix];
+  nixidy.resourceImports = [./generated.nix];
 
   applications.sops-secrets-operator = {
     inherit namespace;

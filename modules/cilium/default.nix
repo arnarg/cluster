@@ -61,7 +61,7 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    nixidy.resourceImports = [./resource.nix];
+    nixidy.resourceImports = [./generated.nix];
 
     applications.cilium = {
       inherit namespace;
