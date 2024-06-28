@@ -62,6 +62,16 @@
           "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml"
         ];
       };
+      generators.tailscale = nixidy.packages.${system}.generators.fromCRD {
+        name = "tailscale";
+        src = pkgs.fetchFromGitHub {
+          owner = "tailscale";
+          repo = "tailscale";
+          rev = "v1.68.1";
+          hash = "sha256-ZAzro69F7ovfdqzRss/U7puh1T37bkEtUXabCYc5LwU=";
+        };
+        crds = ["cmd/k8s-operator/deploy/crds/tailscale.com_proxyclasses.yaml"];
+      };
     };
 
     devShells.default = pkgs.mkShell {

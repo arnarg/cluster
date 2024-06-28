@@ -26,6 +26,8 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    nixidy.resourceImports = [./generated.nix];
+
     applications.tailscale-operator = {
       inherit namespace;
 
@@ -69,19 +71,6 @@ in {
                   protocol: UDP
         ''
 
-        ''
-          apiVersion: tailscale.com/v1alpha1
-          kind: ProxyClass
-          metadata:
-            name: prod
-            namespace: ${namespace}
-          spec:
-            statefulSet:
-              pod:
-                labels:
-                  argocd.argoproj.io/part-of: tailscale-operator
-        ''
-
         # Load SOPS encrypted secret
         (builtins.readFile ./tailscale-secret.sops.yaml)
       ];
@@ -95,6 +84,9 @@ in {
 
         # Add labels to tailscale-operator pod
         deployments.operator.spec.template.metadata.labels."argocd.argoproj.io/part-of" = "tailscale-operator";
+
+        # Create a tailscale proxy class to set labels on proxies
+        proxyClasses.prod.spec.statefulSet.pod.labels."argocd.argoproj.io/part-of" = "tailscale-operator";
 
         # Allow tailscale-operator access to kube-apiserver
         ciliumNetworkPolicies.allow-kube-apiserver-egress.spec = {
