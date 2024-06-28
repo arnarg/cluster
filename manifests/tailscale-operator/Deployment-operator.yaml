@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: operator
+  namespace: tailscale
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: operator
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: operator
+        argocd.argoproj.io/part-of: tailscale-operator
+    spec:
+      containers:
+        - env:
+            - name: OPERATOR_INITIAL_TAGS
+              value: tag:k8s-operator
+            - name: OPERATOR_HOSTNAME
+              value: tailscale-operator
+            - name: OPERATOR_SECRET
+              value: operator
+            - name: OPERATOR_LOGGING
+              value: info
+            - name: OPERATOR_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: CLIENT_ID_FILE
+              value: /oauth/client_id
+            - name: CLIENT_SECRET_FILE
+              value: /oauth/client_secret
+            - name: PROXY_IMAGE
+              value: tailscale/tailscale:v1.68.1
+            - name: PROXY_TAGS
+              value: tag:k8s
+            - name: APISERVER_PROXY
+              value: "false"
+            - name: PROXY_FIREWALL_MODE
+              value: auto
+          image: tailscale/k8s-operator:v1.68.1
+          imagePullPolicy: Always
+          name: operator
+          volumeMounts:
+            - mountPath: /oauth
+              name: oauth
+              readOnly: true
+      nodeSelector:
+        kubernetes.io/os: linux
+      serviceAccountName: operator
+      volumes:
+        - name: oauth
+          secret:
+            secretName: operator-oauth

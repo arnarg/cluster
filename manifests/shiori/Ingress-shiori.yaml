@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shiori
+  namespace: shiori
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: shiori.cdbrdr.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: shiori
+                port:
+                  name: http
+            path: /
+            pathType: Prefix

@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: k8s-gateway
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: k8s-gateway
+  name: k8s-gateway
+  namespace: k8s-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: k8s-gateway
+      app.kubernetes.io/name: k8s-gateway
+  template:
+    metadata:
+      annotations:
+        checksum/config: 019434ebbda2a95778cb8e1d9b4b86c1dcad106047882b5f0d1dc0b7cab7ab95
+      labels:
+        app.kubernetes.io/instance: k8s-gateway
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: k8s-gateway
+        app.kubernetes.io/version: 0.4.0
+        helm.sh/chart: k8s-gateway-2.4.0
+    spec:
+      containers:
+        - args:
+            - -conf
+            - /etc/coredns/Corefile
+          image: quay.io/oriedge/k8s_gateway:v0.4.0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: k8s-gateway
+          ports:
+            - containerPort: 1053
+              name: dns-udp
+              protocol: UDP
+            - containerPort: 9153
+              name: metrics
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /ready
+              port: 8181
+              scheme: HTTP
+            initialDelaySeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources: {}
+          securityContext:
+            runAsUser: 1000
+          volumeMounts:
+            - mountPath: /etc/coredns
+              name: config-volume
+      serviceAccountName: k8s-gateway
+      volumes:
+        - configMap:
+            items:
+              - key: Corefile
+                path: Corefile
+            name: k8s-gateway
+          name: config-volume

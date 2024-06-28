@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    app.kubernetes.io/component: server
+    app.kubernetes.io/instance: argocd
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: argocd-server
+    app.kubernetes.io/part-of: argocd
+  name: argocd-server
+  namespace: argocd
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: argocd.cdbrdr.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: argocd-server
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix

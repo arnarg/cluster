@@ -1,0 +1,30 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-tailscale-https-egress
+  namespace: tailscale
+spec:
+  description: Policy to allow egress HTTPS traffic to tailscale coordination servers and derp servers.
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+          rules:
+            dns:
+              - matchPattern: '*'
+    - toFQDNs:
+        - matchPattern: '*.tailscale.com'
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+            - port: "80"
+              protocol: TCP
+  endpointSelector:
+    matchLabels:
+      argocd.argoproj.io/part-of: tailscale-operator

@@ -1,0 +1,141 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: traefik-traefik
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: traefik
+  name: traefik
+  namespace: traefik
+spec:
+  minReadySeconds: 0
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: traefik-traefik
+      app.kubernetes.io/name: traefik
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9100"
+        prometheus.io/scrape: "true"
+      labels:
+        app.kubernetes.io/instance: traefik-traefik
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: traefik
+        helm.sh/chart: traefik-28.3.0
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - args:
+            - --entryPoints.metrics.address=:9100/tcp
+            - --entryPoints.traefik.address=:9000/tcp
+            - --entryPoints.web.address=:8000/tcp
+            - --entryPoints.websecure.address=:8443/tcp
+            - --api.dashboard=true
+            - --ping=true
+            - --metrics.prometheus=true
+            - --metrics.prometheus.entrypoint=metrics
+            - --providers.kubernetescrd
+            - --providers.kubernetesingress
+            - --providers.kubernetesingress.ingressendpoint.publishedservice=traefik/traefik
+            - --entryPoints.web.http.redirections.entryPoint.to=:443
+            - --entryPoints.web.http.redirections.entryPoint.scheme=https
+            - --entryPoints.websecure.http.tls=true
+            - --entryPoints.websecure.http.tls.certResolver=letsencrypt
+            - --log.level=INFO
+            - --certificatesresolvers.letsencrypt.acme.dnsChallenge.provider=cloudflare
+            - --certificatesresolvers.letsencrypt.acme.email=acme@codedbearder.com
+            - --certificatesresolvers.letsencrypt.acme.storage=/data/acme.json
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          envFrom:
+            - secretRef:
+                name: acme-env
+          image: docker.io/traefik:v3.0.2
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ping
+              port: 9000
+              scheme: HTTP
+            initialDelaySeconds: 2
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 2
+          name: traefik
+          ports:
+            - containerPort: 9100
+              name: metrics
+              protocol: TCP
+            - containerPort: 9000
+              name: traefik
+              protocol: TCP
+            - containerPort: 8000
+              name: web
+              protocol: TCP
+            - containerPort: 8443
+              name: websecure
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 1
+            httpGet:
+              path: /ping
+              port: 9000
+              scheme: HTTP
+            initialDelaySeconds: 2
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 2
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - mountPath: /data
+              name: data
+              subPath: traefik
+            - mountPath: /tmp
+              name: tmp
+      hostNetwork: false
+      initContainers:
+        - command:
+            - sh
+            - -c
+            - touch /data/acme.json; chmod -v 600 /data/acme.json
+          image: busybox:1.36
+          name: volume-permissions
+          volumeMounts:
+            - mountPath: /data
+              name: data
+              subPath: traefik
+      securityContext:
+        fsGroup: 2000
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 65532
+        runAsNonRoot: true
+        runAsUser: 65532
+      serviceAccountName: traefik
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: traefik
+        - emptyDir: {}
+          name: tmp

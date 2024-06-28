@@ -1,0 +1,11 @@
+apiVersion: v1
+data:
+  Corefile: ".:1053 {\n    k8s_gateway cdbrdr.com {\n      apex k8s-gateway.k8s-gateway\n      ttl 300\n      resources Ingress\n      fallthrough\n    }\n    log\n    errors\n    health { \n      lameduck 5s\n      \n    }\n    ready\n    prometheus 0.0.0.0:9153\n    forward cdbrdr.com tls://1.1.1.1 tls://1.0.0.1 { \n      tls_servername cloudflare-dns.com\n      \n    }\n    loop\n    reload\n    loadbalance\n}"
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/instance: k8s-gateway
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: k8s-gateway
+  name: k8s-gateway
+  namespace: k8s-gateway
