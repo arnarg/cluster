@@ -80,24 +80,6 @@
       generate = {
         type = "app";
         program =
-          (pkgs.writeShellScript "generate-nixidy" ''
-            set -eo pipefail
-            dest=./manifests
-
-            mkdir -p $dest
-
-            echo "generating manifests"
-            RESULT=$(nix run .#nixidy -- build .#prod --print-out-paths --no-link)
-            ${pkgs.rsync}/bin/rsync --recursive --delete -L "$RESULT/" "$dest"
-
-            echo "done!"
-          '')
-          .outPath;
-      };
-
-      genResources = {
-        type = "app";
-        program =
           (pkgs.writeShellScript "generate-modules" ''
             set -eo pipefail
 

@@ -36,7 +36,7 @@ jobs:
       - shell: bash
         if: ${{ steps.commit-nixhelm.outputs.committed == 'true' }}
         run: |
-          nix run .#generate
+          nix run .#nixidy -- switch .#prod
 
           echo "BRANCH=promote/env/prod" >> "$GITHUB_ENV"
 

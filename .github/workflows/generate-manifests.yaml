@@ -24,7 +24,7 @@ jobs:
       run: |
         git checkout -B promote/env/prod
 
-        nix run .#generate
+        nix run .#nixidy -- switch .#prod
 
         echo "BRANCH=promote/env/prod" >> "$GITHUB_ENV"
         echo "COMMIT_MESSAGE=chore(prod): promote to prod ${{github.sha}}" >> "$GITHUB_ENV"
