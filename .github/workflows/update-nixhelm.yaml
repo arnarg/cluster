@@ -4,9 +4,9 @@ on:
   # If you want to run this workflow manually.
   workflow_dispatch:
 
-  # Run every saturday at 9:00
+  # Run every saturday at 8:00
   schedule:
-    - cron: '0 9 * * 6'
+    - cron: '0 8 * * 6'
 
 jobs:
   upgrade:
