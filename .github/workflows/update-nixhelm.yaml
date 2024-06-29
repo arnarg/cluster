@@ -11,6 +11,8 @@ on:
 jobs:
   upgrade:
     runs-on: ubuntu-latest
+    env:
+      BRANCH: promote/env/prod
     steps:
       - uses: actions/checkout@v4
 
@@ -19,9 +21,11 @@ jobs:
           extra_nix_config: |
             extra-experimental-features = nix-command flakes
 
+      - uses: DeterminateSystems/magic-nix-cache-action@v7
+
       - shell: bash
         run: |
-          git checkout -B promote/env/prod
+          git checkout -B ${{env.BRANCH}}
 
           nix flake lock --update-input nixhelm
 
@@ -29,22 +33,20 @@ jobs:
         id: commit-nixhelm
         with:
           default_author: github_actions
-          message: "chore(prod): update nixhelm"
+          message: "chore: update nixhelm"
           fetch: false
           push: false
 
-      - shell: bash
+      - uses: arnarg/nixidy/actions/switch@main
         if: ${{ steps.commit-nixhelm.outputs.committed == 'true' }}
-        run: |
-          nix run .#nixidy -- switch .#prod
-
-          echo "BRANCH=promote/env/prod" >> "$GITHUB_ENV"
+        with:
+          environment: .#prod
 
       - uses: EndBug/add-and-commit@v9
         id: commit
         with:
           default_author: github_actions
-          message: "chore(prod): promote to prod ${{github.sha}}"
+          message: "chore: promote to prod ${{github.sha}}"
           fetch: false
           push: --set-upstream origin ${{env.BRANCH}} --force
 
