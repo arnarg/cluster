@@ -27,13 +27,10 @@
   in {
     nixidyEnvs.prod = nixidy.lib.mkEnv {
       inherit pkgs;
+      charts = nixhelm.chartsDerivations.${system};
       modules = [
         ./modules
         ./configuration.nix
-        {
-          nixidy.charts = nixhelm.chartsDerivations.${system};
-          nixidy.chartsDir = ./charts;
-        }
       ];
     };
 

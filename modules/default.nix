@@ -20,6 +20,8 @@
   config = {
     nixidy.target.repository = "https://github.com/arnarg/cluster.git";
 
+    nixidy.chartsDir = ../charts;
+
     nixidy.defaults = {
       syncPolicy.automated.selfHeal = true;
       syncPolicy.automated.prune = true;
