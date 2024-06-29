@@ -19,8 +19,8 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cm: 8f36adafdf3cf4adfa2c6ee3e7be50b0f6e6ea4182e02969b0c67178149acaf5
-        checksum/cmd-params: 1d9e3813557c58cd17c254ad0c60d3f99923ae919e817356827e1ba209a0636a
+        checksum/cm: f1c75c7251a8051a29f8683451339b3daf303e8d488603834f61af708ad08635
+        checksum/cmd-params: 21db682535be7c0429536b8e731725cec2561ea2d79aed094452d81ed4bb80d5
       labels:
         app.kubernetes.io/component: repo-server
         app.kubernetes.io/instance: argocd
@@ -28,7 +28,7 @@ spec:
         app.kubernetes.io/name: argocd-repo-server
         app.kubernetes.io/part-of: argocd
         app.kubernetes.io/version: v2.11.3
-        helm.sh/chart: argo-cd-7.3.2
+        helm.sh/chart: argo-cd-7.3.3
     spec:
       affinity:
         podAntiAffinity:
@@ -143,6 +143,7 @@ spec:
                 secretKeyRef:
                   key: auth
                   name: argocd-redis
+                  optional: true
             - name: REDIS_SENTINEL_USERNAME
               valueFrom:
                 secretKeyRef:
