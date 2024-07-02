@@ -2,6 +2,14 @@
 
 GitOps for my Kubernetes cluster defined with [nixidy](https://github.com/arnarg/nixidy).
 
+## Folder Structure
+
+- `charts/` - Extra Helm Charts (that are not available in [nixhelm](https://github.com/farcaller/nixhelm)) used in the cluster config.
+- `manifests/` - Plain YAML Kubernetes manifests that are rendered by nixidy. Argo CD will watch these folders for updates.
+- `modules/` - Nixidy modules that define all the different applications for the cluster.
+- `configuration.nix` - Special configuration for the `prod` env (and the only env).
+- `flake.nix` - A nix flake setting up the nixidy configuration.
+
 ## Networking
 
 The cluster runs on k3s and uses Cilium for CNI.
