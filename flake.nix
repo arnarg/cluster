@@ -70,6 +70,21 @@
           };
           crds = ["cmd/k8s-operator/deploy/crds/tailscale.com_proxyclasses.yaml"];
         };
+        traefik = nixidy.packages.${system}.generators.fromCRD {
+          name = "traefik";
+          src = pkgs.fetchFromGitHub {
+            owner = "traefik";
+            repo = "traefik-helm-chart";
+            rev = "v28.3.0";
+            hash = "sha256-fFmvoal7bpPu+CjAYGg5cAYFqffQ20YKJvwlU8YW5NE=";
+          };
+          crds = [
+            "traefik/crds/traefik.io_ingressroutes.yaml"
+            "traefik/crds/traefik.io_ingressroutetcps.yaml"
+            "traefik/crds/traefik.io_ingressrouteudps.yaml"
+            "traefik/crds/traefik.io_traefikservices.yaml"
+          ];
+        };
       };
     };
 
@@ -88,6 +103,9 @@
 
             echo "generate tailscale"
             cat ${self.packages.${system}.generators.tailscale} > modules/tailscale-operator/generated.nix
+
+            echo "generate traefik"
+            cat ${self.packages.${system}.generators.traefik} > modules/traefik/generated.nix
           '')
           .outPath;
       };
