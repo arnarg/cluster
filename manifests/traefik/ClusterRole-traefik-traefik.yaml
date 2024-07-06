@@ -20,8 +20,8 @@ rules:
   - apiGroups:
       - ""
     resources:
-      - services
       - endpoints
+      - services
     verbs:
       - get
       - list
