@@ -189,7 +189,7 @@ in {
             {
               toFQDNs = [
                 {matchName = "api.cloudflare.com";}
-                {matchName = "acme-v02.api.letsencrypt.com";}
+                {matchName = "acme-v02.api.letsencrypt.org";}
               ];
               toPorts = [
                 {
