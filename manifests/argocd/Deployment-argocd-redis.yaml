@@ -23,8 +23,8 @@ spec:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: argocd-redis
         app.kubernetes.io/part-of: argocd
-        app.kubernetes.io/version: v2.11.4
-        helm.sh/chart: argo-cd-7.3.6
+        app.kubernetes.io/version: v2.11.5
+        helm.sh/chart: argo-cd-7.3.9
     spec:
       affinity:
         podAntiAffinity:
