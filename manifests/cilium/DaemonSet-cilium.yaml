@@ -149,7 +149,6 @@ spec:
           volumeMounts:
             - mountPath: /var/run/cilium/envoy/sockets
               name: envoy-sockets
-              readOnly: false
             - mountPath: /host/proc/sys/net
               name: host-proc-sys-net
             - mountPath: /host/proc/sys/kernel
