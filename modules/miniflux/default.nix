@@ -1,10 +1,4 @@
-{
-  lib,
-  config,
-  ...
-}: let
-  inherit (builtins) toJSON;
-
+{config, ...}: let
   namespace = "miniflux";
 
   labels = {
@@ -26,7 +20,7 @@ in {
           template = {
             metadata.labels = labels;
             spec.containers.miniflux = {
-              image = "ghcr.io/miniflux/miniflux:2.1.3-distroless";
+              image = "ghcr.io/miniflux/miniflux:2.1.4-distroless";
               ports.http.containerPort = port;
               env = {
                 DATABASE_URL.valueFrom.secretKeyRef = {
