@@ -58,8 +58,8 @@
           src = pkgs.fetchFromGitHub {
             owner = "cilium";
             repo = "cilium";
-            rev = "v1.15.6";
-            hash = "sha256-oC6pjtiS8HvqzzRQsE+2bm6JP7Y3cbupXxCKSvP6/kU=";
+            rev = "v1.16.0";
+            hash = "sha256-LJrNGHF52hdKCuVwjvGifqsH+8hxkf/A3LZNpCHeR7E=";
           };
           crds = [
             "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml"

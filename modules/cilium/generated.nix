@@ -207,6 +207,10 @@ with lib; let
           description = "EgressDeny is a list of EgressDenyRule which are enforced at egress. Any rule inserted here will be denied regardless of the allowed egress rules in the 'egress' field. If omitted or empty, this rule does not apply at egress.";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEgressDeny"));
         };
+        "enableDefaultDeny" = mkOption {
+          description = "EnableDefaultDeny determines whether this policy configures the subject endpoint(s) to have a default deny mode. If enabled, this causes all traffic not explicitly allowed by a network policy to be dropped. \n If not specified, the default is true for each traffic direction that has rules, and false otherwise. For example, if a policy only has Ingress or IngressDeny rules, then the default for ingress is true and egress is false. \n If multiple policies apply to an endpoint, that endpoint's default deny will be enabled if any policy requests it. \n This is useful for creating broad-based network policies that will not cause endpoints to enter default-deny mode.";
+          type = types.nullOr (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEnableDefaultDeny");
+        };
         "endpointSelector" = mkOption {
           description = "EndpointSelector selects all endpoints which should be subject to this rule. EndpointSelector and NodeSelector cannot be both empty and are mutually exclusive.";
           type = types.nullOr (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEndpointSelector");
@@ -233,6 +237,7 @@ with lib; let
         "description" = mkOverride 1002 null;
         "egress" = mkOverride 1002 null;
         "egressDeny" = mkOverride 1002 null;
+        "enableDefaultDeny" = mkOverride 1002 null;
         "endpointSelector" = mkOverride 1002 null;
         "ingress" = mkOverride 1002 null;
         "ingressDeny" = mkOverride 1002 null;
@@ -274,6 +279,10 @@ with lib; let
           description = "ToGroups is a directive that allows the integration with multiple outside providers. Currently, only AWS is supported, and the rule can select by multiple sub directives: \n Example: toGroups: - aws: securityGroupsIds: - 'sg-XXXXXXXXXXXXX'";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEgressToGroups"));
         };
+        "toNodes" = mkOption {
+          description = "ToNodes is a list of nodes identified by an EndpointSelector to which endpoints subject to the rule is allowed to communicate.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEgressToNodes"));
+        };
         "toPorts" = mkOption {
           description = "ToPorts is a list of destination ports identified by port number and protocol which the endpoint subject to the rule is allowed to connect to. \n Example: Any endpoint with the label \"role=frontend\" is allowed to initiate connections to destination port 8080/tcp";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEgressToPorts"));
@@ -297,6 +306,7 @@ with lib; let
         "toEntities" = mkOverride 1002 null;
         "toFQDNs" = mkOverride 1002 null;
         "toGroups" = mkOverride 1002 null;
+        "toNodes" = mkOverride 1002 null;
         "toPorts" = mkOverride 1002 null;
         "toRequires" = mkOverride 1002 null;
         "toServices" = mkOverride 1002 null;
@@ -338,6 +348,10 @@ with lib; let
           description = "ToGroups is a directive that allows the integration with multiple outside providers. Currently, only AWS is supported, and the rule can select by multiple sub directives: \n Example: toGroups: - aws: securityGroupsIds: - 'sg-XXXXXXXXXXXXX'";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEgressDenyToGroups"));
         };
+        "toNodes" = mkOption {
+          description = "ToNodes is a list of nodes identified by an EndpointSelector to which endpoints subject to the rule is allowed to communicate.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEgressDenyToNodes"));
+        };
         "toPorts" = mkOption {
           description = "ToPorts is a list of destination ports identified by port number and protocol which the endpoint subject to the rule is not allowed to connect to. \n Example: Any endpoint with the label \"role=frontend\" is not allowed to initiate connections to destination port 8080/tcp";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEgressDenyToPorts"));
@@ -359,6 +373,7 @@ with lib; let
         "toEndpoints" = mkOverride 1002 null;
         "toEntities" = mkOverride 1002 null;
         "toGroups" = mkOverride 1002 null;
+        "toNodes" = mkOverride 1002 null;
         "toPorts" = mkOverride 1002 null;
         "toRequires" = mkOverride 1002 null;
         "toServices" = mkOverride 1002 null;
@@ -383,7 +398,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "type" = mkOption {
-          description = "Type is a ICMP-type. It should be 0-255 (8bit).";
+          description = "Type is a ICMP-type. It should be an 8bit code (0-255), or it's CamelCase name (for example, \"EchoReply\"). Allowed ICMP types are: Ipv4: EchoReply | DestinationUnreachable | Redirect | Echo | EchoRequest | RouterAdvertisement | RouterSelection | TimeExceeded | ParameterProblem | Timestamp | TimestampReply | Photuris | ExtendedEcho Request | ExtendedEcho Reply Ipv6: DestinationUnreachable | PacketTooBig | TimeExceeded | ParameterProblem | EchoRequest | EchoReply | MulticastListenerQuery| MulticastListenerReport | MulticastListenerDone | RouterSolicitation | RouterAdvertisement | NeighborSolicitation | NeighborAdvertisement | RedirectMessage | RouterRenumbering | ICMPNodeInformationQuery | ICMPNodeInformationResponse | InverseNeighborDiscoverySolicitation | InverseNeighborDiscoveryAdvertisement | HomeAgentAddressDiscoveryRequest | HomeAgentAddressDiscoveryReply | MobilePrefixSolicitation | MobilePrefixAdvertisement | DuplicateAddressRequestCodeSuffix | DuplicateAddressConfirmationCodeSuffix | ExtendedEchoRequest | ExtendedEchoReply";
           type = types.int;
         };
       };
@@ -399,7 +414,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "cidrGroupRef" = mkOption {
-          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress) or cannot (IngressDeny) receive connections from.";
+          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress/Egress) or cannot (IngressDeny/EgressDeny) receive connections from.";
           type = types.nullOr types.str;
         };
         "except" = mkOption {
@@ -490,6 +505,43 @@ with lib; let
         "securityGroupsNames" = mkOverride 1002 null;
       };
     };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEgressDenyToNodes" = {
+      options = {
+        "matchExpressions" = mkOption {
+          description = "matchExpressions is a list of label selector requirements. The requirements are ANDed.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEgressDenyToNodesMatchExpressions"));
+        };
+        "matchLabels" = mkOption {
+          description = "matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+      };
+
+      config = {
+        "matchExpressions" = mkOverride 1002 null;
+        "matchLabels" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEgressDenyToNodesMatchExpressions" = {
+      options = {
+        "key" = mkOption {
+          description = "key is the label key that the selector applies to.";
+          type = types.str;
+        };
+        "operator" = mkOption {
+          description = "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.";
+          type = types.str;
+        };
+        "values" = mkOption {
+          description = "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "values" = mkOverride 1002 null;
+      };
+    };
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEgressDenyToPorts" = {
       options = {
         "ports" = mkOption {
@@ -504,8 +556,12 @@ with lib; let
     };
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEgressDenyToPortsPorts" = {
       options = {
+        "endPort" = mkOption {
+          description = "EndPort can only be an L4 port number.";
+          type = types.nullOr types.int;
+        };
         "port" = mkOption {
-          description = "Port is an L4 port number. For now the string will be strictly parsed as a single uint16. In the future, this field may support ranges in the form \"1024-2048 Port can also be a port name, which must contain at least one [a-z], and may also contain [0-9] and '-' anywhere except adjacent to another '-' or in the beginning or the end.";
+          description = "Port can be an L4 port number, or a name in the form of \"http\" or \"http-8080\".";
           type = types.str;
         };
         "protocol" = mkOption {
@@ -515,6 +571,7 @@ with lib; let
       };
 
       config = {
+        "endPort" = mkOverride 1002 null;
         "protocol" = mkOverride 1002 null;
       };
     };
@@ -661,7 +718,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "type" = mkOption {
-          description = "Type is a ICMP-type. It should be 0-255 (8bit).";
+          description = "Type is a ICMP-type. It should be an 8bit code (0-255), or it's CamelCase name (for example, \"EchoReply\"). Allowed ICMP types are: Ipv4: EchoReply | DestinationUnreachable | Redirect | Echo | EchoRequest | RouterAdvertisement | RouterSelection | TimeExceeded | ParameterProblem | Timestamp | TimestampReply | Photuris | ExtendedEcho Request | ExtendedEcho Reply Ipv6: DestinationUnreachable | PacketTooBig | TimeExceeded | ParameterProblem | EchoRequest | EchoReply | MulticastListenerQuery| MulticastListenerReport | MulticastListenerDone | RouterSolicitation | RouterAdvertisement | NeighborSolicitation | NeighborAdvertisement | RedirectMessage | RouterRenumbering | ICMPNodeInformationQuery | ICMPNodeInformationResponse | InverseNeighborDiscoverySolicitation | InverseNeighborDiscoveryAdvertisement | HomeAgentAddressDiscoveryRequest | HomeAgentAddressDiscoveryReply | MobilePrefixSolicitation | MobilePrefixAdvertisement | DuplicateAddressRequestCodeSuffix | DuplicateAddressConfirmationCodeSuffix | ExtendedEchoRequest | ExtendedEchoReply";
           type = types.int;
         };
       };
@@ -677,7 +734,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "cidrGroupRef" = mkOption {
-          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress) or cannot (IngressDeny) receive connections from.";
+          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress/Egress) or cannot (IngressDeny/EgressDeny) receive connections from.";
           type = types.nullOr types.str;
         };
         "except" = mkOption {
@@ -785,6 +842,43 @@ with lib; let
         "securityGroupsNames" = mkOverride 1002 null;
       };
     };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEgressToNodes" = {
+      options = {
+        "matchExpressions" = mkOption {
+          description = "matchExpressions is a list of label selector requirements. The requirements are ANDed.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEgressToNodesMatchExpressions"));
+        };
+        "matchLabels" = mkOption {
+          description = "matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+      };
+
+      config = {
+        "matchExpressions" = mkOverride 1002 null;
+        "matchLabels" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEgressToNodesMatchExpressions" = {
+      options = {
+        "key" = mkOption {
+          description = "key is the label key that the selector applies to.";
+          type = types.str;
+        };
+        "operator" = mkOption {
+          description = "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.";
+          type = types.str;
+        };
+        "values" = mkOption {
+          description = "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "values" = mkOverride 1002 null;
+      };
+    };
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEgressToPorts" = {
       options = {
         "listener" = mkOption {
@@ -825,16 +919,22 @@ with lib; let
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEgressToPortsListener" = {
       options = {
         "envoyConfig" = mkOption {
-          description = "EnvoyConfig is a reference to the CEC or CCNP resource in which the listener is defined.";
+          description = "EnvoyConfig is a reference to the CEC or CCEC resource in which the listener is defined.";
           type = submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEgressToPortsListenerEnvoyConfig";
         };
         "name" = mkOption {
           description = "Name is the name of the listener.";
           type = types.str;
         };
+        "priority" = mkOption {
+          description = "Priority for this Listener that is used when multiple rules would apply different listeners to a policy map entry. Behavior of this is implementation dependent.";
+          type = types.nullOr types.int;
+        };
       };
 
-      config = {};
+      config = {
+        "priority" = mkOverride 1002 null;
+      };
     };
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEgressToPortsListenerEnvoyConfig" = {
       options = {
@@ -896,8 +996,12 @@ with lib; let
     };
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEgressToPortsPorts" = {
       options = {
+        "endPort" = mkOption {
+          description = "EndPort can only be an L4 port number.";
+          type = types.nullOr types.int;
+        };
         "port" = mkOption {
-          description = "Port is an L4 port number. For now the string will be strictly parsed as a single uint16. In the future, this field may support ranges in the form \"1024-2048 Port can also be a port name, which must contain at least one [a-z], and may also contain [0-9] and '-' anywhere except adjacent to another '-' or in the beginning or the end.";
+          description = "Port can be an L4 port number, or a name in the form of \"http\" or \"http-8080\".";
           type = types.str;
         };
         "protocol" = mkOption {
@@ -907,6 +1011,7 @@ with lib; let
       };
 
       config = {
+        "endPort" = mkOverride 1002 null;
         "protocol" = mkOverride 1002 null;
       };
     };
@@ -1232,6 +1337,23 @@ with lib; let
         "values" = mkOverride 1002 null;
       };
     };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEnableDefaultDeny" = {
+      options = {
+        "egress" = mkOption {
+          description = "Whether or not the endpoint should have a default-deny rule applied to egress traffic.";
+          type = types.nullOr types.bool;
+        };
+        "ingress" = mkOption {
+          description = "Whether or not the endpoint should have a default-deny rule applied to ingress traffic.";
+          type = types.nullOr types.bool;
+        };
+      };
+
+      config = {
+        "egress" = mkOverride 1002 null;
+        "ingress" = mkOverride 1002 null;
+      };
+    };
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecEndpointSelector" = {
       options = {
         "matchExpressions" = mkOption {
@@ -1291,6 +1413,14 @@ with lib; let
           description = "FromEntities is a list of special entities which the endpoint subject to the rule is allowed to receive connections from. Supported entities are `world`, `cluster` and `host`";
           type = types.nullOr (types.listOf types.str);
         };
+        "fromGroups" = mkOption {
+          description = "FromGroups is a directive that allows the integration with multiple outside providers. Currently, only AWS is supported, and the rule can select by multiple sub directives: \n Example: FromGroups: - aws: securityGroupsIds: - 'sg-XXXXXXXXXXXXX'";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressFromGroups"));
+        };
+        "fromNodes" = mkOption {
+          description = "FromNodes is a list of nodes identified by an EndpointSelector which are allowed to communicate with the endpoint subject to the rule.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressFromNodes"));
+        };
         "fromRequires" = mkOption {
           description = "FromRequires is a list of additional constraints which must be met in order for the selected endpoints to be reachable. These additional constraints do no by itself grant access privileges and must always be accompanied with at least one matching FromEndpoints. \n Example: Any Endpoint with the label \"team=A\" requires consuming endpoint to also carry the label \"team=A\".";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressFromRequires"));
@@ -1311,6 +1441,8 @@ with lib; let
         "fromCIDRSet" = mkOverride 1002 null;
         "fromEndpoints" = mkOverride 1002 null;
         "fromEntities" = mkOverride 1002 null;
+        "fromGroups" = mkOverride 1002 null;
+        "fromNodes" = mkOverride 1002 null;
         "fromRequires" = mkOverride 1002 null;
         "icmps" = mkOverride 1002 null;
         "toPorts" = mkOverride 1002 null;
@@ -1344,6 +1476,14 @@ with lib; let
           description = "FromEntities is a list of special entities which the endpoint subject to the rule is allowed to receive connections from. Supported entities are `world`, `cluster` and `host`";
           type = types.nullOr (types.listOf types.str);
         };
+        "fromGroups" = mkOption {
+          description = "FromGroups is a directive that allows the integration with multiple outside providers. Currently, only AWS is supported, and the rule can select by multiple sub directives: \n Example: FromGroups: - aws: securityGroupsIds: - 'sg-XXXXXXXXXXXXX'";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressDenyFromGroups"));
+        };
+        "fromNodes" = mkOption {
+          description = "FromNodes is a list of nodes identified by an EndpointSelector which are allowed to communicate with the endpoint subject to the rule.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressDenyFromNodes"));
+        };
         "fromRequires" = mkOption {
           description = "FromRequires is a list of additional constraints which must be met in order for the selected endpoints to be reachable. These additional constraints do no by itself grant access privileges and must always be accompanied with at least one matching FromEndpoints. \n Example: Any Endpoint with the label \"team=A\" requires consuming endpoint to also carry the label \"team=A\".";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressDenyFromRequires"));
@@ -1363,6 +1503,8 @@ with lib; let
         "fromCIDRSet" = mkOverride 1002 null;
         "fromEndpoints" = mkOverride 1002 null;
         "fromEntities" = mkOverride 1002 null;
+        "fromGroups" = mkOverride 1002 null;
+        "fromNodes" = mkOverride 1002 null;
         "fromRequires" = mkOverride 1002 null;
         "icmps" = mkOverride 1002 null;
         "toPorts" = mkOverride 1002 null;
@@ -1375,7 +1517,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "cidrGroupRef" = mkOption {
-          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress) or cannot (IngressDeny) receive connections from.";
+          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress/Egress) or cannot (IngressDeny/EgressDeny) receive connections from.";
           type = types.nullOr types.str;
         };
         "except" = mkOption {
@@ -1408,6 +1550,82 @@ with lib; let
       };
     };
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressDenyFromEndpointsMatchExpressions" = {
+      options = {
+        "key" = mkOption {
+          description = "key is the label key that the selector applies to.";
+          type = types.str;
+        };
+        "operator" = mkOption {
+          description = "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.";
+          type = types.str;
+        };
+        "values" = mkOption {
+          description = "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "values" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressDenyFromGroups" = {
+      options = {
+        "aws" = mkOption {
+          description = "AWSGroup is an structure that can be used to whitelisting information from AWS integration";
+          type = types.nullOr (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressDenyFromGroupsAws");
+        };
+      };
+
+      config = {
+        "aws" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressDenyFromGroupsAws" = {
+      options = {
+        "labels" = mkOption {
+          description = "";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+        "region" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "securityGroupsIds" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
+        "securityGroupsNames" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "labels" = mkOverride 1002 null;
+        "region" = mkOverride 1002 null;
+        "securityGroupsIds" = mkOverride 1002 null;
+        "securityGroupsNames" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressDenyFromNodes" = {
+      options = {
+        "matchExpressions" = mkOption {
+          description = "matchExpressions is a list of label selector requirements. The requirements are ANDed.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressDenyFromNodesMatchExpressions"));
+        };
+        "matchLabels" = mkOption {
+          description = "matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+      };
+
+      config = {
+        "matchExpressions" = mkOverride 1002 null;
+        "matchLabels" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressDenyFromNodesMatchExpressions" = {
       options = {
         "key" = mkOption {
           description = "key is the label key that the selector applies to.";
@@ -1483,7 +1701,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "type" = mkOption {
-          description = "Type is a ICMP-type. It should be 0-255 (8bit).";
+          description = "Type is a ICMP-type. It should be an 8bit code (0-255), or it's CamelCase name (for example, \"EchoReply\"). Allowed ICMP types are: Ipv4: EchoReply | DestinationUnreachable | Redirect | Echo | EchoRequest | RouterAdvertisement | RouterSelection | TimeExceeded | ParameterProblem | Timestamp | TimestampReply | Photuris | ExtendedEcho Request | ExtendedEcho Reply Ipv6: DestinationUnreachable | PacketTooBig | TimeExceeded | ParameterProblem | EchoRequest | EchoReply | MulticastListenerQuery| MulticastListenerReport | MulticastListenerDone | RouterSolicitation | RouterAdvertisement | NeighborSolicitation | NeighborAdvertisement | RedirectMessage | RouterRenumbering | ICMPNodeInformationQuery | ICMPNodeInformationResponse | InverseNeighborDiscoverySolicitation | InverseNeighborDiscoveryAdvertisement | HomeAgentAddressDiscoveryRequest | HomeAgentAddressDiscoveryReply | MobilePrefixSolicitation | MobilePrefixAdvertisement | DuplicateAddressRequestCodeSuffix | DuplicateAddressConfirmationCodeSuffix | ExtendedEchoRequest | ExtendedEchoReply";
           type = types.int;
         };
       };
@@ -1506,8 +1724,12 @@ with lib; let
     };
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressDenyToPortsPorts" = {
       options = {
+        "endPort" = mkOption {
+          description = "EndPort can only be an L4 port number.";
+          type = types.nullOr types.int;
+        };
         "port" = mkOption {
-          description = "Port is an L4 port number. For now the string will be strictly parsed as a single uint16. In the future, this field may support ranges in the form \"1024-2048 Port can also be a port name, which must contain at least one [a-z], and may also contain [0-9] and '-' anywhere except adjacent to another '-' or in the beginning or the end.";
+          description = "Port can be an L4 port number, or a name in the form of \"http\" or \"http-8080\".";
           type = types.str;
         };
         "protocol" = mkOption {
@@ -1517,6 +1739,7 @@ with lib; let
       };
 
       config = {
+        "endPort" = mkOverride 1002 null;
         "protocol" = mkOverride 1002 null;
       };
     };
@@ -1527,7 +1750,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "cidrGroupRef" = mkOption {
-          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress) or cannot (IngressDeny) receive connections from.";
+          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress/Egress) or cannot (IngressDeny/EgressDeny) receive connections from.";
           type = types.nullOr types.str;
         };
         "except" = mkOption {
@@ -1560,6 +1783,82 @@ with lib; let
       };
     };
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressFromEndpointsMatchExpressions" = {
+      options = {
+        "key" = mkOption {
+          description = "key is the label key that the selector applies to.";
+          type = types.str;
+        };
+        "operator" = mkOption {
+          description = "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.";
+          type = types.str;
+        };
+        "values" = mkOption {
+          description = "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "values" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressFromGroups" = {
+      options = {
+        "aws" = mkOption {
+          description = "AWSGroup is an structure that can be used to whitelisting information from AWS integration";
+          type = types.nullOr (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressFromGroupsAws");
+        };
+      };
+
+      config = {
+        "aws" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressFromGroupsAws" = {
+      options = {
+        "labels" = mkOption {
+          description = "";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+        "region" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "securityGroupsIds" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
+        "securityGroupsNames" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "labels" = mkOverride 1002 null;
+        "region" = mkOverride 1002 null;
+        "securityGroupsIds" = mkOverride 1002 null;
+        "securityGroupsNames" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressFromNodes" = {
+      options = {
+        "matchExpressions" = mkOption {
+          description = "matchExpressions is a list of label selector requirements. The requirements are ANDed.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressFromNodesMatchExpressions"));
+        };
+        "matchLabels" = mkOption {
+          description = "matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+      };
+
+      config = {
+        "matchExpressions" = mkOverride 1002 null;
+        "matchLabels" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressFromNodesMatchExpressions" = {
       options = {
         "key" = mkOption {
           description = "key is the label key that the selector applies to.";
@@ -1635,7 +1934,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "type" = mkOption {
-          description = "Type is a ICMP-type. It should be 0-255 (8bit).";
+          description = "Type is a ICMP-type. It should be an 8bit code (0-255), or it's CamelCase name (for example, \"EchoReply\"). Allowed ICMP types are: Ipv4: EchoReply | DestinationUnreachable | Redirect | Echo | EchoRequest | RouterAdvertisement | RouterSelection | TimeExceeded | ParameterProblem | Timestamp | TimestampReply | Photuris | ExtendedEcho Request | ExtendedEcho Reply Ipv6: DestinationUnreachable | PacketTooBig | TimeExceeded | ParameterProblem | EchoRequest | EchoReply | MulticastListenerQuery| MulticastListenerReport | MulticastListenerDone | RouterSolicitation | RouterAdvertisement | NeighborSolicitation | NeighborAdvertisement | RedirectMessage | RouterRenumbering | ICMPNodeInformationQuery | ICMPNodeInformationResponse | InverseNeighborDiscoverySolicitation | InverseNeighborDiscoveryAdvertisement | HomeAgentAddressDiscoveryRequest | HomeAgentAddressDiscoveryReply | MobilePrefixSolicitation | MobilePrefixAdvertisement | DuplicateAddressRequestCodeSuffix | DuplicateAddressConfirmationCodeSuffix | ExtendedEchoRequest | ExtendedEchoReply";
           type = types.int;
         };
       };
@@ -1684,16 +1983,22 @@ with lib; let
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressToPortsListener" = {
       options = {
         "envoyConfig" = mkOption {
-          description = "EnvoyConfig is a reference to the CEC or CCNP resource in which the listener is defined.";
+          description = "EnvoyConfig is a reference to the CEC or CCEC resource in which the listener is defined.";
           type = submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressToPortsListenerEnvoyConfig";
         };
         "name" = mkOption {
           description = "Name is the name of the listener.";
           type = types.str;
         };
+        "priority" = mkOption {
+          description = "Priority for this Listener that is used when multiple rules would apply different listeners to a policy map entry. Behavior of this is implementation dependent.";
+          type = types.nullOr types.int;
+        };
       };
 
-      config = {};
+      config = {
+        "priority" = mkOverride 1002 null;
+      };
     };
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressToPortsListenerEnvoyConfig" = {
       options = {
@@ -1755,8 +2060,12 @@ with lib; let
     };
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecIngressToPortsPorts" = {
       options = {
+        "endPort" = mkOption {
+          description = "EndPort can only be an L4 port number.";
+          type = types.nullOr types.int;
+        };
         "port" = mkOption {
-          description = "Port is an L4 port number. For now the string will be strictly parsed as a single uint16. In the future, this field may support ranges in the form \"1024-2048 Port can also be a port name, which must contain at least one [a-z], and may also contain [0-9] and '-' anywhere except adjacent to another '-' or in the beginning or the end.";
+          description = "Port can be an L4 port number, or a name in the form of \"http\" or \"http-8080\".";
           type = types.str;
         };
         "protocol" = mkOption {
@@ -1766,6 +2075,7 @@ with lib; let
       };
 
       config = {
+        "endPort" = mkOverride 1002 null;
         "protocol" = mkOverride 1002 null;
       };
     };
@@ -2039,6 +2349,10 @@ with lib; let
           description = "EgressDeny is a list of EgressDenyRule which are enforced at egress. Any rule inserted here will be denied regardless of the allowed egress rules in the 'egress' field. If omitted or empty, this rule does not apply at egress.";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEgressDeny"));
         };
+        "enableDefaultDeny" = mkOption {
+          description = "EnableDefaultDeny determines whether this policy configures the subject endpoint(s) to have a default deny mode. If enabled, this causes all traffic not explicitly allowed by a network policy to be dropped. \n If not specified, the default is true for each traffic direction that has rules, and false otherwise. For example, if a policy only has Ingress or IngressDeny rules, then the default for ingress is true and egress is false. \n If multiple policies apply to an endpoint, that endpoint's default deny will be enabled if any policy requests it. \n This is useful for creating broad-based network policies that will not cause endpoints to enter default-deny mode.";
+          type = types.nullOr (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEnableDefaultDeny");
+        };
         "endpointSelector" = mkOption {
           description = "EndpointSelector selects all endpoints which should be subject to this rule. EndpointSelector and NodeSelector cannot be both empty and are mutually exclusive.";
           type = types.nullOr (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEndpointSelector");
@@ -2065,6 +2379,7 @@ with lib; let
         "description" = mkOverride 1002 null;
         "egress" = mkOverride 1002 null;
         "egressDeny" = mkOverride 1002 null;
+        "enableDefaultDeny" = mkOverride 1002 null;
         "endpointSelector" = mkOverride 1002 null;
         "ingress" = mkOverride 1002 null;
         "ingressDeny" = mkOverride 1002 null;
@@ -2106,6 +2421,10 @@ with lib; let
           description = "ToGroups is a directive that allows the integration with multiple outside providers. Currently, only AWS is supported, and the rule can select by multiple sub directives: \n Example: toGroups: - aws: securityGroupsIds: - 'sg-XXXXXXXXXXXXX'";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEgressToGroups"));
         };
+        "toNodes" = mkOption {
+          description = "ToNodes is a list of nodes identified by an EndpointSelector to which endpoints subject to the rule is allowed to communicate.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEgressToNodes"));
+        };
         "toPorts" = mkOption {
           description = "ToPorts is a list of destination ports identified by port number and protocol which the endpoint subject to the rule is allowed to connect to. \n Example: Any endpoint with the label \"role=frontend\" is allowed to initiate connections to destination port 8080/tcp";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEgressToPorts"));
@@ -2129,6 +2448,7 @@ with lib; let
         "toEntities" = mkOverride 1002 null;
         "toFQDNs" = mkOverride 1002 null;
         "toGroups" = mkOverride 1002 null;
+        "toNodes" = mkOverride 1002 null;
         "toPorts" = mkOverride 1002 null;
         "toRequires" = mkOverride 1002 null;
         "toServices" = mkOverride 1002 null;
@@ -2170,6 +2490,10 @@ with lib; let
           description = "ToGroups is a directive that allows the integration with multiple outside providers. Currently, only AWS is supported, and the rule can select by multiple sub directives: \n Example: toGroups: - aws: securityGroupsIds: - 'sg-XXXXXXXXXXXXX'";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEgressDenyToGroups"));
         };
+        "toNodes" = mkOption {
+          description = "ToNodes is a list of nodes identified by an EndpointSelector to which endpoints subject to the rule is allowed to communicate.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEgressDenyToNodes"));
+        };
         "toPorts" = mkOption {
           description = "ToPorts is a list of destination ports identified by port number and protocol which the endpoint subject to the rule is not allowed to connect to. \n Example: Any endpoint with the label \"role=frontend\" is not allowed to initiate connections to destination port 8080/tcp";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEgressDenyToPorts"));
@@ -2191,6 +2515,7 @@ with lib; let
         "toEndpoints" = mkOverride 1002 null;
         "toEntities" = mkOverride 1002 null;
         "toGroups" = mkOverride 1002 null;
+        "toNodes" = mkOverride 1002 null;
         "toPorts" = mkOverride 1002 null;
         "toRequires" = mkOverride 1002 null;
         "toServices" = mkOverride 1002 null;
@@ -2215,7 +2540,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "type" = mkOption {
-          description = "Type is a ICMP-type. It should be 0-255 (8bit).";
+          description = "Type is a ICMP-type. It should be an 8bit code (0-255), or it's CamelCase name (for example, \"EchoReply\"). Allowed ICMP types are: Ipv4: EchoReply | DestinationUnreachable | Redirect | Echo | EchoRequest | RouterAdvertisement | RouterSelection | TimeExceeded | ParameterProblem | Timestamp | TimestampReply | Photuris | ExtendedEcho Request | ExtendedEcho Reply Ipv6: DestinationUnreachable | PacketTooBig | TimeExceeded | ParameterProblem | EchoRequest | EchoReply | MulticastListenerQuery| MulticastListenerReport | MulticastListenerDone | RouterSolicitation | RouterAdvertisement | NeighborSolicitation | NeighborAdvertisement | RedirectMessage | RouterRenumbering | ICMPNodeInformationQuery | ICMPNodeInformationResponse | InverseNeighborDiscoverySolicitation | InverseNeighborDiscoveryAdvertisement | HomeAgentAddressDiscoveryRequest | HomeAgentAddressDiscoveryReply | MobilePrefixSolicitation | MobilePrefixAdvertisement | DuplicateAddressRequestCodeSuffix | DuplicateAddressConfirmationCodeSuffix | ExtendedEchoRequest | ExtendedEchoReply";
           type = types.int;
         };
       };
@@ -2231,7 +2556,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "cidrGroupRef" = mkOption {
-          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress) or cannot (IngressDeny) receive connections from.";
+          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress/Egress) or cannot (IngressDeny/EgressDeny) receive connections from.";
           type = types.nullOr types.str;
         };
         "except" = mkOption {
@@ -2322,6 +2647,43 @@ with lib; let
         "securityGroupsNames" = mkOverride 1002 null;
       };
     };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEgressDenyToNodes" = {
+      options = {
+        "matchExpressions" = mkOption {
+          description = "matchExpressions is a list of label selector requirements. The requirements are ANDed.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEgressDenyToNodesMatchExpressions"));
+        };
+        "matchLabels" = mkOption {
+          description = "matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+      };
+
+      config = {
+        "matchExpressions" = mkOverride 1002 null;
+        "matchLabels" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEgressDenyToNodesMatchExpressions" = {
+      options = {
+        "key" = mkOption {
+          description = "key is the label key that the selector applies to.";
+          type = types.str;
+        };
+        "operator" = mkOption {
+          description = "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.";
+          type = types.str;
+        };
+        "values" = mkOption {
+          description = "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "values" = mkOverride 1002 null;
+      };
+    };
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEgressDenyToPorts" = {
       options = {
         "ports" = mkOption {
@@ -2336,8 +2698,12 @@ with lib; let
     };
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEgressDenyToPortsPorts" = {
       options = {
+        "endPort" = mkOption {
+          description = "EndPort can only be an L4 port number.";
+          type = types.nullOr types.int;
+        };
         "port" = mkOption {
-          description = "Port is an L4 port number. For now the string will be strictly parsed as a single uint16. In the future, this field may support ranges in the form \"1024-2048 Port can also be a port name, which must contain at least one [a-z], and may also contain [0-9] and '-' anywhere except adjacent to another '-' or in the beginning or the end.";
+          description = "Port can be an L4 port number, or a name in the form of \"http\" or \"http-8080\".";
           type = types.str;
         };
         "protocol" = mkOption {
@@ -2347,6 +2713,7 @@ with lib; let
       };
 
       config = {
+        "endPort" = mkOverride 1002 null;
         "protocol" = mkOverride 1002 null;
       };
     };
@@ -2493,7 +2860,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "type" = mkOption {
-          description = "Type is a ICMP-type. It should be 0-255 (8bit).";
+          description = "Type is a ICMP-type. It should be an 8bit code (0-255), or it's CamelCase name (for example, \"EchoReply\"). Allowed ICMP types are: Ipv4: EchoReply | DestinationUnreachable | Redirect | Echo | EchoRequest | RouterAdvertisement | RouterSelection | TimeExceeded | ParameterProblem | Timestamp | TimestampReply | Photuris | ExtendedEcho Request | ExtendedEcho Reply Ipv6: DestinationUnreachable | PacketTooBig | TimeExceeded | ParameterProblem | EchoRequest | EchoReply | MulticastListenerQuery| MulticastListenerReport | MulticastListenerDone | RouterSolicitation | RouterAdvertisement | NeighborSolicitation | NeighborAdvertisement | RedirectMessage | RouterRenumbering | ICMPNodeInformationQuery | ICMPNodeInformationResponse | InverseNeighborDiscoverySolicitation | InverseNeighborDiscoveryAdvertisement | HomeAgentAddressDiscoveryRequest | HomeAgentAddressDiscoveryReply | MobilePrefixSolicitation | MobilePrefixAdvertisement | DuplicateAddressRequestCodeSuffix | DuplicateAddressConfirmationCodeSuffix | ExtendedEchoRequest | ExtendedEchoReply";
           type = types.int;
         };
       };
@@ -2509,7 +2876,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "cidrGroupRef" = mkOption {
-          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress) or cannot (IngressDeny) receive connections from.";
+          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress/Egress) or cannot (IngressDeny/EgressDeny) receive connections from.";
           type = types.nullOr types.str;
         };
         "except" = mkOption {
@@ -2617,6 +2984,43 @@ with lib; let
         "securityGroupsNames" = mkOverride 1002 null;
       };
     };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEgressToNodes" = {
+      options = {
+        "matchExpressions" = mkOption {
+          description = "matchExpressions is a list of label selector requirements. The requirements are ANDed.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEgressToNodesMatchExpressions"));
+        };
+        "matchLabels" = mkOption {
+          description = "matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+      };
+
+      config = {
+        "matchExpressions" = mkOverride 1002 null;
+        "matchLabels" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEgressToNodesMatchExpressions" = {
+      options = {
+        "key" = mkOption {
+          description = "key is the label key that the selector applies to.";
+          type = types.str;
+        };
+        "operator" = mkOption {
+          description = "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.";
+          type = types.str;
+        };
+        "values" = mkOption {
+          description = "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "values" = mkOverride 1002 null;
+      };
+    };
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEgressToPorts" = {
       options = {
         "listener" = mkOption {
@@ -2657,16 +3061,22 @@ with lib; let
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEgressToPortsListener" = {
       options = {
         "envoyConfig" = mkOption {
-          description = "EnvoyConfig is a reference to the CEC or CCNP resource in which the listener is defined.";
+          description = "EnvoyConfig is a reference to the CEC or CCEC resource in which the listener is defined.";
           type = submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEgressToPortsListenerEnvoyConfig";
         };
         "name" = mkOption {
           description = "Name is the name of the listener.";
           type = types.str;
         };
+        "priority" = mkOption {
+          description = "Priority for this Listener that is used when multiple rules would apply different listeners to a policy map entry. Behavior of this is implementation dependent.";
+          type = types.nullOr types.int;
+        };
       };
 
-      config = {};
+      config = {
+        "priority" = mkOverride 1002 null;
+      };
     };
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEgressToPortsListenerEnvoyConfig" = {
       options = {
@@ -2728,8 +3138,12 @@ with lib; let
     };
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEgressToPortsPorts" = {
       options = {
+        "endPort" = mkOption {
+          description = "EndPort can only be an L4 port number.";
+          type = types.nullOr types.int;
+        };
         "port" = mkOption {
-          description = "Port is an L4 port number. For now the string will be strictly parsed as a single uint16. In the future, this field may support ranges in the form \"1024-2048 Port can also be a port name, which must contain at least one [a-z], and may also contain [0-9] and '-' anywhere except adjacent to another '-' or in the beginning or the end.";
+          description = "Port can be an L4 port number, or a name in the form of \"http\" or \"http-8080\".";
           type = types.str;
         };
         "protocol" = mkOption {
@@ -2739,6 +3153,7 @@ with lib; let
       };
 
       config = {
+        "endPort" = mkOverride 1002 null;
         "protocol" = mkOverride 1002 null;
       };
     };
@@ -3064,6 +3479,23 @@ with lib; let
         "values" = mkOverride 1002 null;
       };
     };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEnableDefaultDeny" = {
+      options = {
+        "egress" = mkOption {
+          description = "Whether or not the endpoint should have a default-deny rule applied to egress traffic.";
+          type = types.nullOr types.bool;
+        };
+        "ingress" = mkOption {
+          description = "Whether or not the endpoint should have a default-deny rule applied to ingress traffic.";
+          type = types.nullOr types.bool;
+        };
+      };
+
+      config = {
+        "egress" = mkOverride 1002 null;
+        "ingress" = mkOverride 1002 null;
+      };
+    };
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsEndpointSelector" = {
       options = {
         "matchExpressions" = mkOption {
@@ -3123,6 +3555,14 @@ with lib; let
           description = "FromEntities is a list of special entities which the endpoint subject to the rule is allowed to receive connections from. Supported entities are `world`, `cluster` and `host`";
           type = types.nullOr (types.listOf types.str);
         };
+        "fromGroups" = mkOption {
+          description = "FromGroups is a directive that allows the integration with multiple outside providers. Currently, only AWS is supported, and the rule can select by multiple sub directives: \n Example: FromGroups: - aws: securityGroupsIds: - 'sg-XXXXXXXXXXXXX'";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressFromGroups"));
+        };
+        "fromNodes" = mkOption {
+          description = "FromNodes is a list of nodes identified by an EndpointSelector which are allowed to communicate with the endpoint subject to the rule.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressFromNodes"));
+        };
         "fromRequires" = mkOption {
           description = "FromRequires is a list of additional constraints which must be met in order for the selected endpoints to be reachable. These additional constraints do no by itself grant access privileges and must always be accompanied with at least one matching FromEndpoints. \n Example: Any Endpoint with the label \"team=A\" requires consuming endpoint to also carry the label \"team=A\".";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressFromRequires"));
@@ -3143,6 +3583,8 @@ with lib; let
         "fromCIDRSet" = mkOverride 1002 null;
         "fromEndpoints" = mkOverride 1002 null;
         "fromEntities" = mkOverride 1002 null;
+        "fromGroups" = mkOverride 1002 null;
+        "fromNodes" = mkOverride 1002 null;
         "fromRequires" = mkOverride 1002 null;
         "icmps" = mkOverride 1002 null;
         "toPorts" = mkOverride 1002 null;
@@ -3176,6 +3618,14 @@ with lib; let
           description = "FromEntities is a list of special entities which the endpoint subject to the rule is allowed to receive connections from. Supported entities are `world`, `cluster` and `host`";
           type = types.nullOr (types.listOf types.str);
         };
+        "fromGroups" = mkOption {
+          description = "FromGroups is a directive that allows the integration with multiple outside providers. Currently, only AWS is supported, and the rule can select by multiple sub directives: \n Example: FromGroups: - aws: securityGroupsIds: - 'sg-XXXXXXXXXXXXX'";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressDenyFromGroups"));
+        };
+        "fromNodes" = mkOption {
+          description = "FromNodes is a list of nodes identified by an EndpointSelector which are allowed to communicate with the endpoint subject to the rule.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressDenyFromNodes"));
+        };
         "fromRequires" = mkOption {
           description = "FromRequires is a list of additional constraints which must be met in order for the selected endpoints to be reachable. These additional constraints do no by itself grant access privileges and must always be accompanied with at least one matching FromEndpoints. \n Example: Any Endpoint with the label \"team=A\" requires consuming endpoint to also carry the label \"team=A\".";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressDenyFromRequires"));
@@ -3195,6 +3645,8 @@ with lib; let
         "fromCIDRSet" = mkOverride 1002 null;
         "fromEndpoints" = mkOverride 1002 null;
         "fromEntities" = mkOverride 1002 null;
+        "fromGroups" = mkOverride 1002 null;
+        "fromNodes" = mkOverride 1002 null;
         "fromRequires" = mkOverride 1002 null;
         "icmps" = mkOverride 1002 null;
         "toPorts" = mkOverride 1002 null;
@@ -3207,7 +3659,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "cidrGroupRef" = mkOption {
-          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress) or cannot (IngressDeny) receive connections from.";
+          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress/Egress) or cannot (IngressDeny/EgressDeny) receive connections from.";
           type = types.nullOr types.str;
         };
         "except" = mkOption {
@@ -3240,6 +3692,82 @@ with lib; let
       };
     };
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressDenyFromEndpointsMatchExpressions" = {
+      options = {
+        "key" = mkOption {
+          description = "key is the label key that the selector applies to.";
+          type = types.str;
+        };
+        "operator" = mkOption {
+          description = "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.";
+          type = types.str;
+        };
+        "values" = mkOption {
+          description = "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "values" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressDenyFromGroups" = {
+      options = {
+        "aws" = mkOption {
+          description = "AWSGroup is an structure that can be used to whitelisting information from AWS integration";
+          type = types.nullOr (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressDenyFromGroupsAws");
+        };
+      };
+
+      config = {
+        "aws" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressDenyFromGroupsAws" = {
+      options = {
+        "labels" = mkOption {
+          description = "";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+        "region" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "securityGroupsIds" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
+        "securityGroupsNames" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "labels" = mkOverride 1002 null;
+        "region" = mkOverride 1002 null;
+        "securityGroupsIds" = mkOverride 1002 null;
+        "securityGroupsNames" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressDenyFromNodes" = {
+      options = {
+        "matchExpressions" = mkOption {
+          description = "matchExpressions is a list of label selector requirements. The requirements are ANDed.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressDenyFromNodesMatchExpressions"));
+        };
+        "matchLabels" = mkOption {
+          description = "matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+      };
+
+      config = {
+        "matchExpressions" = mkOverride 1002 null;
+        "matchLabels" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressDenyFromNodesMatchExpressions" = {
       options = {
         "key" = mkOption {
           description = "key is the label key that the selector applies to.";
@@ -3315,7 +3843,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "type" = mkOption {
-          description = "Type is a ICMP-type. It should be 0-255 (8bit).";
+          description = "Type is a ICMP-type. It should be an 8bit code (0-255), or it's CamelCase name (for example, \"EchoReply\"). Allowed ICMP types are: Ipv4: EchoReply | DestinationUnreachable | Redirect | Echo | EchoRequest | RouterAdvertisement | RouterSelection | TimeExceeded | ParameterProblem | Timestamp | TimestampReply | Photuris | ExtendedEcho Request | ExtendedEcho Reply Ipv6: DestinationUnreachable | PacketTooBig | TimeExceeded | ParameterProblem | EchoRequest | EchoReply | MulticastListenerQuery| MulticastListenerReport | MulticastListenerDone | RouterSolicitation | RouterAdvertisement | NeighborSolicitation | NeighborAdvertisement | RedirectMessage | RouterRenumbering | ICMPNodeInformationQuery | ICMPNodeInformationResponse | InverseNeighborDiscoverySolicitation | InverseNeighborDiscoveryAdvertisement | HomeAgentAddressDiscoveryRequest | HomeAgentAddressDiscoveryReply | MobilePrefixSolicitation | MobilePrefixAdvertisement | DuplicateAddressRequestCodeSuffix | DuplicateAddressConfirmationCodeSuffix | ExtendedEchoRequest | ExtendedEchoReply";
           type = types.int;
         };
       };
@@ -3338,8 +3866,12 @@ with lib; let
     };
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressDenyToPortsPorts" = {
       options = {
+        "endPort" = mkOption {
+          description = "EndPort can only be an L4 port number.";
+          type = types.nullOr types.int;
+        };
         "port" = mkOption {
-          description = "Port is an L4 port number. For now the string will be strictly parsed as a single uint16. In the future, this field may support ranges in the form \"1024-2048 Port can also be a port name, which must contain at least one [a-z], and may also contain [0-9] and '-' anywhere except adjacent to another '-' or in the beginning or the end.";
+          description = "Port can be an L4 port number, or a name in the form of \"http\" or \"http-8080\".";
           type = types.str;
         };
         "protocol" = mkOption {
@@ -3349,6 +3881,7 @@ with lib; let
       };
 
       config = {
+        "endPort" = mkOverride 1002 null;
         "protocol" = mkOverride 1002 null;
       };
     };
@@ -3359,7 +3892,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "cidrGroupRef" = mkOption {
-          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress) or cannot (IngressDeny) receive connections from.";
+          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress/Egress) or cannot (IngressDeny/EgressDeny) receive connections from.";
           type = types.nullOr types.str;
         };
         "except" = mkOption {
@@ -3392,6 +3925,82 @@ with lib; let
       };
     };
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressFromEndpointsMatchExpressions" = {
+      options = {
+        "key" = mkOption {
+          description = "key is the label key that the selector applies to.";
+          type = types.str;
+        };
+        "operator" = mkOption {
+          description = "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.";
+          type = types.str;
+        };
+        "values" = mkOption {
+          description = "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "values" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressFromGroups" = {
+      options = {
+        "aws" = mkOption {
+          description = "AWSGroup is an structure that can be used to whitelisting information from AWS integration";
+          type = types.nullOr (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressFromGroupsAws");
+        };
+      };
+
+      config = {
+        "aws" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressFromGroupsAws" = {
+      options = {
+        "labels" = mkOption {
+          description = "";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+        "region" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "securityGroupsIds" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
+        "securityGroupsNames" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "labels" = mkOverride 1002 null;
+        "region" = mkOverride 1002 null;
+        "securityGroupsIds" = mkOverride 1002 null;
+        "securityGroupsNames" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressFromNodes" = {
+      options = {
+        "matchExpressions" = mkOption {
+          description = "matchExpressions is a list of label selector requirements. The requirements are ANDed.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressFromNodesMatchExpressions"));
+        };
+        "matchLabels" = mkOption {
+          description = "matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+      };
+
+      config = {
+        "matchExpressions" = mkOverride 1002 null;
+        "matchLabels" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressFromNodesMatchExpressions" = {
       options = {
         "key" = mkOption {
           description = "key is the label key that the selector applies to.";
@@ -3467,7 +4076,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "type" = mkOption {
-          description = "Type is a ICMP-type. It should be 0-255 (8bit).";
+          description = "Type is a ICMP-type. It should be an 8bit code (0-255), or it's CamelCase name (for example, \"EchoReply\"). Allowed ICMP types are: Ipv4: EchoReply | DestinationUnreachable | Redirect | Echo | EchoRequest | RouterAdvertisement | RouterSelection | TimeExceeded | ParameterProblem | Timestamp | TimestampReply | Photuris | ExtendedEcho Request | ExtendedEcho Reply Ipv6: DestinationUnreachable | PacketTooBig | TimeExceeded | ParameterProblem | EchoRequest | EchoReply | MulticastListenerQuery| MulticastListenerReport | MulticastListenerDone | RouterSolicitation | RouterAdvertisement | NeighborSolicitation | NeighborAdvertisement | RedirectMessage | RouterRenumbering | ICMPNodeInformationQuery | ICMPNodeInformationResponse | InverseNeighborDiscoverySolicitation | InverseNeighborDiscoveryAdvertisement | HomeAgentAddressDiscoveryRequest | HomeAgentAddressDiscoveryReply | MobilePrefixSolicitation | MobilePrefixAdvertisement | DuplicateAddressRequestCodeSuffix | DuplicateAddressConfirmationCodeSuffix | ExtendedEchoRequest | ExtendedEchoReply";
           type = types.int;
         };
       };
@@ -3516,16 +4125,22 @@ with lib; let
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressToPortsListener" = {
       options = {
         "envoyConfig" = mkOption {
-          description = "EnvoyConfig is a reference to the CEC or CCNP resource in which the listener is defined.";
+          description = "EnvoyConfig is a reference to the CEC or CCEC resource in which the listener is defined.";
           type = submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressToPortsListenerEnvoyConfig";
         };
         "name" = mkOption {
           description = "Name is the name of the listener.";
           type = types.str;
         };
+        "priority" = mkOption {
+          description = "Priority for this Listener that is used when multiple rules would apply different listeners to a policy map entry. Behavior of this is implementation dependent.";
+          type = types.nullOr types.int;
+        };
       };
 
-      config = {};
+      config = {
+        "priority" = mkOverride 1002 null;
+      };
     };
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressToPortsListenerEnvoyConfig" = {
       options = {
@@ -3587,8 +4202,12 @@ with lib; let
     };
     "cilium.io.v2.CiliumClusterwideNetworkPolicySpecsIngressToPortsPorts" = {
       options = {
+        "endPort" = mkOption {
+          description = "EndPort can only be an L4 port number.";
+          type = types.nullOr types.int;
+        };
         "port" = mkOption {
-          description = "Port is an L4 port number. For now the string will be strictly parsed as a single uint16. In the future, this field may support ranges in the form \"1024-2048 Port can also be a port name, which must contain at least one [a-z], and may also contain [0-9] and '-' anywhere except adjacent to another '-' or in the beginning or the end.";
+          description = "Port can be an L4 port number, or a name in the form of \"http\" or \"http-8080\".";
           type = types.str;
         };
         "protocol" = mkOption {
@@ -3598,6 +4217,7 @@ with lib; let
       };
 
       config = {
+        "endPort" = mkOverride 1002 null;
         "protocol" = mkOverride 1002 null;
       };
     };
@@ -3859,19 +4479,49 @@ with lib; let
     };
     "cilium.io.v2.CiliumClusterwideNetworkPolicyStatus" = {
       options = {
+        "conditions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumClusterwideNetworkPolicyStatusConditions"));
+        };
         "derivativePolicies" = mkOption {
           description = "DerivativePolicies is the status of all policies derived from the Cilium policy";
-          type = types.nullOr (types.attrsOf types.attrs);
-        };
-        "nodes" = mkOption {
-          description = "Nodes is the Cilium policy status for each node";
           type = types.nullOr (types.attrsOf types.attrs);
         };
       };
 
       config = {
+        "conditions" = mkOverride 1002 null;
         "derivativePolicies" = mkOverride 1002 null;
-        "nodes" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumClusterwideNetworkPolicyStatusConditions" = {
+      options = {
+        "lastTransitionTime" = mkOption {
+          description = "The last time the condition transitioned from one status to another.";
+          type = types.nullOr types.str;
+        };
+        "message" = mkOption {
+          description = "A human readable message indicating details about the transition.";
+          type = types.nullOr types.str;
+        };
+        "reason" = mkOption {
+          description = "The reason for the condition's last transition.";
+          type = types.nullOr types.str;
+        };
+        "status" = mkOption {
+          description = "The status of the condition, one of True, False, or Unknown";
+          type = types.str;
+        };
+        "type" = mkOption {
+          description = "The type of the policy condition";
+          type = types.str;
+        };
+      };
+
+      config = {
+        "lastTransitionTime" = mkOverride 1002 null;
+        "message" = mkOverride 1002 null;
+        "reason" = mkOverride 1002 null;
       };
     };
     "cilium.io.v2.CiliumNetworkPolicy" = {
@@ -3924,6 +4574,10 @@ with lib; let
           description = "EgressDeny is a list of EgressDenyRule which are enforced at egress. Any rule inserted here will be denied regardless of the allowed egress rules in the 'egress' field. If omitted or empty, this rule does not apply at egress.";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecEgressDeny"));
         };
+        "enableDefaultDeny" = mkOption {
+          description = "EnableDefaultDeny determines whether this policy configures the subject endpoint(s) to have a default deny mode. If enabled, this causes all traffic not explicitly allowed by a network policy to be dropped. \n If not specified, the default is true for each traffic direction that has rules, and false otherwise. For example, if a policy only has Ingress or IngressDeny rules, then the default for ingress is true and egress is false. \n If multiple policies apply to an endpoint, that endpoint's default deny will be enabled if any policy requests it. \n This is useful for creating broad-based network policies that will not cause endpoints to enter default-deny mode.";
+          type = types.nullOr (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecEnableDefaultDeny");
+        };
         "endpointSelector" = mkOption {
           description = "EndpointSelector selects all endpoints which should be subject to this rule. EndpointSelector and NodeSelector cannot be both empty and are mutually exclusive.";
           type = types.nullOr (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecEndpointSelector");
@@ -3950,6 +4604,7 @@ with lib; let
         "description" = mkOverride 1002 null;
         "egress" = mkOverride 1002 null;
         "egressDeny" = mkOverride 1002 null;
+        "enableDefaultDeny" = mkOverride 1002 null;
         "endpointSelector" = mkOverride 1002 null;
         "ingress" = mkOverride 1002 null;
         "ingressDeny" = mkOverride 1002 null;
@@ -3991,6 +4646,10 @@ with lib; let
           description = "ToGroups is a directive that allows the integration with multiple outside providers. Currently, only AWS is supported, and the rule can select by multiple sub directives: \n Example: toGroups: - aws: securityGroupsIds: - 'sg-XXXXXXXXXXXXX'";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecEgressToGroups"));
         };
+        "toNodes" = mkOption {
+          description = "ToNodes is a list of nodes identified by an EndpointSelector to which endpoints subject to the rule is allowed to communicate.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecEgressToNodes"));
+        };
         "toPorts" = mkOption {
           description = "ToPorts is a list of destination ports identified by port number and protocol which the endpoint subject to the rule is allowed to connect to. \n Example: Any endpoint with the label \"role=frontend\" is allowed to initiate connections to destination port 8080/tcp";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecEgressToPorts"));
@@ -4014,6 +4673,7 @@ with lib; let
         "toEntities" = mkOverride 1002 null;
         "toFQDNs" = mkOverride 1002 null;
         "toGroups" = mkOverride 1002 null;
+        "toNodes" = mkOverride 1002 null;
         "toPorts" = mkOverride 1002 null;
         "toRequires" = mkOverride 1002 null;
         "toServices" = mkOverride 1002 null;
@@ -4055,6 +4715,10 @@ with lib; let
           description = "ToGroups is a directive that allows the integration with multiple outside providers. Currently, only AWS is supported, and the rule can select by multiple sub directives: \n Example: toGroups: - aws: securityGroupsIds: - 'sg-XXXXXXXXXXXXX'";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecEgressDenyToGroups"));
         };
+        "toNodes" = mkOption {
+          description = "ToNodes is a list of nodes identified by an EndpointSelector to which endpoints subject to the rule is allowed to communicate.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecEgressDenyToNodes"));
+        };
         "toPorts" = mkOption {
           description = "ToPorts is a list of destination ports identified by port number and protocol which the endpoint subject to the rule is not allowed to connect to. \n Example: Any endpoint with the label \"role=frontend\" is not allowed to initiate connections to destination port 8080/tcp";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecEgressDenyToPorts"));
@@ -4076,6 +4740,7 @@ with lib; let
         "toEndpoints" = mkOverride 1002 null;
         "toEntities" = mkOverride 1002 null;
         "toGroups" = mkOverride 1002 null;
+        "toNodes" = mkOverride 1002 null;
         "toPorts" = mkOverride 1002 null;
         "toRequires" = mkOverride 1002 null;
         "toServices" = mkOverride 1002 null;
@@ -4100,7 +4765,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "type" = mkOption {
-          description = "Type is a ICMP-type. It should be 0-255 (8bit).";
+          description = "Type is a ICMP-type. It should be an 8bit code (0-255), or it's CamelCase name (for example, \"EchoReply\"). Allowed ICMP types are: Ipv4: EchoReply | DestinationUnreachable | Redirect | Echo | EchoRequest | RouterAdvertisement | RouterSelection | TimeExceeded | ParameterProblem | Timestamp | TimestampReply | Photuris | ExtendedEcho Request | ExtendedEcho Reply Ipv6: DestinationUnreachable | PacketTooBig | TimeExceeded | ParameterProblem | EchoRequest | EchoReply | MulticastListenerQuery| MulticastListenerReport | MulticastListenerDone | RouterSolicitation | RouterAdvertisement | NeighborSolicitation | NeighborAdvertisement | RedirectMessage | RouterRenumbering | ICMPNodeInformationQuery | ICMPNodeInformationResponse | InverseNeighborDiscoverySolicitation | InverseNeighborDiscoveryAdvertisement | HomeAgentAddressDiscoveryRequest | HomeAgentAddressDiscoveryReply | MobilePrefixSolicitation | MobilePrefixAdvertisement | DuplicateAddressRequestCodeSuffix | DuplicateAddressConfirmationCodeSuffix | ExtendedEchoRequest | ExtendedEchoReply";
           type = types.int;
         };
       };
@@ -4116,7 +4781,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "cidrGroupRef" = mkOption {
-          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress) or cannot (IngressDeny) receive connections from.";
+          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress/Egress) or cannot (IngressDeny/EgressDeny) receive connections from.";
           type = types.nullOr types.str;
         };
         "except" = mkOption {
@@ -4207,6 +4872,43 @@ with lib; let
         "securityGroupsNames" = mkOverride 1002 null;
       };
     };
+    "cilium.io.v2.CiliumNetworkPolicySpecEgressDenyToNodes" = {
+      options = {
+        "matchExpressions" = mkOption {
+          description = "matchExpressions is a list of label selector requirements. The requirements are ANDed.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecEgressDenyToNodesMatchExpressions"));
+        };
+        "matchLabels" = mkOption {
+          description = "matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+      };
+
+      config = {
+        "matchExpressions" = mkOverride 1002 null;
+        "matchLabels" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumNetworkPolicySpecEgressDenyToNodesMatchExpressions" = {
+      options = {
+        "key" = mkOption {
+          description = "key is the label key that the selector applies to.";
+          type = types.str;
+        };
+        "operator" = mkOption {
+          description = "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.";
+          type = types.str;
+        };
+        "values" = mkOption {
+          description = "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "values" = mkOverride 1002 null;
+      };
+    };
     "cilium.io.v2.CiliumNetworkPolicySpecEgressDenyToPorts" = {
       options = {
         "ports" = mkOption {
@@ -4221,8 +4923,12 @@ with lib; let
     };
     "cilium.io.v2.CiliumNetworkPolicySpecEgressDenyToPortsPorts" = {
       options = {
+        "endPort" = mkOption {
+          description = "EndPort can only be an L4 port number.";
+          type = types.nullOr types.int;
+        };
         "port" = mkOption {
-          description = "Port is an L4 port number. For now the string will be strictly parsed as a single uint16. In the future, this field may support ranges in the form \"1024-2048 Port can also be a port name, which must contain at least one [a-z], and may also contain [0-9] and '-' anywhere except adjacent to another '-' or in the beginning or the end.";
+          description = "Port can be an L4 port number, or a name in the form of \"http\" or \"http-8080\".";
           type = types.str;
         };
         "protocol" = mkOption {
@@ -4232,6 +4938,7 @@ with lib; let
       };
 
       config = {
+        "endPort" = mkOverride 1002 null;
         "protocol" = mkOverride 1002 null;
       };
     };
@@ -4378,7 +5085,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "type" = mkOption {
-          description = "Type is a ICMP-type. It should be 0-255 (8bit).";
+          description = "Type is a ICMP-type. It should be an 8bit code (0-255), or it's CamelCase name (for example, \"EchoReply\"). Allowed ICMP types are: Ipv4: EchoReply | DestinationUnreachable | Redirect | Echo | EchoRequest | RouterAdvertisement | RouterSelection | TimeExceeded | ParameterProblem | Timestamp | TimestampReply | Photuris | ExtendedEcho Request | ExtendedEcho Reply Ipv6: DestinationUnreachable | PacketTooBig | TimeExceeded | ParameterProblem | EchoRequest | EchoReply | MulticastListenerQuery| MulticastListenerReport | MulticastListenerDone | RouterSolicitation | RouterAdvertisement | NeighborSolicitation | NeighborAdvertisement | RedirectMessage | RouterRenumbering | ICMPNodeInformationQuery | ICMPNodeInformationResponse | InverseNeighborDiscoverySolicitation | InverseNeighborDiscoveryAdvertisement | HomeAgentAddressDiscoveryRequest | HomeAgentAddressDiscoveryReply | MobilePrefixSolicitation | MobilePrefixAdvertisement | DuplicateAddressRequestCodeSuffix | DuplicateAddressConfirmationCodeSuffix | ExtendedEchoRequest | ExtendedEchoReply";
           type = types.int;
         };
       };
@@ -4394,7 +5101,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "cidrGroupRef" = mkOption {
-          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress) or cannot (IngressDeny) receive connections from.";
+          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress/Egress) or cannot (IngressDeny/EgressDeny) receive connections from.";
           type = types.nullOr types.str;
         };
         "except" = mkOption {
@@ -4502,6 +5209,43 @@ with lib; let
         "securityGroupsNames" = mkOverride 1002 null;
       };
     };
+    "cilium.io.v2.CiliumNetworkPolicySpecEgressToNodes" = {
+      options = {
+        "matchExpressions" = mkOption {
+          description = "matchExpressions is a list of label selector requirements. The requirements are ANDed.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecEgressToNodesMatchExpressions"));
+        };
+        "matchLabels" = mkOption {
+          description = "matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+      };
+
+      config = {
+        "matchExpressions" = mkOverride 1002 null;
+        "matchLabels" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumNetworkPolicySpecEgressToNodesMatchExpressions" = {
+      options = {
+        "key" = mkOption {
+          description = "key is the label key that the selector applies to.";
+          type = types.str;
+        };
+        "operator" = mkOption {
+          description = "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.";
+          type = types.str;
+        };
+        "values" = mkOption {
+          description = "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "values" = mkOverride 1002 null;
+      };
+    };
     "cilium.io.v2.CiliumNetworkPolicySpecEgressToPorts" = {
       options = {
         "listener" = mkOption {
@@ -4542,16 +5286,22 @@ with lib; let
     "cilium.io.v2.CiliumNetworkPolicySpecEgressToPortsListener" = {
       options = {
         "envoyConfig" = mkOption {
-          description = "EnvoyConfig is a reference to the CEC or CCNP resource in which the listener is defined.";
+          description = "EnvoyConfig is a reference to the CEC or CCEC resource in which the listener is defined.";
           type = submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecEgressToPortsListenerEnvoyConfig";
         };
         "name" = mkOption {
           description = "Name is the name of the listener.";
           type = types.str;
         };
+        "priority" = mkOption {
+          description = "Priority for this Listener that is used when multiple rules would apply different listeners to a policy map entry. Behavior of this is implementation dependent.";
+          type = types.nullOr types.int;
+        };
       };
 
-      config = {};
+      config = {
+        "priority" = mkOverride 1002 null;
+      };
     };
     "cilium.io.v2.CiliumNetworkPolicySpecEgressToPortsListenerEnvoyConfig" = {
       options = {
@@ -4613,8 +5363,12 @@ with lib; let
     };
     "cilium.io.v2.CiliumNetworkPolicySpecEgressToPortsPorts" = {
       options = {
+        "endPort" = mkOption {
+          description = "EndPort can only be an L4 port number.";
+          type = types.nullOr types.int;
+        };
         "port" = mkOption {
-          description = "Port is an L4 port number. For now the string will be strictly parsed as a single uint16. In the future, this field may support ranges in the form \"1024-2048 Port can also be a port name, which must contain at least one [a-z], and may also contain [0-9] and '-' anywhere except adjacent to another '-' or in the beginning or the end.";
+          description = "Port can be an L4 port number, or a name in the form of \"http\" or \"http-8080\".";
           type = types.str;
         };
         "protocol" = mkOption {
@@ -4624,6 +5378,7 @@ with lib; let
       };
 
       config = {
+        "endPort" = mkOverride 1002 null;
         "protocol" = mkOverride 1002 null;
       };
     };
@@ -4949,6 +5704,23 @@ with lib; let
         "values" = mkOverride 1002 null;
       };
     };
+    "cilium.io.v2.CiliumNetworkPolicySpecEnableDefaultDeny" = {
+      options = {
+        "egress" = mkOption {
+          description = "Whether or not the endpoint should have a default-deny rule applied to egress traffic.";
+          type = types.nullOr types.bool;
+        };
+        "ingress" = mkOption {
+          description = "Whether or not the endpoint should have a default-deny rule applied to ingress traffic.";
+          type = types.nullOr types.bool;
+        };
+      };
+
+      config = {
+        "egress" = mkOverride 1002 null;
+        "ingress" = mkOverride 1002 null;
+      };
+    };
     "cilium.io.v2.CiliumNetworkPolicySpecEndpointSelector" = {
       options = {
         "matchExpressions" = mkOption {
@@ -5008,6 +5780,14 @@ with lib; let
           description = "FromEntities is a list of special entities which the endpoint subject to the rule is allowed to receive connections from. Supported entities are `world`, `cluster` and `host`";
           type = types.nullOr (types.listOf types.str);
         };
+        "fromGroups" = mkOption {
+          description = "FromGroups is a directive that allows the integration with multiple outside providers. Currently, only AWS is supported, and the rule can select by multiple sub directives: \n Example: FromGroups: - aws: securityGroupsIds: - 'sg-XXXXXXXXXXXXX'";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecIngressFromGroups"));
+        };
+        "fromNodes" = mkOption {
+          description = "FromNodes is a list of nodes identified by an EndpointSelector which are allowed to communicate with the endpoint subject to the rule.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecIngressFromNodes"));
+        };
         "fromRequires" = mkOption {
           description = "FromRequires is a list of additional constraints which must be met in order for the selected endpoints to be reachable. These additional constraints do no by itself grant access privileges and must always be accompanied with at least one matching FromEndpoints. \n Example: Any Endpoint with the label \"team=A\" requires consuming endpoint to also carry the label \"team=A\".";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecIngressFromRequires"));
@@ -5028,6 +5808,8 @@ with lib; let
         "fromCIDRSet" = mkOverride 1002 null;
         "fromEndpoints" = mkOverride 1002 null;
         "fromEntities" = mkOverride 1002 null;
+        "fromGroups" = mkOverride 1002 null;
+        "fromNodes" = mkOverride 1002 null;
         "fromRequires" = mkOverride 1002 null;
         "icmps" = mkOverride 1002 null;
         "toPorts" = mkOverride 1002 null;
@@ -5061,6 +5843,14 @@ with lib; let
           description = "FromEntities is a list of special entities which the endpoint subject to the rule is allowed to receive connections from. Supported entities are `world`, `cluster` and `host`";
           type = types.nullOr (types.listOf types.str);
         };
+        "fromGroups" = mkOption {
+          description = "FromGroups is a directive that allows the integration with multiple outside providers. Currently, only AWS is supported, and the rule can select by multiple sub directives: \n Example: FromGroups: - aws: securityGroupsIds: - 'sg-XXXXXXXXXXXXX'";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecIngressDenyFromGroups"));
+        };
+        "fromNodes" = mkOption {
+          description = "FromNodes is a list of nodes identified by an EndpointSelector which are allowed to communicate with the endpoint subject to the rule.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecIngressDenyFromNodes"));
+        };
         "fromRequires" = mkOption {
           description = "FromRequires is a list of additional constraints which must be met in order for the selected endpoints to be reachable. These additional constraints do no by itself grant access privileges and must always be accompanied with at least one matching FromEndpoints. \n Example: Any Endpoint with the label \"team=A\" requires consuming endpoint to also carry the label \"team=A\".";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecIngressDenyFromRequires"));
@@ -5080,6 +5870,8 @@ with lib; let
         "fromCIDRSet" = mkOverride 1002 null;
         "fromEndpoints" = mkOverride 1002 null;
         "fromEntities" = mkOverride 1002 null;
+        "fromGroups" = mkOverride 1002 null;
+        "fromNodes" = mkOverride 1002 null;
         "fromRequires" = mkOverride 1002 null;
         "icmps" = mkOverride 1002 null;
         "toPorts" = mkOverride 1002 null;
@@ -5092,7 +5884,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "cidrGroupRef" = mkOption {
-          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress) or cannot (IngressDeny) receive connections from.";
+          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress/Egress) or cannot (IngressDeny/EgressDeny) receive connections from.";
           type = types.nullOr types.str;
         };
         "except" = mkOption {
@@ -5125,6 +5917,82 @@ with lib; let
       };
     };
     "cilium.io.v2.CiliumNetworkPolicySpecIngressDenyFromEndpointsMatchExpressions" = {
+      options = {
+        "key" = mkOption {
+          description = "key is the label key that the selector applies to.";
+          type = types.str;
+        };
+        "operator" = mkOption {
+          description = "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.";
+          type = types.str;
+        };
+        "values" = mkOption {
+          description = "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "values" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumNetworkPolicySpecIngressDenyFromGroups" = {
+      options = {
+        "aws" = mkOption {
+          description = "AWSGroup is an structure that can be used to whitelisting information from AWS integration";
+          type = types.nullOr (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecIngressDenyFromGroupsAws");
+        };
+      };
+
+      config = {
+        "aws" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumNetworkPolicySpecIngressDenyFromGroupsAws" = {
+      options = {
+        "labels" = mkOption {
+          description = "";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+        "region" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "securityGroupsIds" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
+        "securityGroupsNames" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "labels" = mkOverride 1002 null;
+        "region" = mkOverride 1002 null;
+        "securityGroupsIds" = mkOverride 1002 null;
+        "securityGroupsNames" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumNetworkPolicySpecIngressDenyFromNodes" = {
+      options = {
+        "matchExpressions" = mkOption {
+          description = "matchExpressions is a list of label selector requirements. The requirements are ANDed.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecIngressDenyFromNodesMatchExpressions"));
+        };
+        "matchLabels" = mkOption {
+          description = "matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+      };
+
+      config = {
+        "matchExpressions" = mkOverride 1002 null;
+        "matchLabels" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumNetworkPolicySpecIngressDenyFromNodesMatchExpressions" = {
       options = {
         "key" = mkOption {
           description = "key is the label key that the selector applies to.";
@@ -5200,7 +6068,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "type" = mkOption {
-          description = "Type is a ICMP-type. It should be 0-255 (8bit).";
+          description = "Type is a ICMP-type. It should be an 8bit code (0-255), or it's CamelCase name (for example, \"EchoReply\"). Allowed ICMP types are: Ipv4: EchoReply | DestinationUnreachable | Redirect | Echo | EchoRequest | RouterAdvertisement | RouterSelection | TimeExceeded | ParameterProblem | Timestamp | TimestampReply | Photuris | ExtendedEcho Request | ExtendedEcho Reply Ipv6: DestinationUnreachable | PacketTooBig | TimeExceeded | ParameterProblem | EchoRequest | EchoReply | MulticastListenerQuery| MulticastListenerReport | MulticastListenerDone | RouterSolicitation | RouterAdvertisement | NeighborSolicitation | NeighborAdvertisement | RedirectMessage | RouterRenumbering | ICMPNodeInformationQuery | ICMPNodeInformationResponse | InverseNeighborDiscoverySolicitation | InverseNeighborDiscoveryAdvertisement | HomeAgentAddressDiscoveryRequest | HomeAgentAddressDiscoveryReply | MobilePrefixSolicitation | MobilePrefixAdvertisement | DuplicateAddressRequestCodeSuffix | DuplicateAddressConfirmationCodeSuffix | ExtendedEchoRequest | ExtendedEchoReply";
           type = types.int;
         };
       };
@@ -5223,8 +6091,12 @@ with lib; let
     };
     "cilium.io.v2.CiliumNetworkPolicySpecIngressDenyToPortsPorts" = {
       options = {
+        "endPort" = mkOption {
+          description = "EndPort can only be an L4 port number.";
+          type = types.nullOr types.int;
+        };
         "port" = mkOption {
-          description = "Port is an L4 port number. For now the string will be strictly parsed as a single uint16. In the future, this field may support ranges in the form \"1024-2048 Port can also be a port name, which must contain at least one [a-z], and may also contain [0-9] and '-' anywhere except adjacent to another '-' or in the beginning or the end.";
+          description = "Port can be an L4 port number, or a name in the form of \"http\" or \"http-8080\".";
           type = types.str;
         };
         "protocol" = mkOption {
@@ -5234,6 +6106,7 @@ with lib; let
       };
 
       config = {
+        "endPort" = mkOverride 1002 null;
         "protocol" = mkOverride 1002 null;
       };
     };
@@ -5244,7 +6117,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "cidrGroupRef" = mkOption {
-          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress) or cannot (IngressDeny) receive connections from.";
+          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress/Egress) or cannot (IngressDeny/EgressDeny) receive connections from.";
           type = types.nullOr types.str;
         };
         "except" = mkOption {
@@ -5277,6 +6150,82 @@ with lib; let
       };
     };
     "cilium.io.v2.CiliumNetworkPolicySpecIngressFromEndpointsMatchExpressions" = {
+      options = {
+        "key" = mkOption {
+          description = "key is the label key that the selector applies to.";
+          type = types.str;
+        };
+        "operator" = mkOption {
+          description = "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.";
+          type = types.str;
+        };
+        "values" = mkOption {
+          description = "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "values" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumNetworkPolicySpecIngressFromGroups" = {
+      options = {
+        "aws" = mkOption {
+          description = "AWSGroup is an structure that can be used to whitelisting information from AWS integration";
+          type = types.nullOr (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecIngressFromGroupsAws");
+        };
+      };
+
+      config = {
+        "aws" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumNetworkPolicySpecIngressFromGroupsAws" = {
+      options = {
+        "labels" = mkOption {
+          description = "";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+        "region" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "securityGroupsIds" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
+        "securityGroupsNames" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "labels" = mkOverride 1002 null;
+        "region" = mkOverride 1002 null;
+        "securityGroupsIds" = mkOverride 1002 null;
+        "securityGroupsNames" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumNetworkPolicySpecIngressFromNodes" = {
+      options = {
+        "matchExpressions" = mkOption {
+          description = "matchExpressions is a list of label selector requirements. The requirements are ANDed.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecIngressFromNodesMatchExpressions"));
+        };
+        "matchLabels" = mkOption {
+          description = "matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+      };
+
+      config = {
+        "matchExpressions" = mkOverride 1002 null;
+        "matchLabels" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumNetworkPolicySpecIngressFromNodesMatchExpressions" = {
       options = {
         "key" = mkOption {
           description = "key is the label key that the selector applies to.";
@@ -5352,7 +6301,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "type" = mkOption {
-          description = "Type is a ICMP-type. It should be 0-255 (8bit).";
+          description = "Type is a ICMP-type. It should be an 8bit code (0-255), or it's CamelCase name (for example, \"EchoReply\"). Allowed ICMP types are: Ipv4: EchoReply | DestinationUnreachable | Redirect | Echo | EchoRequest | RouterAdvertisement | RouterSelection | TimeExceeded | ParameterProblem | Timestamp | TimestampReply | Photuris | ExtendedEcho Request | ExtendedEcho Reply Ipv6: DestinationUnreachable | PacketTooBig | TimeExceeded | ParameterProblem | EchoRequest | EchoReply | MulticastListenerQuery| MulticastListenerReport | MulticastListenerDone | RouterSolicitation | RouterAdvertisement | NeighborSolicitation | NeighborAdvertisement | RedirectMessage | RouterRenumbering | ICMPNodeInformationQuery | ICMPNodeInformationResponse | InverseNeighborDiscoverySolicitation | InverseNeighborDiscoveryAdvertisement | HomeAgentAddressDiscoveryRequest | HomeAgentAddressDiscoveryReply | MobilePrefixSolicitation | MobilePrefixAdvertisement | DuplicateAddressRequestCodeSuffix | DuplicateAddressConfirmationCodeSuffix | ExtendedEchoRequest | ExtendedEchoReply";
           type = types.int;
         };
       };
@@ -5401,16 +6350,22 @@ with lib; let
     "cilium.io.v2.CiliumNetworkPolicySpecIngressToPortsListener" = {
       options = {
         "envoyConfig" = mkOption {
-          description = "EnvoyConfig is a reference to the CEC or CCNP resource in which the listener is defined.";
+          description = "EnvoyConfig is a reference to the CEC or CCEC resource in which the listener is defined.";
           type = submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecIngressToPortsListenerEnvoyConfig";
         };
         "name" = mkOption {
           description = "Name is the name of the listener.";
           type = types.str;
         };
+        "priority" = mkOption {
+          description = "Priority for this Listener that is used when multiple rules would apply different listeners to a policy map entry. Behavior of this is implementation dependent.";
+          type = types.nullOr types.int;
+        };
       };
 
-      config = {};
+      config = {
+        "priority" = mkOverride 1002 null;
+      };
     };
     "cilium.io.v2.CiliumNetworkPolicySpecIngressToPortsListenerEnvoyConfig" = {
       options = {
@@ -5472,8 +6427,12 @@ with lib; let
     };
     "cilium.io.v2.CiliumNetworkPolicySpecIngressToPortsPorts" = {
       options = {
+        "endPort" = mkOption {
+          description = "EndPort can only be an L4 port number.";
+          type = types.nullOr types.int;
+        };
         "port" = mkOption {
-          description = "Port is an L4 port number. For now the string will be strictly parsed as a single uint16. In the future, this field may support ranges in the form \"1024-2048 Port can also be a port name, which must contain at least one [a-z], and may also contain [0-9] and '-' anywhere except adjacent to another '-' or in the beginning or the end.";
+          description = "Port can be an L4 port number, or a name in the form of \"http\" or \"http-8080\".";
           type = types.str;
         };
         "protocol" = mkOption {
@@ -5483,6 +6442,7 @@ with lib; let
       };
 
       config = {
+        "endPort" = mkOverride 1002 null;
         "protocol" = mkOverride 1002 null;
       };
     };
@@ -5756,6 +6716,10 @@ with lib; let
           description = "EgressDeny is a list of EgressDenyRule which are enforced at egress. Any rule inserted here will be denied regardless of the allowed egress rules in the 'egress' field. If omitted or empty, this rule does not apply at egress.";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecsEgressDeny"));
         };
+        "enableDefaultDeny" = mkOption {
+          description = "EnableDefaultDeny determines whether this policy configures the subject endpoint(s) to have a default deny mode. If enabled, this causes all traffic not explicitly allowed by a network policy to be dropped. \n If not specified, the default is true for each traffic direction that has rules, and false otherwise. For example, if a policy only has Ingress or IngressDeny rules, then the default for ingress is true and egress is false. \n If multiple policies apply to an endpoint, that endpoint's default deny will be enabled if any policy requests it. \n This is useful for creating broad-based network policies that will not cause endpoints to enter default-deny mode.";
+          type = types.nullOr (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecsEnableDefaultDeny");
+        };
         "endpointSelector" = mkOption {
           description = "EndpointSelector selects all endpoints which should be subject to this rule. EndpointSelector and NodeSelector cannot be both empty and are mutually exclusive.";
           type = types.nullOr (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecsEndpointSelector");
@@ -5782,6 +6746,7 @@ with lib; let
         "description" = mkOverride 1002 null;
         "egress" = mkOverride 1002 null;
         "egressDeny" = mkOverride 1002 null;
+        "enableDefaultDeny" = mkOverride 1002 null;
         "endpointSelector" = mkOverride 1002 null;
         "ingress" = mkOverride 1002 null;
         "ingressDeny" = mkOverride 1002 null;
@@ -5823,6 +6788,10 @@ with lib; let
           description = "ToGroups is a directive that allows the integration with multiple outside providers. Currently, only AWS is supported, and the rule can select by multiple sub directives: \n Example: toGroups: - aws: securityGroupsIds: - 'sg-XXXXXXXXXXXXX'";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecsEgressToGroups"));
         };
+        "toNodes" = mkOption {
+          description = "ToNodes is a list of nodes identified by an EndpointSelector to which endpoints subject to the rule is allowed to communicate.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecsEgressToNodes"));
+        };
         "toPorts" = mkOption {
           description = "ToPorts is a list of destination ports identified by port number and protocol which the endpoint subject to the rule is allowed to connect to. \n Example: Any endpoint with the label \"role=frontend\" is allowed to initiate connections to destination port 8080/tcp";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecsEgressToPorts"));
@@ -5846,6 +6815,7 @@ with lib; let
         "toEntities" = mkOverride 1002 null;
         "toFQDNs" = mkOverride 1002 null;
         "toGroups" = mkOverride 1002 null;
+        "toNodes" = mkOverride 1002 null;
         "toPorts" = mkOverride 1002 null;
         "toRequires" = mkOverride 1002 null;
         "toServices" = mkOverride 1002 null;
@@ -5887,6 +6857,10 @@ with lib; let
           description = "ToGroups is a directive that allows the integration with multiple outside providers. Currently, only AWS is supported, and the rule can select by multiple sub directives: \n Example: toGroups: - aws: securityGroupsIds: - 'sg-XXXXXXXXXXXXX'";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecsEgressDenyToGroups"));
         };
+        "toNodes" = mkOption {
+          description = "ToNodes is a list of nodes identified by an EndpointSelector to which endpoints subject to the rule is allowed to communicate.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecsEgressDenyToNodes"));
+        };
         "toPorts" = mkOption {
           description = "ToPorts is a list of destination ports identified by port number and protocol which the endpoint subject to the rule is not allowed to connect to. \n Example: Any endpoint with the label \"role=frontend\" is not allowed to initiate connections to destination port 8080/tcp";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecsEgressDenyToPorts"));
@@ -5908,6 +6882,7 @@ with lib; let
         "toEndpoints" = mkOverride 1002 null;
         "toEntities" = mkOverride 1002 null;
         "toGroups" = mkOverride 1002 null;
+        "toNodes" = mkOverride 1002 null;
         "toPorts" = mkOverride 1002 null;
         "toRequires" = mkOverride 1002 null;
         "toServices" = mkOverride 1002 null;
@@ -5932,7 +6907,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "type" = mkOption {
-          description = "Type is a ICMP-type. It should be 0-255 (8bit).";
+          description = "Type is a ICMP-type. It should be an 8bit code (0-255), or it's CamelCase name (for example, \"EchoReply\"). Allowed ICMP types are: Ipv4: EchoReply | DestinationUnreachable | Redirect | Echo | EchoRequest | RouterAdvertisement | RouterSelection | TimeExceeded | ParameterProblem | Timestamp | TimestampReply | Photuris | ExtendedEcho Request | ExtendedEcho Reply Ipv6: DestinationUnreachable | PacketTooBig | TimeExceeded | ParameterProblem | EchoRequest | EchoReply | MulticastListenerQuery| MulticastListenerReport | MulticastListenerDone | RouterSolicitation | RouterAdvertisement | NeighborSolicitation | NeighborAdvertisement | RedirectMessage | RouterRenumbering | ICMPNodeInformationQuery | ICMPNodeInformationResponse | InverseNeighborDiscoverySolicitation | InverseNeighborDiscoveryAdvertisement | HomeAgentAddressDiscoveryRequest | HomeAgentAddressDiscoveryReply | MobilePrefixSolicitation | MobilePrefixAdvertisement | DuplicateAddressRequestCodeSuffix | DuplicateAddressConfirmationCodeSuffix | ExtendedEchoRequest | ExtendedEchoReply";
           type = types.int;
         };
       };
@@ -5948,7 +6923,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "cidrGroupRef" = mkOption {
-          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress) or cannot (IngressDeny) receive connections from.";
+          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress/Egress) or cannot (IngressDeny/EgressDeny) receive connections from.";
           type = types.nullOr types.str;
         };
         "except" = mkOption {
@@ -6039,6 +7014,43 @@ with lib; let
         "securityGroupsNames" = mkOverride 1002 null;
       };
     };
+    "cilium.io.v2.CiliumNetworkPolicySpecsEgressDenyToNodes" = {
+      options = {
+        "matchExpressions" = mkOption {
+          description = "matchExpressions is a list of label selector requirements. The requirements are ANDed.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecsEgressDenyToNodesMatchExpressions"));
+        };
+        "matchLabels" = mkOption {
+          description = "matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+      };
+
+      config = {
+        "matchExpressions" = mkOverride 1002 null;
+        "matchLabels" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumNetworkPolicySpecsEgressDenyToNodesMatchExpressions" = {
+      options = {
+        "key" = mkOption {
+          description = "key is the label key that the selector applies to.";
+          type = types.str;
+        };
+        "operator" = mkOption {
+          description = "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.";
+          type = types.str;
+        };
+        "values" = mkOption {
+          description = "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "values" = mkOverride 1002 null;
+      };
+    };
     "cilium.io.v2.CiliumNetworkPolicySpecsEgressDenyToPorts" = {
       options = {
         "ports" = mkOption {
@@ -6053,8 +7065,12 @@ with lib; let
     };
     "cilium.io.v2.CiliumNetworkPolicySpecsEgressDenyToPortsPorts" = {
       options = {
+        "endPort" = mkOption {
+          description = "EndPort can only be an L4 port number.";
+          type = types.nullOr types.int;
+        };
         "port" = mkOption {
-          description = "Port is an L4 port number. For now the string will be strictly parsed as a single uint16. In the future, this field may support ranges in the form \"1024-2048 Port can also be a port name, which must contain at least one [a-z], and may also contain [0-9] and '-' anywhere except adjacent to another '-' or in the beginning or the end.";
+          description = "Port can be an L4 port number, or a name in the form of \"http\" or \"http-8080\".";
           type = types.str;
         };
         "protocol" = mkOption {
@@ -6064,6 +7080,7 @@ with lib; let
       };
 
       config = {
+        "endPort" = mkOverride 1002 null;
         "protocol" = mkOverride 1002 null;
       };
     };
@@ -6210,7 +7227,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "type" = mkOption {
-          description = "Type is a ICMP-type. It should be 0-255 (8bit).";
+          description = "Type is a ICMP-type. It should be an 8bit code (0-255), or it's CamelCase name (for example, \"EchoReply\"). Allowed ICMP types are: Ipv4: EchoReply | DestinationUnreachable | Redirect | Echo | EchoRequest | RouterAdvertisement | RouterSelection | TimeExceeded | ParameterProblem | Timestamp | TimestampReply | Photuris | ExtendedEcho Request | ExtendedEcho Reply Ipv6: DestinationUnreachable | PacketTooBig | TimeExceeded | ParameterProblem | EchoRequest | EchoReply | MulticastListenerQuery| MulticastListenerReport | MulticastListenerDone | RouterSolicitation | RouterAdvertisement | NeighborSolicitation | NeighborAdvertisement | RedirectMessage | RouterRenumbering | ICMPNodeInformationQuery | ICMPNodeInformationResponse | InverseNeighborDiscoverySolicitation | InverseNeighborDiscoveryAdvertisement | HomeAgentAddressDiscoveryRequest | HomeAgentAddressDiscoveryReply | MobilePrefixSolicitation | MobilePrefixAdvertisement | DuplicateAddressRequestCodeSuffix | DuplicateAddressConfirmationCodeSuffix | ExtendedEchoRequest | ExtendedEchoReply";
           type = types.int;
         };
       };
@@ -6226,7 +7243,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "cidrGroupRef" = mkOption {
-          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress) or cannot (IngressDeny) receive connections from.";
+          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress/Egress) or cannot (IngressDeny/EgressDeny) receive connections from.";
           type = types.nullOr types.str;
         };
         "except" = mkOption {
@@ -6334,6 +7351,43 @@ with lib; let
         "securityGroupsNames" = mkOverride 1002 null;
       };
     };
+    "cilium.io.v2.CiliumNetworkPolicySpecsEgressToNodes" = {
+      options = {
+        "matchExpressions" = mkOption {
+          description = "matchExpressions is a list of label selector requirements. The requirements are ANDed.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecsEgressToNodesMatchExpressions"));
+        };
+        "matchLabels" = mkOption {
+          description = "matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+      };
+
+      config = {
+        "matchExpressions" = mkOverride 1002 null;
+        "matchLabels" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumNetworkPolicySpecsEgressToNodesMatchExpressions" = {
+      options = {
+        "key" = mkOption {
+          description = "key is the label key that the selector applies to.";
+          type = types.str;
+        };
+        "operator" = mkOption {
+          description = "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.";
+          type = types.str;
+        };
+        "values" = mkOption {
+          description = "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "values" = mkOverride 1002 null;
+      };
+    };
     "cilium.io.v2.CiliumNetworkPolicySpecsEgressToPorts" = {
       options = {
         "listener" = mkOption {
@@ -6374,16 +7428,22 @@ with lib; let
     "cilium.io.v2.CiliumNetworkPolicySpecsEgressToPortsListener" = {
       options = {
         "envoyConfig" = mkOption {
-          description = "EnvoyConfig is a reference to the CEC or CCNP resource in which the listener is defined.";
+          description = "EnvoyConfig is a reference to the CEC or CCEC resource in which the listener is defined.";
           type = submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecsEgressToPortsListenerEnvoyConfig";
         };
         "name" = mkOption {
           description = "Name is the name of the listener.";
           type = types.str;
         };
+        "priority" = mkOption {
+          description = "Priority for this Listener that is used when multiple rules would apply different listeners to a policy map entry. Behavior of this is implementation dependent.";
+          type = types.nullOr types.int;
+        };
       };
 
-      config = {};
+      config = {
+        "priority" = mkOverride 1002 null;
+      };
     };
     "cilium.io.v2.CiliumNetworkPolicySpecsEgressToPortsListenerEnvoyConfig" = {
       options = {
@@ -6445,8 +7505,12 @@ with lib; let
     };
     "cilium.io.v2.CiliumNetworkPolicySpecsEgressToPortsPorts" = {
       options = {
+        "endPort" = mkOption {
+          description = "EndPort can only be an L4 port number.";
+          type = types.nullOr types.int;
+        };
         "port" = mkOption {
-          description = "Port is an L4 port number. For now the string will be strictly parsed as a single uint16. In the future, this field may support ranges in the form \"1024-2048 Port can also be a port name, which must contain at least one [a-z], and may also contain [0-9] and '-' anywhere except adjacent to another '-' or in the beginning or the end.";
+          description = "Port can be an L4 port number, or a name in the form of \"http\" or \"http-8080\".";
           type = types.str;
         };
         "protocol" = mkOption {
@@ -6456,6 +7520,7 @@ with lib; let
       };
 
       config = {
+        "endPort" = mkOverride 1002 null;
         "protocol" = mkOverride 1002 null;
       };
     };
@@ -6781,6 +7846,23 @@ with lib; let
         "values" = mkOverride 1002 null;
       };
     };
+    "cilium.io.v2.CiliumNetworkPolicySpecsEnableDefaultDeny" = {
+      options = {
+        "egress" = mkOption {
+          description = "Whether or not the endpoint should have a default-deny rule applied to egress traffic.";
+          type = types.nullOr types.bool;
+        };
+        "ingress" = mkOption {
+          description = "Whether or not the endpoint should have a default-deny rule applied to ingress traffic.";
+          type = types.nullOr types.bool;
+        };
+      };
+
+      config = {
+        "egress" = mkOverride 1002 null;
+        "ingress" = mkOverride 1002 null;
+      };
+    };
     "cilium.io.v2.CiliumNetworkPolicySpecsEndpointSelector" = {
       options = {
         "matchExpressions" = mkOption {
@@ -6840,6 +7922,14 @@ with lib; let
           description = "FromEntities is a list of special entities which the endpoint subject to the rule is allowed to receive connections from. Supported entities are `world`, `cluster` and `host`";
           type = types.nullOr (types.listOf types.str);
         };
+        "fromGroups" = mkOption {
+          description = "FromGroups is a directive that allows the integration with multiple outside providers. Currently, only AWS is supported, and the rule can select by multiple sub directives: \n Example: FromGroups: - aws: securityGroupsIds: - 'sg-XXXXXXXXXXXXX'";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecsIngressFromGroups"));
+        };
+        "fromNodes" = mkOption {
+          description = "FromNodes is a list of nodes identified by an EndpointSelector which are allowed to communicate with the endpoint subject to the rule.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecsIngressFromNodes"));
+        };
         "fromRequires" = mkOption {
           description = "FromRequires is a list of additional constraints which must be met in order for the selected endpoints to be reachable. These additional constraints do no by itself grant access privileges and must always be accompanied with at least one matching FromEndpoints. \n Example: Any Endpoint with the label \"team=A\" requires consuming endpoint to also carry the label \"team=A\".";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecsIngressFromRequires"));
@@ -6860,6 +7950,8 @@ with lib; let
         "fromCIDRSet" = mkOverride 1002 null;
         "fromEndpoints" = mkOverride 1002 null;
         "fromEntities" = mkOverride 1002 null;
+        "fromGroups" = mkOverride 1002 null;
+        "fromNodes" = mkOverride 1002 null;
         "fromRequires" = mkOverride 1002 null;
         "icmps" = mkOverride 1002 null;
         "toPorts" = mkOverride 1002 null;
@@ -6893,6 +7985,14 @@ with lib; let
           description = "FromEntities is a list of special entities which the endpoint subject to the rule is allowed to receive connections from. Supported entities are `world`, `cluster` and `host`";
           type = types.nullOr (types.listOf types.str);
         };
+        "fromGroups" = mkOption {
+          description = "FromGroups is a directive that allows the integration with multiple outside providers. Currently, only AWS is supported, and the rule can select by multiple sub directives: \n Example: FromGroups: - aws: securityGroupsIds: - 'sg-XXXXXXXXXXXXX'";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecsIngressDenyFromGroups"));
+        };
+        "fromNodes" = mkOption {
+          description = "FromNodes is a list of nodes identified by an EndpointSelector which are allowed to communicate with the endpoint subject to the rule.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecsIngressDenyFromNodes"));
+        };
         "fromRequires" = mkOption {
           description = "FromRequires is a list of additional constraints which must be met in order for the selected endpoints to be reachable. These additional constraints do no by itself grant access privileges and must always be accompanied with at least one matching FromEndpoints. \n Example: Any Endpoint with the label \"team=A\" requires consuming endpoint to also carry the label \"team=A\".";
           type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecsIngressDenyFromRequires"));
@@ -6912,6 +8012,8 @@ with lib; let
         "fromCIDRSet" = mkOverride 1002 null;
         "fromEndpoints" = mkOverride 1002 null;
         "fromEntities" = mkOverride 1002 null;
+        "fromGroups" = mkOverride 1002 null;
+        "fromNodes" = mkOverride 1002 null;
         "fromRequires" = mkOverride 1002 null;
         "icmps" = mkOverride 1002 null;
         "toPorts" = mkOverride 1002 null;
@@ -6924,7 +8026,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "cidrGroupRef" = mkOption {
-          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress) or cannot (IngressDeny) receive connections from.";
+          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress/Egress) or cannot (IngressDeny/EgressDeny) receive connections from.";
           type = types.nullOr types.str;
         };
         "except" = mkOption {
@@ -6957,6 +8059,82 @@ with lib; let
       };
     };
     "cilium.io.v2.CiliumNetworkPolicySpecsIngressDenyFromEndpointsMatchExpressions" = {
+      options = {
+        "key" = mkOption {
+          description = "key is the label key that the selector applies to.";
+          type = types.str;
+        };
+        "operator" = mkOption {
+          description = "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.";
+          type = types.str;
+        };
+        "values" = mkOption {
+          description = "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "values" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumNetworkPolicySpecsIngressDenyFromGroups" = {
+      options = {
+        "aws" = mkOption {
+          description = "AWSGroup is an structure that can be used to whitelisting information from AWS integration";
+          type = types.nullOr (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecsIngressDenyFromGroupsAws");
+        };
+      };
+
+      config = {
+        "aws" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumNetworkPolicySpecsIngressDenyFromGroupsAws" = {
+      options = {
+        "labels" = mkOption {
+          description = "";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+        "region" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "securityGroupsIds" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
+        "securityGroupsNames" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "labels" = mkOverride 1002 null;
+        "region" = mkOverride 1002 null;
+        "securityGroupsIds" = mkOverride 1002 null;
+        "securityGroupsNames" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumNetworkPolicySpecsIngressDenyFromNodes" = {
+      options = {
+        "matchExpressions" = mkOption {
+          description = "matchExpressions is a list of label selector requirements. The requirements are ANDed.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecsIngressDenyFromNodesMatchExpressions"));
+        };
+        "matchLabels" = mkOption {
+          description = "matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+      };
+
+      config = {
+        "matchExpressions" = mkOverride 1002 null;
+        "matchLabels" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumNetworkPolicySpecsIngressDenyFromNodesMatchExpressions" = {
       options = {
         "key" = mkOption {
           description = "key is the label key that the selector applies to.";
@@ -7032,7 +8210,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "type" = mkOption {
-          description = "Type is a ICMP-type. It should be 0-255 (8bit).";
+          description = "Type is a ICMP-type. It should be an 8bit code (0-255), or it's CamelCase name (for example, \"EchoReply\"). Allowed ICMP types are: Ipv4: EchoReply | DestinationUnreachable | Redirect | Echo | EchoRequest | RouterAdvertisement | RouterSelection | TimeExceeded | ParameterProblem | Timestamp | TimestampReply | Photuris | ExtendedEcho Request | ExtendedEcho Reply Ipv6: DestinationUnreachable | PacketTooBig | TimeExceeded | ParameterProblem | EchoRequest | EchoReply | MulticastListenerQuery| MulticastListenerReport | MulticastListenerDone | RouterSolicitation | RouterAdvertisement | NeighborSolicitation | NeighborAdvertisement | RedirectMessage | RouterRenumbering | ICMPNodeInformationQuery | ICMPNodeInformationResponse | InverseNeighborDiscoverySolicitation | InverseNeighborDiscoveryAdvertisement | HomeAgentAddressDiscoveryRequest | HomeAgentAddressDiscoveryReply | MobilePrefixSolicitation | MobilePrefixAdvertisement | DuplicateAddressRequestCodeSuffix | DuplicateAddressConfirmationCodeSuffix | ExtendedEchoRequest | ExtendedEchoReply";
           type = types.int;
         };
       };
@@ -7055,8 +8233,12 @@ with lib; let
     };
     "cilium.io.v2.CiliumNetworkPolicySpecsIngressDenyToPortsPorts" = {
       options = {
+        "endPort" = mkOption {
+          description = "EndPort can only be an L4 port number.";
+          type = types.nullOr types.int;
+        };
         "port" = mkOption {
-          description = "Port is an L4 port number. For now the string will be strictly parsed as a single uint16. In the future, this field may support ranges in the form \"1024-2048 Port can also be a port name, which must contain at least one [a-z], and may also contain [0-9] and '-' anywhere except adjacent to another '-' or in the beginning or the end.";
+          description = "Port can be an L4 port number, or a name in the form of \"http\" or \"http-8080\".";
           type = types.str;
         };
         "protocol" = mkOption {
@@ -7066,6 +8248,7 @@ with lib; let
       };
 
       config = {
+        "endPort" = mkOverride 1002 null;
         "protocol" = mkOverride 1002 null;
       };
     };
@@ -7076,7 +8259,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "cidrGroupRef" = mkOption {
-          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress) or cannot (IngressDeny) receive connections from.";
+          description = "CIDRGroupRef is a reference to a CiliumCIDRGroup object. A CiliumCIDRGroup contains a list of CIDRs that the endpoint, subject to the rule, can (Ingress/Egress) or cannot (IngressDeny/EgressDeny) receive connections from.";
           type = types.nullOr types.str;
         };
         "except" = mkOption {
@@ -7109,6 +8292,82 @@ with lib; let
       };
     };
     "cilium.io.v2.CiliumNetworkPolicySpecsIngressFromEndpointsMatchExpressions" = {
+      options = {
+        "key" = mkOption {
+          description = "key is the label key that the selector applies to.";
+          type = types.str;
+        };
+        "operator" = mkOption {
+          description = "operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.";
+          type = types.str;
+        };
+        "values" = mkOption {
+          description = "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "values" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumNetworkPolicySpecsIngressFromGroups" = {
+      options = {
+        "aws" = mkOption {
+          description = "AWSGroup is an structure that can be used to whitelisting information from AWS integration";
+          type = types.nullOr (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecsIngressFromGroupsAws");
+        };
+      };
+
+      config = {
+        "aws" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumNetworkPolicySpecsIngressFromGroupsAws" = {
+      options = {
+        "labels" = mkOption {
+          description = "";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+        "region" = mkOption {
+          description = "";
+          type = types.nullOr types.str;
+        };
+        "securityGroupsIds" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
+        "securityGroupsNames" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "labels" = mkOverride 1002 null;
+        "region" = mkOverride 1002 null;
+        "securityGroupsIds" = mkOverride 1002 null;
+        "securityGroupsNames" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumNetworkPolicySpecsIngressFromNodes" = {
+      options = {
+        "matchExpressions" = mkOption {
+          description = "matchExpressions is a list of label selector requirements. The requirements are ANDed.";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecsIngressFromNodesMatchExpressions"));
+        };
+        "matchLabels" = mkOption {
+          description = "matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is \"key\", the operator is \"In\", and the values array contains only \"value\". The requirements are ANDed.";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+      };
+
+      config = {
+        "matchExpressions" = mkOverride 1002 null;
+        "matchLabels" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumNetworkPolicySpecsIngressFromNodesMatchExpressions" = {
       options = {
         "key" = mkOption {
           description = "key is the label key that the selector applies to.";
@@ -7184,7 +8443,7 @@ with lib; let
           type = types.nullOr types.str;
         };
         "type" = mkOption {
-          description = "Type is a ICMP-type. It should be 0-255 (8bit).";
+          description = "Type is a ICMP-type. It should be an 8bit code (0-255), or it's CamelCase name (for example, \"EchoReply\"). Allowed ICMP types are: Ipv4: EchoReply | DestinationUnreachable | Redirect | Echo | EchoRequest | RouterAdvertisement | RouterSelection | TimeExceeded | ParameterProblem | Timestamp | TimestampReply | Photuris | ExtendedEcho Request | ExtendedEcho Reply Ipv6: DestinationUnreachable | PacketTooBig | TimeExceeded | ParameterProblem | EchoRequest | EchoReply | MulticastListenerQuery| MulticastListenerReport | MulticastListenerDone | RouterSolicitation | RouterAdvertisement | NeighborSolicitation | NeighborAdvertisement | RedirectMessage | RouterRenumbering | ICMPNodeInformationQuery | ICMPNodeInformationResponse | InverseNeighborDiscoverySolicitation | InverseNeighborDiscoveryAdvertisement | HomeAgentAddressDiscoveryRequest | HomeAgentAddressDiscoveryReply | MobilePrefixSolicitation | MobilePrefixAdvertisement | DuplicateAddressRequestCodeSuffix | DuplicateAddressConfirmationCodeSuffix | ExtendedEchoRequest | ExtendedEchoReply";
           type = types.int;
         };
       };
@@ -7233,16 +8492,22 @@ with lib; let
     "cilium.io.v2.CiliumNetworkPolicySpecsIngressToPortsListener" = {
       options = {
         "envoyConfig" = mkOption {
-          description = "EnvoyConfig is a reference to the CEC or CCNP resource in which the listener is defined.";
+          description = "EnvoyConfig is a reference to the CEC or CCEC resource in which the listener is defined.";
           type = submoduleOf "cilium.io.v2.CiliumNetworkPolicySpecsIngressToPortsListenerEnvoyConfig";
         };
         "name" = mkOption {
           description = "Name is the name of the listener.";
           type = types.str;
         };
+        "priority" = mkOption {
+          description = "Priority for this Listener that is used when multiple rules would apply different listeners to a policy map entry. Behavior of this is implementation dependent.";
+          type = types.nullOr types.int;
+        };
       };
 
-      config = {};
+      config = {
+        "priority" = mkOverride 1002 null;
+      };
     };
     "cilium.io.v2.CiliumNetworkPolicySpecsIngressToPortsListenerEnvoyConfig" = {
       options = {
@@ -7304,8 +8569,12 @@ with lib; let
     };
     "cilium.io.v2.CiliumNetworkPolicySpecsIngressToPortsPorts" = {
       options = {
+        "endPort" = mkOption {
+          description = "EndPort can only be an L4 port number.";
+          type = types.nullOr types.int;
+        };
         "port" = mkOption {
-          description = "Port is an L4 port number. For now the string will be strictly parsed as a single uint16. In the future, this field may support ranges in the form \"1024-2048 Port can also be a port name, which must contain at least one [a-z], and may also contain [0-9] and '-' anywhere except adjacent to another '-' or in the beginning or the end.";
+          description = "Port can be an L4 port number, or a name in the form of \"http\" or \"http-8080\".";
           type = types.str;
         };
         "protocol" = mkOption {
@@ -7315,6 +8584,7 @@ with lib; let
       };
 
       config = {
+        "endPort" = mkOverride 1002 null;
         "protocol" = mkOverride 1002 null;
       };
     };
@@ -7576,19 +8846,49 @@ with lib; let
     };
     "cilium.io.v2.CiliumNetworkPolicyStatus" = {
       options = {
+        "conditions" = mkOption {
+          description = "";
+          type = types.nullOr (types.listOf (submoduleOf "cilium.io.v2.CiliumNetworkPolicyStatusConditions"));
+        };
         "derivativePolicies" = mkOption {
           description = "DerivativePolicies is the status of all policies derived from the Cilium policy";
-          type = types.nullOr (types.attrsOf types.attrs);
-        };
-        "nodes" = mkOption {
-          description = "Nodes is the Cilium policy status for each node";
           type = types.nullOr (types.attrsOf types.attrs);
         };
       };
 
       config = {
+        "conditions" = mkOverride 1002 null;
         "derivativePolicies" = mkOverride 1002 null;
-        "nodes" = mkOverride 1002 null;
+      };
+    };
+    "cilium.io.v2.CiliumNetworkPolicyStatusConditions" = {
+      options = {
+        "lastTransitionTime" = mkOption {
+          description = "The last time the condition transitioned from one status to another.";
+          type = types.nullOr types.str;
+        };
+        "message" = mkOption {
+          description = "A human readable message indicating details about the transition.";
+          type = types.nullOr types.str;
+        };
+        "reason" = mkOption {
+          description = "The reason for the condition's last transition.";
+          type = types.nullOr types.str;
+        };
+        "status" = mkOption {
+          description = "The status of the condition, one of True, False, or Unknown";
+          type = types.str;
+        };
+        "type" = mkOption {
+          description = "The type of the policy condition";
+          type = types.str;
+        };
+      };
+
+      config = {
+        "lastTransitionTime" = mkOverride 1002 null;
+        "message" = mkOverride 1002 null;
+        "reason" = mkOverride 1002 null;
       };
     };
   };
