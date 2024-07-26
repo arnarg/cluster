@@ -66,6 +66,8 @@ in {
     applications.cilium = {
       inherit namespace;
 
+      annotations."argocd.argoproj.io/compare-options" = "ServerSideDiff=true";
+
       helm.releases.cilium = {
         inherit values;
         chart = charts.cilium.cilium;
@@ -250,22 +252,6 @@ in {
               ];
             }
           ];
-        };
-
-        # Argo CD seems to be stuck trying to sync the resource when
-        # a volume mount has `readOnly: false`.
-        # Here I patch the `cilium` daemonset to remove it.
-        # TODO: Check if needed.
-        daemonSets.cilium.spec.template.spec.containers.cilium-agent = {
-          volumeMounts."/var/run/cilium/envoy/sockets".readOnly = lib.mkForce null;
-        };
-
-        # Argo CD seems to be stuck trying to sync the resource when
-        # a volume mount has `readOnly: false`.
-        # Here I patch the `cilium-envoy` daemonset to remove it.
-        # TODO: Check if needed.
-        daemonSets.cilium-envoy.spec.template.spec.containers.cilium-envoy = {
-          volumeMounts."/var/run/cilium/envoy/sockets".readOnly = lib.mkForce null;
         };
       };
     };
