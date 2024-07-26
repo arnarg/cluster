@@ -18,8 +18,8 @@ spec:
         app.kubernetes.io/instance: csi-driver-nfs
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: csi-driver-nfs
-        app.kubernetes.io/version: v4.7.0
-        helm.sh/chart: csi-driver-nfs-v4.7.0
+        app.kubernetes.io/version: v4.8.0
+        helm.sh/chart: csi-driver-nfs-v4.8.0
     spec:
       containers:
         - args:
@@ -27,7 +27,7 @@ spec:
             - --probe-timeout=3s
             - --http-endpoint=localhost:29653
             - --v=2
-          image: registry.k8s.io/sig-storage/livenessprobe:v2.12.0
+          image: registry.k8s.io/sig-storage/livenessprobe:v2.13.1
           imagePullPolicy: IfNotPresent
           name: liveness-probe
           resources:
@@ -55,7 +55,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
-          image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.10.0
+          image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.11.1
           imagePullPolicy: IfNotPresent
           livenessProbe:
             exec:
@@ -94,7 +94,7 @@ spec:
                   fieldPath: spec.nodeName
             - name: CSI_ENDPOINT
               value: unix:///csi/csi.sock
-          image: registry.k8s.io/sig-storage/nfsplugin:v4.7.0
+          image: registry.k8s.io/sig-storage/nfsplugin:v4.8.0
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
@@ -120,7 +120,6 @@ spec:
               drop:
                 - ALL
             privileged: true
-            readOnlyRootFilesystem: true
           volumeMounts:
             - mountPath: /csi
               name: socket-dir
