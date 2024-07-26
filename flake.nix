@@ -71,8 +71,8 @@
           src = pkgs.fetchFromGitHub {
             owner = "tailscale";
             repo = "tailscale";
-            rev = "v1.68.1";
-            hash = "sha256-ZAzro69F7ovfdqzRss/U7puh1T37bkEtUXabCYc5LwU=";
+            rev = "v1.70.0";
+            hash = "sha256-rB/zaJavA3OH1HK7Rfpta/QmQzi0xsEYTvW5JzzTAlI=";
           };
           crds = ["cmd/k8s-operator/deploy/crds/tailscale.com_proxyclasses.yaml"];
         };
