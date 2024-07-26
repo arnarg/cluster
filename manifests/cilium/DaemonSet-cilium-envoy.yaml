@@ -121,6 +121,7 @@ spec:
           volumeMounts:
             - mountPath: /var/run/cilium/envoy/sockets
               name: envoy-sockets
+              readOnly: false
             - mountPath: /var/run/cilium/envoy/artifacts
               name: envoy-artifacts
               readOnly: true
