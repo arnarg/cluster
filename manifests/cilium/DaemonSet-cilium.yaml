@@ -53,7 +53,7 @@ spec:
               value: localhost
             - name: KUBERNETES_SERVICE_PORT
               value: "6444"
-          image: quay.io/cilium/cilium:v1.15.7@sha256:2e432bf6879feb8b891c497d6fd784b13e53456017d2b8e4ea734145f0282ef0
+          image: quay.io/cilium/cilium:v1.16.0@sha256:46ffa4ef3cf6d8885dcc4af5963b0683f7d59daa90d49ed9fb68d3b1627fe058
           imagePullPolicy: IfNotPresent
           lifecycle:
             postStart:
@@ -147,6 +147,9 @@ spec:
             successThreshold: 1
           terminationMessagePolicy: FallbackToLogsOnError
           volumeMounts:
+            - mountPath: /var/run/cilium/envoy/sockets
+              name: envoy-sockets
+              readOnly: false
             - mountPath: /host/proc/sys/net
               name: host-proc-sys-net
             - mountPath: /host/proc/sys/kernel
@@ -191,7 +194,7 @@ spec:
               value: localhost
             - name: KUBERNETES_SERVICE_PORT
               value: "6444"
-          image: quay.io/cilium/cilium:v1.15.7@sha256:2e432bf6879feb8b891c497d6fd784b13e53456017d2b8e4ea734145f0282ef0
+          image: quay.io/cilium/cilium:v1.16.0@sha256:46ffa4ef3cf6d8885dcc4af5963b0683f7d59daa90d49ed9fb68d3b1627fe058
           imagePullPolicy: IfNotPresent
           name: config
           terminationMessagePolicy: FallbackToLogsOnError
@@ -210,7 +213,7 @@ spec:
               value: /run/cilium/cgroupv2
             - name: BIN_PATH
               value: /opt/cni/bin
-          image: quay.io/cilium/cilium:v1.15.7@sha256:2e432bf6879feb8b891c497d6fd784b13e53456017d2b8e4ea734145f0282ef0
+          image: quay.io/cilium/cilium:v1.16.0@sha256:46ffa4ef3cf6d8885dcc4af5963b0683f7d59daa90d49ed9fb68d3b1627fe058
           imagePullPolicy: IfNotPresent
           name: mount-cgroup
           securityContext:
@@ -240,7 +243,7 @@ spec:
           env:
             - name: BIN_PATH
               value: /opt/cni/bin
-          image: quay.io/cilium/cilium:v1.15.7@sha256:2e432bf6879feb8b891c497d6fd784b13e53456017d2b8e4ea734145f0282ef0
+          image: quay.io/cilium/cilium:v1.16.0@sha256:46ffa4ef3cf6d8885dcc4af5963b0683f7d59daa90d49ed9fb68d3b1627fe058
           imagePullPolicy: IfNotPresent
           name: apply-sysctl-overwrites
           securityContext:
@@ -266,7 +269,7 @@ spec:
             - /bin/bash
             - -c
             - --
-          image: quay.io/cilium/cilium:v1.15.7@sha256:2e432bf6879feb8b891c497d6fd784b13e53456017d2b8e4ea734145f0282ef0
+          image: quay.io/cilium/cilium:v1.16.0@sha256:46ffa4ef3cf6d8885dcc4af5963b0683f7d59daa90d49ed9fb68d3b1627fe058
           imagePullPolicy: IfNotPresent
           name: mount-bpf-fs
           securityContext:
@@ -301,7 +304,7 @@ spec:
               value: localhost
             - name: KUBERNETES_SERVICE_PORT
               value: "6444"
-          image: quay.io/cilium/cilium:v1.15.7@sha256:2e432bf6879feb8b891c497d6fd784b13e53456017d2b8e4ea734145f0282ef0
+          image: quay.io/cilium/cilium:v1.16.0@sha256:46ffa4ef3cf6d8885dcc4af5963b0683f7d59daa90d49ed9fb68d3b1627fe058
           imagePullPolicy: IfNotPresent
           name: clean-cilium-state
           securityContext:
@@ -327,7 +330,7 @@ spec:
               name: cilium-run
         - command:
             - /install-plugin.sh
-          image: quay.io/cilium/cilium:v1.15.7@sha256:2e432bf6879feb8b891c497d6fd784b13e53456017d2b8e4ea734145f0282ef0
+          image: quay.io/cilium/cilium:v1.16.0@sha256:46ffa4ef3cf6d8885dcc4af5963b0683f7d59daa90d49ed9fb68d3b1627fe058
           imagePullPolicy: IfNotPresent
           name: install-cni-binaries
           resources:
@@ -352,7 +355,6 @@ spec:
       securityContext:
         appArmorProfile:
           type: Unconfined
-      serviceAccount: cilium
       serviceAccountName: cilium
       terminationGracePeriodSeconds: 1
       tolerations:
@@ -391,6 +393,10 @@ spec:
             path: /run/xtables.lock
             type: FileOrCreate
           name: xtables-lock
+        - hostPath:
+            path: /var/run/cilium/envoy/sockets
+            type: DirectoryOrCreate
+          name: envoy-sockets
         - name: clustermesh-secrets
           projected:
             defaultMode: 256
@@ -407,6 +413,16 @@ spec:
                     - key: ca.crt
                       path: common-etcd-client-ca.crt
                   name: clustermesh-apiserver-remote-cert
+                  optional: true
+              - secret:
+                  items:
+                    - key: tls.key
+                      path: local-etcd-client.key
+                    - key: tls.crt
+                      path: local-etcd-client.crt
+                    - key: ca.crt
+                      path: local-etcd-client-ca.crt
+                  name: clustermesh-apiserver-local-cert
                   optional: true
         - hostPath:
             path: /proc/sys/net

@@ -36,12 +36,15 @@ spec:
             - serve
           command:
             - hubble-relay
-          image: quay.io/cilium/hubble-relay:v1.15.7@sha256:12870e87ec6c105ca86885c4ee7c184ece6b706cc0f22f63d2a62a9a818fd68f
+          image: quay.io/cilium/hubble-relay:v1.16.0@sha256:33fca7776fc3d7b2abe08873319353806dc1c5e07e12011d7da4da05f836ce8d
           imagePullPolicy: IfNotPresent
           livenessProbe:
+            failureThreshold: 12
             grpc:
               port: 4222
-            timeoutSeconds: 3
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 10
           name: hubble-relay
           ports:
             - containerPort: 4245
@@ -61,8 +64,8 @@ spec:
             failureThreshold: 20
             grpc:
               port: 4222
+            initialDelaySeconds: 10
             periodSeconds: 3
-            timeoutSeconds: 3
           terminationMessagePolicy: FallbackToLogsOnError
           volumeMounts:
             - mountPath: /etc/hubble-relay
@@ -76,7 +79,6 @@ spec:
       restartPolicy: Always
       securityContext:
         fsGroup: 65532
-      serviceAccount: hubble-relay
       serviceAccountName: hubble-relay
       terminationGracePeriodSeconds: 1
       volumes:

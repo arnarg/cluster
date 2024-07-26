@@ -3,11 +3,15 @@ data:
   agent-not-ready-taint-key: node.cilium.io/agent-not-ready
   arping-refresh-period: 30s
   auto-direct-node-routes: "false"
+  bpf-events-drop-enabled: "true"
+  bpf-events-policy-verdict-enabled: "true"
+  bpf-events-trace-enabled: "true"
   bpf-lb-acceleration: disabled
   bpf-lb-external-clusterip: "true"
   bpf-lb-map-max: "65536"
   bpf-lb-sock: "false"
   bpf-lb-sock-hostns-only: "true"
+  bpf-lb-sock-terminate-pod-connections: "false"
   bpf-map-dynamic-size-ratio: "0.0025"
   bpf-policy-map-max: "16384"
   bpf-root: /sys/fs/bpf
@@ -17,15 +21,19 @@ data:
   cluster-name: default
   cluster-pool-ipv4-cidr: 10.42.0.0/16
   cluster-pool-ipv4-mask-size: "24"
+  clustermesh-enable-endpoint-sync: "false"
+  clustermesh-enable-mcs-api: "false"
   cni-exclusive: "true"
   cni-log-file: /var/run/cilium/cilium-cni.log
   custom-cni-conf: "false"
+  datapath-mode: veth
   debug: "false"
   debug-verbose: ""
+  direct-routing-skip-unreachable: "false"
   dnsproxy-enable-transparent-mode: "false"
+  dnsproxy-socket-linger-timeout: "10"
   egress-gateway-reconciliation-trigger-interval: 1s
   enable-auto-protect-node-port-range: "true"
-  enable-bgp-control-plane: "false"
   enable-bpf-clock-probe: "false"
   enable-endpoint-health-checking: "true"
   enable-health-check-loadbalancer-ip: "false"
@@ -45,14 +53,18 @@ data:
   enable-local-redirect-policy: "false"
   enable-masquerade-to-route-source: "false"
   enable-metrics: "true"
+  enable-node-selector-labels: "false"
   enable-policy: always
-  enable-remote-node-identity: "true"
+  enable-runtime-device-detection: "true"
   enable-sctp: "false"
   enable-svc-source-range-check: "true"
+  enable-tcx: "true"
   enable-vtep: "false"
   enable-well-known-identities: "false"
   enable-xt-socket-fallback: "true"
-  external-envoy-proxy: "false"
+  envoy-base-id: "0"
+  envoy-keep-cap-netbindservice: "false"
+  external-envoy-proxy: "true"
   hubble-disable-tls: "false"
   hubble-export-file-max-backups: "5"
   hubble-export-file-max-size-mb: "10"
@@ -69,6 +81,8 @@ data:
   ipam-cilium-node-update-rate: 15s
   k8s-client-burst: "20"
   k8s-client-qps: "10"
+  k8s-require-ipv4-pod-cidr: "false"
+  k8s-require-ipv6-pod-cidr: "false"
   kube-proxy-replacement: "true"
   kube-proxy-replacement-healthz-bind-address: ""
   max-connected-clusters: "255"
@@ -80,6 +94,7 @@ data:
   monitor-aggregation-flags: all
   monitor-aggregation-interval: 5s
   node-port-bind-protection: "true"
+  nodeport-addresses: ""
   nodes-gc-interval: 5m0s
   operator-api-serve-addr: 127.0.0.1:9234
   operator-prometheus-serve-addr: :9963
@@ -91,7 +106,6 @@ data:
   proxy-idle-timeout-seconds: "60"
   proxy-max-connection-duration-seconds: "0"
   proxy-max-requests-per-connection: "0"
-  proxy-prometheus-port: "9964"
   proxy-xff-num-trusted-hops-egress: "0"
   proxy-xff-num-trusted-hops-ingress: "0"
   remove-cilium-node-taints: "true"
@@ -99,8 +113,6 @@ data:
   service-no-backend-response: reject
   set-cilium-is-up-condition: "true"
   set-cilium-node-taints: "true"
-  sidecar-istio-proxy-image: cilium/istio_proxy
-  skip-cnp-status-startup-clean: "false"
   synchronize-k8s-nodes: "true"
   tofqdns-dns-reject-response-code: refused
   tofqdns-enable-dns-compression: "true"

@@ -8,6 +8,14 @@ metadata:
   name: traefik-traefik
 rules:
   - apiGroups:
+      - ""
+    resources:
+      - nodes
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
       - extensions
       - networking.k8s.io
     resources:
@@ -20,10 +28,17 @@ rules:
   - apiGroups:
       - ""
     resources:
-      - endpoints
+      - nodes
       - services
     verbs:
       - get
+      - list
+      - watch
+  - apiGroups:
+      - discovery.k8s.io
+    resources:
+      - endpointslices
+    verbs:
       - list
       - watch
   - apiGroups:

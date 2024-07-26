@@ -20,16 +20,16 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cm: 333d0ac2125b74c43283e33f17e1aa407b8641a0a62eeeb208a2b7cf7b4c5a28
-        checksum/cmd-params: bcbb2496303699a508a41b49a033d6f92d273aba139ec132105f461a1d84fa46
+        checksum/cm: 1bc0820ea0d95db3e9febaa1f1f88544b07964751666175f3ce0fd72f3513d6e
+        checksum/cmd-params: 4ac1307cc9b15d118ba69713c1a089398f44cf6b1fe337af979da063a8acf74d
       labels:
         app.kubernetes.io/component: application-controller
         app.kubernetes.io/instance: argocd
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: argocd-application-controller
         app.kubernetes.io/part-of: argocd
-        app.kubernetes.io/version: v2.11.5
-        helm.sh/chart: argo-cd-7.3.9
+        app.kubernetes.io/version: v2.11.7
+        helm.sh/chart: argo-cd-7.3.11
     spec:
       affinity:
         podAntiAffinity:
@@ -254,7 +254,7 @@ spec:
                   key: controller.ignore.normalizer.jq.timeout
                   name: argocd-cmd-params-cm
                   optional: true
-          image: quay.io/argoproj/argocd:v2.11.5
+          image: quay.io/argoproj/argocd:v2.11.7
           imagePullPolicy: IfNotPresent
           name: application-controller
           ports:
