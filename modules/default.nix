@@ -24,8 +24,13 @@
       chartsDir = ../charts;
 
       defaults = {
-        syncPolicy.automated.selfHeal = true;
-        syncPolicy.automated.prune = true;
+        syncPolicy = {
+          autoSync = {
+            enabled = true;
+            prune = true;
+            selfHeal = true;
+          };
+        };
 
         # Many helm chars will render all resources with the
         # following labels.
