@@ -1,17 +1,19 @@
 {
   description = "My ArgoCD configuration with nixidy.";
 
-  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-  inputs.flake-utils.url = "github:numtide/flake-utils";
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    flake-utils.url = "github:numtide/flake-utils";
 
-  inputs.nixidy = {
-    url = "github:arnarg/nixidy";
-    inputs.nixpkgs.follows = "nixpkgs";
-  };
+    nixidy = {
+      url = "github:arnarg/nixidy";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-  inputs.nixhelm = {
-    url = "github:farcaller/nixhelm";
-    inputs.nixpkgs.follows = "nixpkgs";
+    nixhelm = {
+      url = "github:farcaller/nixhelm";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
