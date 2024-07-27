@@ -55,7 +55,8 @@ in {
       };
 
       ingresses.miniflux.spec = {
-        ingressClassName = config.networking.traefik.ingressClassName;
+        inherit (config.networking.traefik) ingressClassName;
+
         rules = [
           {
             host = "reader.${config.networking.domain}";
@@ -86,8 +87,8 @@ in {
             ];
             ports = [
               {
+                inherit port;
                 protocol = "TCP";
-                port = port;
               }
             ];
           }

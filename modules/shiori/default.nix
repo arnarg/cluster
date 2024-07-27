@@ -1,10 +1,4 @@
-{
-  lib,
-  config,
-  ...
-}: let
-  inherit (builtins) toJSON;
-
+{config, ...}: let
   namespace = "shiori";
 
   labels = {"app.kubernetes.io/name" = "shiori";};
@@ -57,7 +51,8 @@ in {
       persistentVolumeClaims.shiori = {
         metadata.namespace = namespace;
         spec = {
-          storageClassName = config.storage.csi.nfs.storageClassName;
+          inherit (config.storage.csi.nfs) storageClassName;
+
           volumeMode = "Filesystem";
           accessModes = ["ReadWriteOnce"];
           resources.requests.storage = "10Gi";
@@ -75,7 +70,8 @@ in {
       };
 
       ingresses.shiori.spec = {
-        ingressClassName = config.networking.traefik.ingressClassName;
+        inherit (config.networking.traefik) ingressClassName;
+
         rules = [
           {
             host = "shiori.${config.networking.domain}";
@@ -106,59 +102,61 @@ in {
             ];
             ports = [
               {
+                inherit port;
                 protocol = "TCP";
-                port = port;
               }
             ];
           }
         ];
       };
 
-      # Allow shiori to talk to postgres
-      ciliumNetworkPolicies.allow-postgres-egress.spec = {
-        endpointSelector.matchLabels = labels;
-        egress = [
-          {
-            toEntities = [
-              # The PostgreSQL server is hosted on the same
-              # node as the kubernetes API server.
-              # Cilium will always match this as the entity
-              # `kube-apiserver` instead of the CIDR.
-              # See: https://github.com/cilium/cilium/issues/16308
-              "kube-apiserver"
-            ];
-            toPorts = [
-              {
-                ports = [
-                  {
-                    port = "5432";
-                    protocol = "TCP";
-                  }
-                ];
-              }
-            ];
-          }
-        ];
-      };
+      ciliumNetworkPolicies = {
+        # Allow shiori to talk to postgres
+        allow-postgres-egress.spec = {
+          endpointSelector.matchLabels = labels;
+          egress = [
+            {
+              toEntities = [
+                # The PostgreSQL server is hosted on the same
+                # node as the kubernetes API server.
+                # Cilium will always match this as the entity
+                # `kube-apiserver` instead of the CIDR.
+                # See: https://github.com/cilium/cilium/issues/16308
+                "kube-apiserver"
+              ];
+              toPorts = [
+                {
+                  ports = [
+                    {
+                      port = "5432";
+                      protocol = "TCP";
+                    }
+                  ];
+                }
+              ];
+            }
+          ];
+        };
 
-      # Allow egress HTTPS to the internet
-      ciliumNetworkPolicies.allow-https-world-egress.spec = {
-        endpointSelector.matchLabels = labels;
-        egress = [
-          {
-            toEntities = ["world"];
-            toPorts = [
-              {
-                ports = [
-                  {
-                    port = "443";
-                    protocol = "TCP";
-                  }
-                ];
-              }
-            ];
-          }
-        ];
+        # Allow egress HTTPS to the internet
+        allow-https-world-egress.spec = {
+          endpointSelector.matchLabels = labels;
+          egress = [
+            {
+              toEntities = ["world"];
+              toPorts = [
+                {
+                  ports = [
+                    {
+                      port = "443";
+                      protocol = "TCP";
+                    }
+                  ];
+                }
+              ];
+            }
+          ];
+        };
       };
     };
 

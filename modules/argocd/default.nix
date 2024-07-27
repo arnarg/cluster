@@ -11,9 +11,10 @@
   values =
     lib.attrsets.recursiveUpdate {
       server.ingress = {
+        inherit (config.networking.traefik) ingressClassName;
+
         enabled = true;
         hostname = "argocd.${config.networking.domain}";
-        ingressClassName = config.networking.traefik.ingressClassName;
       };
 
       repoServer.dnsConfig.options = [
@@ -80,71 +81,73 @@ in {
           ];
         };
 
-        # Allow argocd-repo-server egress access to github.com
-        ciliumNetworkPolicies.allow-world-egress.spec = {
-          endpointSelector.matchLabels."app.kubernetes.io/name" = "argocd-repo-server";
-          egress = [
-            # Enable DNS proxying
-            {
-              toEndpoints = [
-                {
-                  matchLabels = {
-                    "k8s:io.kubernetes.pod.namespace" = "kube-system";
-                    "k8s:k8s-app" = "kube-dns";
-                  };
-                }
-              ];
-              toPorts = [
-                {
-                  ports = [
-                    {
-                      port = "53";
-                      protocol = "ANY";
-                    }
-                  ];
-                  rules.dns = [
-                    {matchPattern = "*";}
-                  ];
-                }
-              ];
-            }
-            # Allow HTTPS to github.com
-            {
-              toFQDNs = [
-                {matchName = "github.com";}
-              ];
-              toPorts = [
-                {
-                  ports = [
-                    {
-                      port = "443";
-                      protocol = "TCP";
-                    }
-                  ];
-                }
-              ];
-            }
-          ];
-        };
+        ciliumNetworkPolicies = {
+          # Allow argocd-repo-server egress access to github.com
+          allow-world-egress.spec = {
+            endpointSelector.matchLabels."app.kubernetes.io/name" = "argocd-repo-server";
+            egress = [
+              # Enable DNS proxying
+              {
+                toEndpoints = [
+                  {
+                    matchLabels = {
+                      "k8s:io.kubernetes.pod.namespace" = "kube-system";
+                      "k8s:k8s-app" = "kube-dns";
+                    };
+                  }
+                ];
+                toPorts = [
+                  {
+                    ports = [
+                      {
+                        port = "53";
+                        protocol = "ANY";
+                      }
+                    ];
+                    rules.dns = [
+                      {matchPattern = "*";}
+                    ];
+                  }
+                ];
+              }
+              # Allow HTTPS to github.com
+              {
+                toFQDNs = [
+                  {matchName = "github.com";}
+                ];
+                toPorts = [
+                  {
+                    ports = [
+                      {
+                        port = "443";
+                        protocol = "TCP";
+                      }
+                    ];
+                  }
+                ];
+              }
+            ];
+          };
 
-        # Allow all ArgoCD pods to access kube-apiserver
-        ciliumNetworkPolicies.allow-kube-apiserver-egress.spec = {
-          endpointSelector.matchLabels."app.kubernetes.io/part-of" = "argocd";
-          egress = [
-            {
-              toEntities = ["kube-apiserver"];
-              toPorts = [
-                {
-                  ports = [
-                    {
-                      port = "6443";
-                      protocol = "TCP";
-                    }
-                  ];
-                }
-              ];
-            }
-          ];
+          # Allow all ArgoCD pods to access kube-apiserver
+          allow-kube-apiserver-egress.spec = {
+            endpointSelector.matchLabels."app.kubernetes.io/part-of" = "argocd";
+            egress = [
+              {
+                toEntities = ["kube-apiserver"];
+                toPorts = [
+                  {
+                    ports = [
+                      {
+                        port = "6443";
+                        protocol = "TCP";
+                      }
+                    ];
+                  }
+                ];
+              }
+            ];
+          };
         };
       };
     };

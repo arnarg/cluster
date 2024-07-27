@@ -13,7 +13,7 @@ in {
       chart = charts.ori-edge.k8s-gateway;
 
       values = {
-        domain = config.networking.domain;
+        inherit (config.networking) domain;
 
         # Only watch ingresses.
         watchedResources = ["Ingress"];
