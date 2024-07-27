@@ -66,7 +66,8 @@ in {
     applications.cilium = {
       inherit namespace;
 
-      annotations."argocd.argoproj.io/compare-options" = "ServerSideDiff=true";
+      # Server side diff required
+      compareOptions.serverSideDiff = true;
 
       helm.releases.cilium = {
         inherit values;
