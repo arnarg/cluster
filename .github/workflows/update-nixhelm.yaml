@@ -37,6 +37,20 @@ jobs:
           fetch: false
           push: false
 
+      - shell: bash
+        if: ${{ steps.commit-nixhelm.outputs.committed == 'true' }}
+        run: |
+          # In case any crds changed in a helm chart update
+          nix run .#generate
+
+      - uses: EndBug/add-and-commit@v9
+        if: ${{ steps.commit-nixhelm.outputs.committed == 'true' }}
+        with:
+          default_author: github_actions
+          message: "chore: generate resource options"
+          fetch: false
+          push: false
+
       - uses: arnarg/nixidy/actions/switch@main
         if: ${{ steps.commit-nixhelm.outputs.committed == 'true' }}
         with:

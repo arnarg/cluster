@@ -259,6 +259,10 @@ with lib; let
     };
     "traefik.io.v1alpha1.IngressRouteSpecRoutesServices" = {
       options = {
+        "healthCheck" = mkOption {
+          description = "Healthcheck defines health checks for ExternalName services.";
+          type = types.nullOr (submoduleOf "traefik.io.v1alpha1.IngressRouteSpecRoutesServicesHealthCheck");
+        };
         "kind" = mkOption {
           description = "Kind defines the kind of the Service.";
           type = types.nullOr types.str;
@@ -273,6 +277,10 @@ with lib; let
         };
         "nativeLB" = mkOption {
           description = "NativeLB controls, when creating the load-balancer,\nwhether the LB's children are directly the pods IPs or if the only child is the Kubernetes Service clusterIP.\nThe Kubernetes Service itself does load-balance to the pods.\nBy default, NativeLB is false.";
+          type = types.nullOr types.bool;
+        };
+        "nodePortLB" = mkOption {
+          description = "NodePortLB controls, when creating the load-balancer,\nwhether the LB's children are directly the nodes internal IPs using the nodePort when the service type is NodePort.\nIt allows services to be reachable when Traefik runs externally from the Kubernetes cluster but within the same network of the nodes.\nBy default, NodePortLB is false.";
           type = types.nullOr types.bool;
         };
         "passHostHeader" = mkOption {
@@ -310,9 +318,11 @@ with lib; let
       };
 
       config = {
+        "healthCheck" = mkOverride 1002 null;
         "kind" = mkOverride 1002 null;
         "namespace" = mkOverride 1002 null;
         "nativeLB" = mkOverride 1002 null;
+        "nodePortLB" = mkOverride 1002 null;
         "passHostHeader" = mkOverride 1002 null;
         "port" = mkOverride 1002 null;
         "responseForwarding" = mkOverride 1002 null;
@@ -321,6 +331,68 @@ with lib; let
         "sticky" = mkOverride 1002 null;
         "strategy" = mkOverride 1002 null;
         "weight" = mkOverride 1002 null;
+      };
+    };
+    "traefik.io.v1alpha1.IngressRouteSpecRoutesServicesHealthCheck" = {
+      options = {
+        "followRedirects" = mkOption {
+          description = "FollowRedirects defines whether redirects should be followed during the health check calls.\nDefault: true";
+          type = types.nullOr types.bool;
+        };
+        "headers" = mkOption {
+          description = "Headers defines custom headers to be sent to the health check endpoint.";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+        "hostname" = mkOption {
+          description = "Hostname defines the value of hostname in the Host header of the health check request.";
+          type = types.nullOr types.str;
+        };
+        "interval" = mkOption {
+          description = "Interval defines the frequency of the health check calls.\nDefault: 30s";
+          type = types.nullOr types.int;
+        };
+        "method" = mkOption {
+          description = "Method defines the healthcheck method.";
+          type = types.nullOr types.str;
+        };
+        "mode" = mkOption {
+          description = "Mode defines the health check mode.\nIf defined to grpc, will use the gRPC health check protocol to probe the server.\nDefault: http";
+          type = types.nullOr types.str;
+        };
+        "path" = mkOption {
+          description = "Path defines the server URL path for the health check endpoint.";
+          type = types.nullOr types.str;
+        };
+        "port" = mkOption {
+          description = "Port defines the server URL port for the health check endpoint.";
+          type = types.nullOr types.int;
+        };
+        "scheme" = mkOption {
+          description = "Scheme replaces the server URL scheme for the health check endpoint.";
+          type = types.nullOr types.str;
+        };
+        "status" = mkOption {
+          description = "Status defines the expected HTTP status code of the response to the health check request.";
+          type = types.nullOr types.int;
+        };
+        "timeout" = mkOption {
+          description = "Timeout defines the maximum duration Traefik will wait for a health check request before considering the server unhealthy.\nDefault: 5s";
+          type = types.nullOr types.int;
+        };
+      };
+
+      config = {
+        "followRedirects" = mkOverride 1002 null;
+        "headers" = mkOverride 1002 null;
+        "hostname" = mkOverride 1002 null;
+        "interval" = mkOverride 1002 null;
+        "method" = mkOverride 1002 null;
+        "mode" = mkOverride 1002 null;
+        "path" = mkOverride 1002 null;
+        "port" = mkOverride 1002 null;
+        "scheme" = mkOverride 1002 null;
+        "status" = mkOverride 1002 null;
+        "timeout" = mkOverride 1002 null;
       };
     };
     "traefik.io.v1alpha1.IngressRouteSpecRoutesServicesResponseForwarding" = {
@@ -569,6 +641,10 @@ with lib; let
           description = "NativeLB controls, when creating the load-balancer,\nwhether the LB's children are directly the pods IPs or if the only child is the Kubernetes Service clusterIP.\nThe Kubernetes Service itself does load-balance to the pods.\nBy default, NativeLB is false.";
           type = types.nullOr types.bool;
         };
+        "nodePortLB" = mkOption {
+          description = "NodePortLB controls, when creating the load-balancer,\nwhether the LB's children are directly the nodes internal IPs using the nodePort when the service type is NodePort.\nIt allows services to be reachable when Traefik runs externally from the Kubernetes cluster but within the same network of the nodes.\nBy default, NodePortLB is false.";
+          type = types.nullOr types.bool;
+        };
         "port" = mkOption {
           description = "Port defines the port of a Kubernetes Service.\nThis can be a reference to a named port.";
           type = types.int;
@@ -598,6 +674,7 @@ with lib; let
       config = {
         "namespace" = mkOverride 1002 null;
         "nativeLB" = mkOverride 1002 null;
+        "nodePortLB" = mkOverride 1002 null;
         "proxyProtocol" = mkOverride 1002 null;
         "serversTransport" = mkOverride 1002 null;
         "terminationDelay" = mkOverride 1002 null;
@@ -771,6 +848,10 @@ with lib; let
           description = "NativeLB controls, when creating the load-balancer,\nwhether the LB's children are directly the pods IPs or if the only child is the Kubernetes Service clusterIP.\nThe Kubernetes Service itself does load-balance to the pods.\nBy default, NativeLB is false.";
           type = types.nullOr types.bool;
         };
+        "nodePortLB" = mkOption {
+          description = "NodePortLB controls, when creating the load-balancer,\nwhether the LB's children are directly the nodes internal IPs using the nodePort when the service type is NodePort.\nIt allows services to be reachable when Traefik runs externally from the Kubernetes cluster but within the same network of the nodes.\nBy default, NodePortLB is false.";
+          type = types.nullOr types.bool;
+        };
         "port" = mkOption {
           description = "Port defines the port of a Kubernetes Service.\nThis can be a reference to a named port.";
           type = types.int;
@@ -784,6 +865,7 @@ with lib; let
       config = {
         "namespace" = mkOverride 1002 null;
         "nativeLB" = mkOverride 1002 null;
+        "nodePortLB" = mkOverride 1002 null;
         "weight" = mkOverride 1002 null;
       };
     };
@@ -831,6 +913,10 @@ with lib; let
     };
     "traefik.io.v1alpha1.TraefikServiceSpecMirroring" = {
       options = {
+        "healthCheck" = mkOption {
+          description = "Healthcheck defines health checks for ExternalName services.";
+          type = types.nullOr (submoduleOf "traefik.io.v1alpha1.TraefikServiceSpecMirroringHealthCheck");
+        };
         "kind" = mkOption {
           description = "Kind defines the kind of the Service.";
           type = types.nullOr types.str;
@@ -854,6 +940,10 @@ with lib; let
         };
         "nativeLB" = mkOption {
           description = "NativeLB controls, when creating the load-balancer,\nwhether the LB's children are directly the pods IPs or if the only child is the Kubernetes Service clusterIP.\nThe Kubernetes Service itself does load-balance to the pods.\nBy default, NativeLB is false.";
+          type = types.nullOr types.bool;
+        };
+        "nodePortLB" = mkOption {
+          description = "NodePortLB controls, when creating the load-balancer,\nwhether the LB's children are directly the nodes internal IPs using the nodePort when the service type is NodePort.\nIt allows services to be reachable when Traefik runs externally from the Kubernetes cluster but within the same network of the nodes.\nBy default, NodePortLB is false.";
           type = types.nullOr types.bool;
         };
         "passHostHeader" = mkOption {
@@ -891,11 +981,13 @@ with lib; let
       };
 
       config = {
+        "healthCheck" = mkOverride 1002 null;
         "kind" = mkOverride 1002 null;
         "maxBodySize" = mkOverride 1002 null;
         "mirrors" = mkOverride 1002 null;
         "namespace" = mkOverride 1002 null;
         "nativeLB" = mkOverride 1002 null;
+        "nodePortLB" = mkOverride 1002 null;
         "passHostHeader" = mkOverride 1002 null;
         "port" = mkOverride 1002 null;
         "responseForwarding" = mkOverride 1002 null;
@@ -906,8 +998,74 @@ with lib; let
         "weight" = mkOverride 1002 null;
       };
     };
+    "traefik.io.v1alpha1.TraefikServiceSpecMirroringHealthCheck" = {
+      options = {
+        "followRedirects" = mkOption {
+          description = "FollowRedirects defines whether redirects should be followed during the health check calls.\nDefault: true";
+          type = types.nullOr types.bool;
+        };
+        "headers" = mkOption {
+          description = "Headers defines custom headers to be sent to the health check endpoint.";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+        "hostname" = mkOption {
+          description = "Hostname defines the value of hostname in the Host header of the health check request.";
+          type = types.nullOr types.str;
+        };
+        "interval" = mkOption {
+          description = "Interval defines the frequency of the health check calls.\nDefault: 30s";
+          type = types.nullOr types.int;
+        };
+        "method" = mkOption {
+          description = "Method defines the healthcheck method.";
+          type = types.nullOr types.str;
+        };
+        "mode" = mkOption {
+          description = "Mode defines the health check mode.\nIf defined to grpc, will use the gRPC health check protocol to probe the server.\nDefault: http";
+          type = types.nullOr types.str;
+        };
+        "path" = mkOption {
+          description = "Path defines the server URL path for the health check endpoint.";
+          type = types.nullOr types.str;
+        };
+        "port" = mkOption {
+          description = "Port defines the server URL port for the health check endpoint.";
+          type = types.nullOr types.int;
+        };
+        "scheme" = mkOption {
+          description = "Scheme replaces the server URL scheme for the health check endpoint.";
+          type = types.nullOr types.str;
+        };
+        "status" = mkOption {
+          description = "Status defines the expected HTTP status code of the response to the health check request.";
+          type = types.nullOr types.int;
+        };
+        "timeout" = mkOption {
+          description = "Timeout defines the maximum duration Traefik will wait for a health check request before considering the server unhealthy.\nDefault: 5s";
+          type = types.nullOr types.int;
+        };
+      };
+
+      config = {
+        "followRedirects" = mkOverride 1002 null;
+        "headers" = mkOverride 1002 null;
+        "hostname" = mkOverride 1002 null;
+        "interval" = mkOverride 1002 null;
+        "method" = mkOverride 1002 null;
+        "mode" = mkOverride 1002 null;
+        "path" = mkOverride 1002 null;
+        "port" = mkOverride 1002 null;
+        "scheme" = mkOverride 1002 null;
+        "status" = mkOverride 1002 null;
+        "timeout" = mkOverride 1002 null;
+      };
+    };
     "traefik.io.v1alpha1.TraefikServiceSpecMirroringMirrors" = {
       options = {
+        "healthCheck" = mkOption {
+          description = "Healthcheck defines health checks for ExternalName services.";
+          type = types.nullOr (submoduleOf "traefik.io.v1alpha1.TraefikServiceSpecMirroringMirrorsHealthCheck");
+        };
         "kind" = mkOption {
           description = "Kind defines the kind of the Service.";
           type = types.nullOr types.str;
@@ -922,6 +1080,10 @@ with lib; let
         };
         "nativeLB" = mkOption {
           description = "NativeLB controls, when creating the load-balancer,\nwhether the LB's children are directly the pods IPs or if the only child is the Kubernetes Service clusterIP.\nThe Kubernetes Service itself does load-balance to the pods.\nBy default, NativeLB is false.";
+          type = types.nullOr types.bool;
+        };
+        "nodePortLB" = mkOption {
+          description = "NodePortLB controls, when creating the load-balancer,\nwhether the LB's children are directly the nodes internal IPs using the nodePort when the service type is NodePort.\nIt allows services to be reachable when Traefik runs externally from the Kubernetes cluster but within the same network of the nodes.\nBy default, NodePortLB is false.";
           type = types.nullOr types.bool;
         };
         "passHostHeader" = mkOption {
@@ -963,9 +1125,11 @@ with lib; let
       };
 
       config = {
+        "healthCheck" = mkOverride 1002 null;
         "kind" = mkOverride 1002 null;
         "namespace" = mkOverride 1002 null;
         "nativeLB" = mkOverride 1002 null;
+        "nodePortLB" = mkOverride 1002 null;
         "passHostHeader" = mkOverride 1002 null;
         "percent" = mkOverride 1002 null;
         "port" = mkOverride 1002 null;
@@ -975,6 +1139,68 @@ with lib; let
         "sticky" = mkOverride 1002 null;
         "strategy" = mkOverride 1002 null;
         "weight" = mkOverride 1002 null;
+      };
+    };
+    "traefik.io.v1alpha1.TraefikServiceSpecMirroringMirrorsHealthCheck" = {
+      options = {
+        "followRedirects" = mkOption {
+          description = "FollowRedirects defines whether redirects should be followed during the health check calls.\nDefault: true";
+          type = types.nullOr types.bool;
+        };
+        "headers" = mkOption {
+          description = "Headers defines custom headers to be sent to the health check endpoint.";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+        "hostname" = mkOption {
+          description = "Hostname defines the value of hostname in the Host header of the health check request.";
+          type = types.nullOr types.str;
+        };
+        "interval" = mkOption {
+          description = "Interval defines the frequency of the health check calls.\nDefault: 30s";
+          type = types.nullOr types.int;
+        };
+        "method" = mkOption {
+          description = "Method defines the healthcheck method.";
+          type = types.nullOr types.str;
+        };
+        "mode" = mkOption {
+          description = "Mode defines the health check mode.\nIf defined to grpc, will use the gRPC health check protocol to probe the server.\nDefault: http";
+          type = types.nullOr types.str;
+        };
+        "path" = mkOption {
+          description = "Path defines the server URL path for the health check endpoint.";
+          type = types.nullOr types.str;
+        };
+        "port" = mkOption {
+          description = "Port defines the server URL port for the health check endpoint.";
+          type = types.nullOr types.int;
+        };
+        "scheme" = mkOption {
+          description = "Scheme replaces the server URL scheme for the health check endpoint.";
+          type = types.nullOr types.str;
+        };
+        "status" = mkOption {
+          description = "Status defines the expected HTTP status code of the response to the health check request.";
+          type = types.nullOr types.int;
+        };
+        "timeout" = mkOption {
+          description = "Timeout defines the maximum duration Traefik will wait for a health check request before considering the server unhealthy.\nDefault: 5s";
+          type = types.nullOr types.int;
+        };
+      };
+
+      config = {
+        "followRedirects" = mkOverride 1002 null;
+        "headers" = mkOverride 1002 null;
+        "hostname" = mkOverride 1002 null;
+        "interval" = mkOverride 1002 null;
+        "method" = mkOverride 1002 null;
+        "mode" = mkOverride 1002 null;
+        "path" = mkOverride 1002 null;
+        "port" = mkOverride 1002 null;
+        "scheme" = mkOverride 1002 null;
+        "status" = mkOverride 1002 null;
+        "timeout" = mkOverride 1002 null;
       };
     };
     "traefik.io.v1alpha1.TraefikServiceSpecMirroringMirrorsResponseForwarding" = {
@@ -1109,6 +1335,10 @@ with lib; let
     };
     "traefik.io.v1alpha1.TraefikServiceSpecWeightedServices" = {
       options = {
+        "healthCheck" = mkOption {
+          description = "Healthcheck defines health checks for ExternalName services.";
+          type = types.nullOr (submoduleOf "traefik.io.v1alpha1.TraefikServiceSpecWeightedServicesHealthCheck");
+        };
         "kind" = mkOption {
           description = "Kind defines the kind of the Service.";
           type = types.nullOr types.str;
@@ -1123,6 +1353,10 @@ with lib; let
         };
         "nativeLB" = mkOption {
           description = "NativeLB controls, when creating the load-balancer,\nwhether the LB's children are directly the pods IPs or if the only child is the Kubernetes Service clusterIP.\nThe Kubernetes Service itself does load-balance to the pods.\nBy default, NativeLB is false.";
+          type = types.nullOr types.bool;
+        };
+        "nodePortLB" = mkOption {
+          description = "NodePortLB controls, when creating the load-balancer,\nwhether the LB's children are directly the nodes internal IPs using the nodePort when the service type is NodePort.\nIt allows services to be reachable when Traefik runs externally from the Kubernetes cluster but within the same network of the nodes.\nBy default, NodePortLB is false.";
           type = types.nullOr types.bool;
         };
         "passHostHeader" = mkOption {
@@ -1160,9 +1394,11 @@ with lib; let
       };
 
       config = {
+        "healthCheck" = mkOverride 1002 null;
         "kind" = mkOverride 1002 null;
         "namespace" = mkOverride 1002 null;
         "nativeLB" = mkOverride 1002 null;
+        "nodePortLB" = mkOverride 1002 null;
         "passHostHeader" = mkOverride 1002 null;
         "port" = mkOverride 1002 null;
         "responseForwarding" = mkOverride 1002 null;
@@ -1171,6 +1407,68 @@ with lib; let
         "sticky" = mkOverride 1002 null;
         "strategy" = mkOverride 1002 null;
         "weight" = mkOverride 1002 null;
+      };
+    };
+    "traefik.io.v1alpha1.TraefikServiceSpecWeightedServicesHealthCheck" = {
+      options = {
+        "followRedirects" = mkOption {
+          description = "FollowRedirects defines whether redirects should be followed during the health check calls.\nDefault: true";
+          type = types.nullOr types.bool;
+        };
+        "headers" = mkOption {
+          description = "Headers defines custom headers to be sent to the health check endpoint.";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+        "hostname" = mkOption {
+          description = "Hostname defines the value of hostname in the Host header of the health check request.";
+          type = types.nullOr types.str;
+        };
+        "interval" = mkOption {
+          description = "Interval defines the frequency of the health check calls.\nDefault: 30s";
+          type = types.nullOr types.int;
+        };
+        "method" = mkOption {
+          description = "Method defines the healthcheck method.";
+          type = types.nullOr types.str;
+        };
+        "mode" = mkOption {
+          description = "Mode defines the health check mode.\nIf defined to grpc, will use the gRPC health check protocol to probe the server.\nDefault: http";
+          type = types.nullOr types.str;
+        };
+        "path" = mkOption {
+          description = "Path defines the server URL path for the health check endpoint.";
+          type = types.nullOr types.str;
+        };
+        "port" = mkOption {
+          description = "Port defines the server URL port for the health check endpoint.";
+          type = types.nullOr types.int;
+        };
+        "scheme" = mkOption {
+          description = "Scheme replaces the server URL scheme for the health check endpoint.";
+          type = types.nullOr types.str;
+        };
+        "status" = mkOption {
+          description = "Status defines the expected HTTP status code of the response to the health check request.";
+          type = types.nullOr types.int;
+        };
+        "timeout" = mkOption {
+          description = "Timeout defines the maximum duration Traefik will wait for a health check request before considering the server unhealthy.\nDefault: 5s";
+          type = types.nullOr types.int;
+        };
+      };
+
+      config = {
+        "followRedirects" = mkOverride 1002 null;
+        "headers" = mkOverride 1002 null;
+        "hostname" = mkOverride 1002 null;
+        "interval" = mkOverride 1002 null;
+        "method" = mkOverride 1002 null;
+        "mode" = mkOverride 1002 null;
+        "path" = mkOverride 1002 null;
+        "port" = mkOverride 1002 null;
+        "scheme" = mkOverride 1002 null;
+        "status" = mkOverride 1002 null;
+        "timeout" = mkOverride 1002 null;
       };
     };
     "traefik.io.v1alpha1.TraefikServiceSpecWeightedServicesResponseForwarding" = {

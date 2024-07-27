@@ -45,16 +45,6 @@
     packages = {
       nixidy = nixidy.packages.${system}.default;
       generators = {
-        sops = nixidy.packages.${system}.generators.fromCRD {
-          name = "sops";
-          src = pkgs.fetchFromGitHub {
-            owner = "isindir";
-            repo = "sops-secrets-operator";
-            rev = "0.13.0";
-            hash = "sha256-wPGpbmT/KBPKaloDrYOxdsmQqe6FjDBWS+0M/egb5UA=";
-          };
-          crds = ["config/crd/bases/isindir.github.com_sopssecrets.yaml"];
-        };
         cilium = nixidy.packages.${system}.generators.fromCRD {
           name = "cilium";
           src = pkgs.fetchFromGitHub {
@@ -78,19 +68,19 @@
           };
           crds = ["cmd/k8s-operator/deploy/crds/tailscale.com_proxyclasses.yaml"];
         };
+        sops = nixidy.packages.${system}.generators.fromCRD {
+          name = "sops";
+          src = nixhelm.chartsDerivations.${system}.isindir.sops-secrets-operator;
+          crds = ["crds/isindir.github.com_sopssecrets.yaml"];
+        };
         traefik = nixidy.packages.${system}.generators.fromCRD {
           name = "traefik";
-          src = pkgs.fetchFromGitHub {
-            owner = "traefik";
-            repo = "traefik-helm-chart";
-            rev = "v28.3.0";
-            hash = "sha256-fFmvoal7bpPu+CjAYGg5cAYFqffQ20YKJvwlU8YW5NE=";
-          };
+          src = nixhelm.chartsDerivations.${system}.traefik.traefik;
           crds = [
-            "traefik/crds/traefik.io_ingressroutes.yaml"
-            "traefik/crds/traefik.io_ingressroutetcps.yaml"
-            "traefik/crds/traefik.io_ingressrouteudps.yaml"
-            "traefik/crds/traefik.io_traefikservices.yaml"
+            "crds/traefik.io_ingressroutes.yaml"
+            "crds/traefik.io_ingressroutetcps.yaml"
+            "crds/traefik.io_ingressrouteudps.yaml"
+            "crds/traefik.io_traefikservices.yaml"
           ];
         };
       };
