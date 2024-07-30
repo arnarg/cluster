@@ -50,6 +50,9 @@
       podSecurityContext.fsGroup = 2000;
       podSecurityContext.fsGroupChangePolicy = "OnRootMismatch";
 
+      # Only want to keep 3 revisions around
+      deployment.revisionHistoryLimit = 3;
+
       # Kubernetes changes permissions of `/data/acme.json`
       # during pod creation to `0660` but traefik needs it
       # to be `0600`.

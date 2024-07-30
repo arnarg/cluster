@@ -10,6 +10,7 @@ metadata:
 spec:
   minReadySeconds: 0
   replicas: 1
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app.kubernetes.io/instance: traefik-traefik
