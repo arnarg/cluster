@@ -65,7 +65,7 @@ spec:
               value: localhost
             - name: KUBERNETES_SERVICE_PORT
               value: "6444"
-          image: quay.io/cilium/operator-generic:v1.16.0@sha256:d6621c11c4e4943bf2998af7febe05be5ed6fdcf812b27ad4388f47022190316
+          image: quay.io/cilium/operator-generic:v1.16.1@sha256:3bc7e7a43bc4a4d8989cb7936c5d96675dd2d02c306adf925ce0a7c35aa27dc4
           imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:

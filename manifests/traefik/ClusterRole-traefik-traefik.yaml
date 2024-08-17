@@ -16,16 +16,6 @@ rules:
       - list
       - watch
   - apiGroups:
-      - extensions
-      - networking.k8s.io
-    resources:
-      - ingressclasses
-      - ingresses
-    verbs:
-      - get
-      - list
-      - watch
-  - apiGroups:
       - ""
     resources:
       - services
@@ -44,6 +34,16 @@ rules:
       - ""
     resources:
       - secrets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - extensions
+      - networking.k8s.io
+    resources:
+      - ingressclasses
+      - ingresses
     verbs:
       - get
       - list

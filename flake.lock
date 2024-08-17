@@ -87,6 +87,28 @@
         "type": "github"
       }
     },
+    "haumea": {
+      "inputs": {
+        "nixpkgs": [
+          "nixhelm",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1685133229,
+        "narHash": "sha256-FePm/Gi9PBSNwiDFq3N+DWdfxFq0UKsVVTJS3cQPn94=",
+        "owner": "nix-community",
+        "repo": "haumea",
+        "rev": "34dd58385092a23018748b50f9b23de6266dffc2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "ref": "v0.2.2",
+        "repo": "haumea",
+        "type": "github"
+      }
+    },
     "kubenix": {
       "inputs": {
         "flake-compat": "flake-compat",
@@ -166,6 +188,7 @@
     "nixhelm": {
       "inputs": {
         "flake-utils": "flake-utils_2",
+        "haumea": "haumea",
         "nix-kube-generators": "nix-kube-generators",
         "nixpkgs": [
           "nixpkgs"
@@ -173,11 +196,11 @@
         "poetry2nix": "poetry2nix"
       },
       "locked": {
-        "lastModified": 1723252116,
-        "narHash": "sha256-nwEG3RZTn0++a4l9TV9kwIY9NurnnoR11mnigg2lVMQ=",
+        "lastModified": 1723856837,
+        "narHash": "sha256-NJMJTLGY6J1GNACsQI5NlN62JztnNFG5fa1GpADkJxU=",
         "owner": "farcaller",
         "repo": "nixhelm",
-        "rev": "54f417773a4c284d3aa5f10b8fb782c9301d249b",
+        "rev": "e94ea786aff097be3cb28636f784788d80dbf2ae",
         "type": "github"
       },
       "original": {

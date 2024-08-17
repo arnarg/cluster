@@ -93,6 +93,8 @@ data:
   monitor-aggregation: medium
   monitor-aggregation-flags: all
   monitor-aggregation-interval: 5s
+  nat-map-stats-entries: "32"
+  nat-map-stats-interval: 30s
   node-port-bind-protection: "true"
   nodeport-addresses: ""
   nodes-gc-interval: 5m0s
