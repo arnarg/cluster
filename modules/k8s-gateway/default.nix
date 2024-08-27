@@ -1,4 +1,5 @@
 {
+  lib,
   config,
   charts,
   ...
@@ -116,6 +117,22 @@ in {
           }
         ];
       };
+
+      # Patch cluster role for k8s-gateway to
+      # work around issue:
+      # https://github.com/ori-edge/k8s_gateway/issues/279#issuecomment-2309773449
+      clusterRoles.k8s-gateway.rules = lib.mkForce [
+        {
+          apiGroups = [""];
+          resources = ["services" "namespaces"];
+          verbs = ["list" "watch"];
+        }
+        {
+          apiGroups = ["extensions" "networking.k8s.io"];
+          resources = ["ingresses"];
+          verbs = ["list" "watch"];
+        }
+      ];
     };
   };
 }
