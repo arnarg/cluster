@@ -1,3 +1,4 @@
+# TODO: Check if cluster role workaround is still needed
 {
   repo = "https://ori-edge.github.io/k8s_gateway/";
   chart = "k8s-gateway";
