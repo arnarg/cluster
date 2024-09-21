@@ -11,19 +11,45 @@ rules:
       - serviceaccounts
       - configmaps
     verbs:
-      - '*'
+      - create
+      - delete
+      - deletecollection
+      - get
+      - list
+      - patch
+      - update
+      - watch
   - apiGroups:
       - apps
     resources:
       - statefulsets
       - deployments
     verbs:
-      - '*'
+      - create
+      - delete
+      - deletecollection
+      - get
+      - list
+      - patch
+      - update
+      - watch
   - apiGroups:
       - discovery.k8s.io
     resources:
       - endpointslices
     verbs:
       - get
+      - list
+      - watch
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - roles
+      - rolebindings
+    verbs:
+      - get
+      - create
+      - patch
+      - update
       - list
       - watch

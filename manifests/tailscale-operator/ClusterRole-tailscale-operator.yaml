@@ -10,14 +10,28 @@ rules:
       - services
       - services/status
     verbs:
-      - '*'
+      - create
+      - delete
+      - deletecollection
+      - get
+      - list
+      - patch
+      - update
+      - watch
   - apiGroups:
       - networking.k8s.io
     resources:
       - ingresses
       - ingresses/status
     verbs:
-      - '*'
+      - create
+      - delete
+      - deletecollection
+      - get
+      - list
+      - patch
+      - update
+      - watch
   - apiGroups:
       - networking.k8s.io
     resources:
@@ -43,6 +57,16 @@ rules:
     resources:
       - dnsconfigs
       - dnsconfigs/status
+    verbs:
+      - get
+      - list
+      - watch
+      - update
+  - apiGroups:
+      - tailscale.com
+    resources:
+      - recorders
+      - recorders/status
     verbs:
       - get
       - list
