@@ -30,7 +30,7 @@ spec:
         app.kubernetes.io/instance: traefik-traefik
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: traefik
-        helm.sh/chart: traefik-31.0.0
+        helm.sh/chart: traefik-31.1.1
     spec:
       automountServiceAccountToken: true
       containers:
@@ -68,7 +68,7 @@ spec:
           envFrom:
             - secretRef:
                 name: acme-env
-          image: docker.io/traefik:v3.1.2
+          image: docker.io/traefik:v3.1.4
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
