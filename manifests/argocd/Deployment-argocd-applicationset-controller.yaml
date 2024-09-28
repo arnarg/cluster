@@ -19,15 +19,15 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cmd-params: 6eb4f03863aa79a62229059295a646071cdd874da45cc77cac031b14abd2896e
+        checksum/cmd-params: d82ca81c3ca892d15308ae0eef5d530cff481b4b87239bfd64722b41c6f80854
       labels:
         app.kubernetes.io/component: applicationset-controller
         app.kubernetes.io/instance: argocd
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: argocd-applicationset-controller
         app.kubernetes.io/part-of: argocd
-        app.kubernetes.io/version: v2.12.3
-        helm.sh/chart: argo-cd-7.6.1
+        app.kubernetes.io/version: v2.12.4
+        helm.sh/chart: argo-cd-7.6.5
     spec:
       affinity:
         podAntiAffinity:
@@ -176,7 +176,7 @@ spec:
                   key: applicationsetcontroller.enable.scm.providers
                   name: argocd-cmd-params-cm
                   optional: true
-          image: quay.io/argoproj/argocd:v2.12.3
+          image: quay.io/argoproj/argocd:v2.12.4
           imagePullPolicy: IfNotPresent
           name: applicationset-controller
           ports:
