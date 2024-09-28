@@ -5,6 +5,7 @@ data:
   applicationsetcontroller.enable.progressive.syncs: "false"
   applicationsetcontroller.log.format: text
   applicationsetcontroller.log.level: info
+  applicationsetcontroller.namespaces: ""
   applicationsetcontroller.policy: sync
   controller.ignore.normalizer.jq.timeout: 1s
   controller.log.format: text
