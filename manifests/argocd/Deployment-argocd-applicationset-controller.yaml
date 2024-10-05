@@ -19,7 +19,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cmd-params: d82ca81c3ca892d15308ae0eef5d530cff481b4b87239bfd64722b41c6f80854
+        checksum/cmd-params: d577892ed0d47dde524073ca1fdc8223da087ab6e644cebeb41c1faa244ba99e
       labels:
         app.kubernetes.io/component: applicationset-controller
         app.kubernetes.io/instance: argocd
@@ -27,7 +27,7 @@ spec:
         app.kubernetes.io/name: argocd-applicationset-controller
         app.kubernetes.io/part-of: argocd
         app.kubernetes.io/version: v2.12.4
-        helm.sh/chart: argo-cd-7.6.5
+        helm.sh/chart: argo-cd-7.6.8
     spec:
       affinity:
         podAntiAffinity:
