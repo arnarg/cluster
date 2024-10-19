@@ -3,41 +3,26 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.15.1-0.20240618033008-7824932b0cab
-  name: connectors.tailscale.com
+  name: proxygroups.tailscale.com
 spec:
   group: tailscale.com
   names:
-    kind: Connector
-    listKind: ConnectorList
-    plural: connectors
+    kind: ProxyGroup
+    listKind: ProxyGroupList
+    plural: proxygroups
     shortNames:
-      - cn
-    singular: connector
+      - pg
+    singular: proxygroup
   scope: Cluster
   versions:
     - additionalPrinterColumns:
-        - description: CIDR ranges exposed to tailnet by a subnet router defined via this Connector instance.
-          jsonPath: .status.subnetRoutes
-          name: SubnetRoutes
-          type: string
-        - description: Whether this Connector instance defines an exit node.
-          jsonPath: .status.isExitNode
-          name: IsExitNode
-          type: string
-        - description: Status of the deployed Connector resources.
-          jsonPath: .status.conditions[?(@.type == "ConnectorReady")].reason
+        - description: Status of the deployed ProxyGroup resources.
+          jsonPath: .status.conditions[?(@.type == "ProxyGroupReady")].reason
           name: Status
           type: string
       name: v1alpha1
       schema:
         openAPIV3Schema:
-          description: |-
-            Connector defines a Tailscale node that will be deployed in the cluster. The
-            node can be configured to act as a Tailscale subnet router and/or a Tailscale
-            exit node.
-            Connector is a cluster-scoped resource.
-            More info:
-            https://tailscale.com/kb/1441/kubernetes-operator-connector
           properties:
             apiVersion:
               description: |-
@@ -57,82 +42,60 @@ spec:
             metadata:
               type: object
             spec:
-              description: |-
-                ConnectorSpec describes the desired Tailscale component.
-                More info:
-                https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status
+              description: Spec describes the desired ProxyGroup instances.
               properties:
-                exitNode:
+                hostnamePrefix:
                   description: |-
-                    ExitNode defines whether the Connector node should act as a
-                    Tailscale exit node. Defaults to false.
-                    https://tailscale.com/kb/1103/exit-nodes
-                  type: boolean
-                hostname:
-                  description: |-
-                    Hostname is the tailnet hostname that should be assigned to the
-                    Connector node. If unset, hostname defaults to <connector
-                    name>-connector. Hostname can contain lower case letters, numbers and
-                    dashes, it must not start or end with a dash and must be between 2
-                    and 63 characters long.
-                  pattern: ^[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$
+                    HostnamePrefix is the hostname prefix to use for tailnet devices created
+                    by the ProxyGroup. Each device will have the integer number from its
+                    StatefulSet pod appended to this prefix to form the full hostname.
+                    HostnamePrefix can contain lower case letters, numbers and dashes, it
+                    must not start with a dash and must be between 1 and 62 characters long.
+                  pattern: ^[a-z0-9][a-z0-9-]{0,61}$
                   type: string
                 proxyClass:
                   description: |-
-                    ProxyClass is the name of the ProxyClass custom resource that
-                    contains configuration options that should be applied to the
-                    resources created for this Connector. If unset, the operator will
-                    create resources with the default configuration.
+                    ProxyClass is the name of the ProxyClass custom resource that contains
+                    configuration options that should be applied to the resources created
+                    for this ProxyGroup. If unset, and there is no default ProxyClass
+                    configured, the operator will create resources with the default
+                    configuration.
                   type: string
-                subnetRouter:
+                replicas:
                   description: |-
-                    SubnetRouter defines subnet routes that the Connector node should
-                    expose to tailnet. If unset, none are exposed.
-                    https://tailscale.com/kb/1019/subnets/
-                  properties:
-                    advertiseRoutes:
-                      description: |-
-                        AdvertiseRoutes refer to CIDRs that the subnet router should make
-                        available. Route values must be strings that represent a valid IPv4
-                        or IPv6 CIDR range. Values can be Tailscale 4via6 subnet routes.
-                        https://tailscale.com/kb/1201/4via6-subnets/
-                      items:
-                        format: cidr
-                        type: string
-                      minItems: 1
-                      type: array
-                  required:
-                    - advertiseRoutes
-                  type: object
+                    Replicas specifies how many replicas to create the StatefulSet with.
+                    Defaults to 2.
+                  format: int32
+                  type: integer
                 tags:
                   description: |-
-                    Tags that the Tailscale node will be tagged with.
-                    Defaults to [tag:k8s].
-                    To autoapprove the subnet routes or exit node defined by a Connector,
-                    you can configure Tailscale ACLs to give these tags the necessary
-                    permissions.
-                    See https://tailscale.com/kb/1337/acl-syntax#autoapprovers.
-                    If you specify custom tags here, you must also make the operator an owner of these tags.
+                    Tags that the Tailscale devices will be tagged with. Defaults to [tag:k8s].
+                    If you specify custom tags here, make sure you also make the operator
+                    an owner of these tags.
                     See  https://tailscale.com/kb/1236/kubernetes-operator/#setting-up-the-kubernetes-operator.
-                    Tags cannot be changed once a Connector node has been created.
+                    Tags cannot be changed once a ProxyGroup device has been created.
                     Tag values must be in form ^tag:[a-zA-Z][a-zA-Z0-9-]*$.
                   items:
                     pattern: ^tag:[a-zA-Z][a-zA-Z0-9-]*$
                     type: string
                   type: array
+                type:
+                  description: Type of the ProxyGroup proxies. Currently the only supported type is egress.
+                  enum:
+                    - egress
+                  type: string
+              required:
+                - type
               type: object
-              x-kubernetes-validations:
-                - message: A Connector needs to be either an exit node or a subnet router, or both.
-                  rule: has(self.subnetRouter) || self.exitNode == true
             status:
               description: |-
-                ConnectorStatus describes the status of the Connector. This is set
-                and managed by the Tailscale operator.
+                ProxyGroupStatus describes the status of the ProxyGroup resources. This is
+                set and managed by the Tailscale operator.
               properties:
                 conditions:
                   description: |-
-                    List of status conditions to indicate the status of the Connector.
-                    Known condition types are `ConnectorReady`.
+                    List of status conditions to indicate the status of the ProxyGroup
+                    resources. Known condition types are `ProxyGroupReady`.
                   items:
                     description: Condition contains details for one aspect of the current state of this API Resource.
                     properties:
@@ -190,27 +153,30 @@ spec:
                   x-kubernetes-list-map-keys:
                     - type
                   x-kubernetes-list-type: map
-                hostname:
-                  description: |-
-                    Hostname is the fully qualified domain name of the Connector node.
-                    If MagicDNS is enabled in your tailnet, it is the MagicDNS name of the
-                    node.
-                  type: string
-                isExitNode:
-                  description: IsExitNode is set to true if the Connector acts as an exit node.
-                  type: boolean
-                subnetRoutes:
-                  description: |-
-                    SubnetRoutes are the routes currently exposed to tailnet via this
-                    Connector instance.
-                  type: string
-                tailnetIPs:
-                  description: |-
-                    TailnetIPs is the set of tailnet IP addresses (both IPv4 and IPv6)
-                    assigned to the Connector node.
+                devices:
+                  description: List of tailnet devices associated with the ProxyGroup StatefulSet.
                   items:
-                    type: string
+                    properties:
+                      hostname:
+                        description: |-
+                          Hostname is the fully qualified domain name of the device.
+                          If MagicDNS is enabled in your tailnet, it is the MagicDNS name of the
+                          node.
+                        type: string
+                      tailnetIPs:
+                        description: |-
+                          TailnetIPs is the set of tailnet IP addresses (both IPv4 and IPv6)
+                          assigned to the device.
+                        items:
+                          type: string
+                        type: array
+                    required:
+                      - hostname
+                    type: object
                   type: array
+                  x-kubernetes-list-map-keys:
+                    - hostname
+                  x-kubernetes-list-type: map
               type: object
           required:
             - spec

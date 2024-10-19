@@ -16,6 +16,14 @@ rules:
       - delete
   - apiGroups:
       - ""
+    resourceNames:
+      - cilium-config
+    resources:
+      - configmaps
+    verbs:
+      - patch
+  - apiGroups:
+      - ""
     resources:
       - nodes
     verbs:
