@@ -20,6 +20,14 @@ rules:
       - update
       - watch
   - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
       - apps
     resources:
       - statefulsets
@@ -41,6 +49,9 @@ rules:
       - get
       - list
       - watch
+      - create
+      - update
+      - deletecollection
   - apiGroups:
       - rbac.authorization.k8s.io
     resources:

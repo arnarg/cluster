@@ -35,14 +35,14 @@ spec:
             - name: CLIENT_SECRET_FILE
               value: /oauth/client_secret
             - name: PROXY_IMAGE
-              value: tailscale/tailscale:v1.74.1
+              value: tailscale/tailscale:v1.76.1
             - name: PROXY_TAGS
               value: tag:k8s
             - name: APISERVER_PROXY
               value: "false"
             - name: PROXY_FIREWALL_MODE
               value: auto
-          image: tailscale/k8s-operator:v1.74.1
+          image: tailscale/k8s-operator:v1.76.1
           imagePullPolicy: Always
           name: operator
           volumeMounts:
