@@ -172,11 +172,11 @@
     },
     "nix-kube-generators_2": {
       "locked": {
-        "lastModified": 1708155396,
-        "narHash": "sha256-A/BIeJjiRS7sBYP6tFJa/WHDPHe7DGTCkSEKXttYeAQ=",
+        "lastModified": 1729269463,
+        "narHash": "sha256-8jDDpC99fYl5CSHjZyPwb5PK7nQSknhkpfe8+DXI910=",
         "owner": "farcaller",
         "repo": "nix-kube-generators",
-        "rev": "14dbd5e5b40615937900f71d9a9851b59b4d9a88",
+        "rev": "2be4f3cb99e179d9f94e6c8723862421437f8efb",
         "type": "github"
       },
       "original": {
@@ -219,11 +219,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1724231318,
-        "narHash": "sha256-79soXgb7uq1C/EiGxaszDJKiZd5Oihfy/g0wrfU+7Fw=",
+        "lastModified": 1730405985,
+        "narHash": "sha256-mTRqdtJX8Su1mitErrNXn45kZXa+uOCc55uLQQRsXUY=",
         "owner": "arnarg",
         "repo": "nixidy",
-        "rev": "959253046f98678dda5b0d4471463d15f9afe794",
+        "rev": "d28f45aea4d7b93928f1ea94f22a03a3f6dc25f6",
         "type": "github"
       },
       "original": {
