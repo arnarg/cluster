@@ -30,13 +30,13 @@ spec:
         app.kubernetes.io/instance: traefik-traefik
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: traefik
-        helm.sh/chart: traefik-32.1.1
+        helm.sh/chart: traefik-33.0.0
     spec:
       automountServiceAccountToken: true
       containers:
         - args:
             - --entryPoints.metrics.address=:9100/tcp
-            - --entryPoints.traefik.address=:9000/tcp
+            - --entryPoints.traefik.address=:8080/tcp
             - --entryPoints.web.address=:8000/tcp
             - --entryPoints.websecure.address=:8443/tcp
             - --api.dashboard=true
@@ -68,13 +68,13 @@ spec:
           envFrom:
             - secretRef:
                 name: acme-env
-          image: docker.io/traefik:v3.1.6
+          image: docker.io/traefik:v3.2.0
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
             httpGet:
               path: /ping
-              port: 9000
+              port: 8080
               scheme: HTTP
             initialDelaySeconds: 2
             periodSeconds: 10
@@ -85,7 +85,7 @@ spec:
             - containerPort: 9100
               name: metrics
               protocol: TCP
-            - containerPort: 9000
+            - containerPort: 8080
               name: traefik
               protocol: TCP
             - containerPort: 8000
@@ -98,7 +98,7 @@ spec:
             failureThreshold: 1
             httpGet:
               path: /ping
-              port: 9000
+              port: 8080
               scheme: HTTP
             initialDelaySeconds: 2
             periodSeconds: 10
