@@ -26,8 +26,6 @@ spec:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: argocd-dex-server
         app.kubernetes.io/part-of: argocd
-        app.kubernetes.io/version: v2.12.6
-        helm.sh/chart: argo-cd-7.6.12
     spec:
       affinity:
         podAntiAffinity:
