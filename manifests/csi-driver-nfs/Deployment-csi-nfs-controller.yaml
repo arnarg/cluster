@@ -21,8 +21,6 @@ spec:
         app.kubernetes.io/instance: csi-driver-nfs
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: csi-driver-nfs
-        app.kubernetes.io/version: v4.9.0
-        helm.sh/chart: csi-driver-nfs-v4.9.0
     spec:
       containers:
         - args:

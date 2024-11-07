@@ -21,8 +21,6 @@ spec:
         app.kubernetes.io/instance: k8s-gateway
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: k8s-gateway
-        app.kubernetes.io/version: 0.4.0
-        helm.sh/chart: k8s-gateway-2.4.0
     spec:
       containers:
         - args:
