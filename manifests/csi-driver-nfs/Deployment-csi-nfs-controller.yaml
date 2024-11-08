@@ -3,7 +3,6 @@ kind: Deployment
 metadata:
   labels:
     app.kubernetes.io/instance: csi-driver-nfs
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-nfs
   name: csi-nfs-controller
   namespace: kube-system
@@ -19,7 +18,6 @@ spec:
       labels:
         app: csi-nfs-controller
         app.kubernetes.io/instance: csi-driver-nfs
-        app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: csi-driver-nfs
     spec:
       containers:

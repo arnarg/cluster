@@ -3,7 +3,6 @@ kind: ClusterRole
 metadata:
   labels:
     app.kubernetes.io/instance: k8s-gateway
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: k8s-gateway
   name: k8s-gateway
 rules:

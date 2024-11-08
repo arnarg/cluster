@@ -3,7 +3,6 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     app.kubernetes.io/instance: traefik-traefik
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: traefik
   name: traefik-traefik
 roleRef:

@@ -3,7 +3,6 @@ kind: Deployment
 metadata:
   labels:
     app.kubernetes.io/instance: k8s-gateway
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: k8s-gateway
   name: k8s-gateway
   namespace: k8s-gateway
@@ -19,7 +18,6 @@ spec:
         checksum/config: 019434ebbda2a95778cb8e1d9b4b86c1dcad106047882b5f0d1dc0b7cab7ab95
       labels:
         app.kubernetes.io/instance: k8s-gateway
-        app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/name: k8s-gateway
     spec:
       containers:

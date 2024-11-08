@@ -3,7 +3,6 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     app.kubernetes.io/instance: csi-driver-nfs
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/name: csi-driver-nfs
   name: nfs-csi-provisioner-binding
 roleRef:
