@@ -39,6 +39,7 @@
         # Here we add a transformer that strips them out after
         # templating the helm charts in each application.
         helm.transformer = map (lib.kube.removeLabels [
+          "app.kubernetes.io/managed-by"
           "app.kubernetes.io/version"
           "helm.sh/chart"
         ]);
