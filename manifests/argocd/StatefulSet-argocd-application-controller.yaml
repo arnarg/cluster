@@ -19,8 +19,8 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cm: bdf420fed5b282a8cc01d1af33ae7161cb9d031455d2b539b352bf53874f53cd
-        checksum/cmd-params: d6afd38d28b7ae2cbf5700a2d1f5f19a42d25abef6d869d92b52c217decc5d99
+        checksum/cm: 855410f0dfd9a21aaaff1427a51d9ea4155610fc297bc1b7d3ef3624b76e2119
+        checksum/cmd-params: e5b9b3eeeebb4bc7403df42eb832e8e6af9fd490621e064ae2a4138523fe4a86
       labels:
         app.kubernetes.io/component: application-controller
         app.kubernetes.io/instance: argocd
@@ -116,6 +116,24 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   key: controller.self.heal.timeout.seconds
+                  name: argocd-cmd-params-cm
+                  optional: true
+            - name: ARGOCD_APPLICATION_CONTROLLER_SELF_HEAL_BACKOFF_TIMEOUT_SECONDS
+              valueFrom:
+                configMapKeyRef:
+                  key: controller.self.heal.backoff.timeout.seconds
+                  name: argocd-cmd-params-cm
+                  optional: true
+            - name: ARGOCD_APPLICATION_CONTROLLER_SELF_HEAL_BACKOFF_FACTOR
+              valueFrom:
+                configMapKeyRef:
+                  key: controller.self.heal.backoff.factor
+                  name: argocd-cmd-params-cm
+                  optional: true
+            - name: ARGOCD_APPLICATION_CONTROLLER_SELF_HEAL_BACKOFF_CAP_SECONDS
+              valueFrom:
+                configMapKeyRef:
+                  key: controller.self.heal.backoff.cap.seconds
                   name: argocd-cmd-params-cm
                   optional: true
             - name: ARGOCD_APPLICATION_CONTROLLER_REPO_SERVER_PLAINTEXT
@@ -249,7 +267,7 @@ spec:
                   key: controller.ignore.normalizer.jq.timeout
                   name: argocd-cmd-params-cm
                   optional: true
-          image: quay.io/argoproj/argocd:v2.12.6
+          image: quay.io/argoproj/argocd:v2.13.0
           imagePullPolicy: IfNotPresent
           name: application-controller
           ports:
@@ -280,6 +298,8 @@ spec:
               name: argocd-repo-server-tls
             - mountPath: /home/argocd
               name: argocd-home
+            - mountPath: /home/argocd/params
+              name: argocd-cmd-params-cm
           workingDir: /home/argocd
       dnsPolicy: ClusterFirst
       serviceAccountName: argocd-application-controller
@@ -298,3 +318,10 @@ spec:
                 path: ca.crt
             optional: true
             secretName: argocd-repo-server-tls
+        - configMap:
+            items:
+              - key: controller.profile.enabled
+                path: profiler.enabled
+            name: argocd-cmd-params-cm
+            optional: true
+          name: argocd-cmd-params-cm

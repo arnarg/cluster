@@ -18,7 +18,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cmd-params: d6afd38d28b7ae2cbf5700a2d1f5f19a42d25abef6d869d92b52c217decc5d99
+        checksum/cmd-params: e5b9b3eeeebb4bc7403df42eb832e8e6af9fd490621e064ae2a4138523fe4a86
       labels:
         app.kubernetes.io/component: applicationset-controller
         app.kubernetes.io/instance: argocd
@@ -172,7 +172,13 @@ spec:
                   key: applicationsetcontroller.enable.scm.providers
                   name: argocd-cmd-params-cm
                   optional: true
-          image: quay.io/argoproj/argocd:v2.12.6
+            - name: ARGOCD_APPLICATIONSET_CONTROLLER_WEBHOOK_PARALLELISM_LIMIT
+              valueFrom:
+                configMapKeyRef:
+                  key: applicationsetcontroller.webhook.parallelism.limit
+                  name: argocd-cmd-params-cm
+                  optional: true
+          image: quay.io/argoproj/argocd:v2.13.0
           imagePullPolicy: IfNotPresent
           name: applicationset-controller
           ports:
