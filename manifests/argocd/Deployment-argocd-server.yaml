@@ -18,8 +18,8 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cm: bdf420fed5b282a8cc01d1af33ae7161cb9d031455d2b539b352bf53874f53cd
-        checksum/cmd-params: d6afd38d28b7ae2cbf5700a2d1f5f19a42d25abef6d869d92b52c217decc5d99
+        checksum/cm: 855410f0dfd9a21aaaff1427a51d9ea4155610fc297bc1b7d3ef3624b76e2119
+        checksum/cmd-params: e5b9b3eeeebb4bc7403df42eb832e8e6af9fd490621e064ae2a4138523fe4a86
       labels:
         app.kubernetes.io/component: server
         app.kubernetes.io/instance: argocd
@@ -301,7 +301,37 @@ spec:
                   key: server.api.content.types
                   name: argocd-cmd-params-cm
                   optional: true
-          image: quay.io/argoproj/argocd:v2.12.6
+            - name: ARGOCD_SERVER_WEBHOOK_PARALLELISM_LIMIT
+              valueFrom:
+                configMapKeyRef:
+                  key: server.webhook.parallelism.limit
+                  name: argocd-cmd-params-cm
+                  optional: true
+            - name: ARGOCD_APPLICATIONSET_CONTROLLER_ENABLE_NEW_GIT_FILE_GLOBBING
+              valueFrom:
+                configMapKeyRef:
+                  key: applicationsetcontroller.enable.new.git.file.globbing
+                  name: argocd-cmd-params-cm
+                  optional: true
+            - name: ARGOCD_APPLICATIONSET_CONTROLLER_SCM_ROOT_CA_PATH
+              valueFrom:
+                configMapKeyRef:
+                  key: applicationsetcontroller.scm.root.ca.path
+                  name: argocd-cmd-params-cm
+                  optional: true
+            - name: ARGOCD_APPLICATIONSET_CONTROLLER_ALLOWED_SCM_PROVIDERS
+              valueFrom:
+                configMapKeyRef:
+                  key: applicationsetcontroller.allowed.scm.providers
+                  name: argocd-cmd-params-cm
+                  optional: true
+            - name: ARGOCD_APPLICATIONSET_CONTROLLER_ENABLE_SCM_PROVIDERS
+              valueFrom:
+                configMapKeyRef:
+                  key: applicationsetcontroller.enable.scm.providers
+                  name: argocd-cmd-params-cm
+                  optional: true
+          image: quay.io/argoproj/argocd:v2.13.0
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
@@ -354,6 +384,8 @@ spec:
               name: styles
             - mountPath: /tmp
               name: tmp
+            - mountPath: /home/argocd/params
+              name: argocd-cmd-params-cm
       dnsPolicy: ClusterFirst
       serviceAccountName: argocd-server
       terminationGracePeriodSeconds: 30
@@ -392,3 +424,10 @@ spec:
                 path: ca.crt
             optional: true
             secretName: argocd-dex-server-tls
+        - configMap:
+            items:
+              - key: server.profile.enabled
+                path: profiler.enabled
+            name: argocd-cmd-params-cm
+            optional: true
+          name: argocd-cmd-params-cm

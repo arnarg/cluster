@@ -69,7 +69,13 @@ spec:
                   key: notificationscontroller.selfservice.enabled
                   name: argocd-cmd-params-cm
                   optional: true
-          image: quay.io/argoproj/argocd:v2.12.6
+            - name: ARGOCD_NOTIFICATION_CONTROLLER_REPO_SERVER_PLAINTEXT
+              valueFrom:
+                configMapKeyRef:
+                  key: notificationscontroller.repo.server.plaintext
+                  name: argocd-cmd-params-cm
+                  optional: true
+          image: quay.io/argoproj/argocd:v2.13.0
           imagePullPolicy: IfNotPresent
           name: notifications-controller
           ports:
