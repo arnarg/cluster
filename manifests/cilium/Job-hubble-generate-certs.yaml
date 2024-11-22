@@ -39,7 +39,7 @@ spec:
                   - key encipherment
                   - server auth
                   - client auth
-                  validity: 26280h
+                  validity: 8760h
                 - name: hubble-relay-client-certs
                   namespace: kube-system
                   commonName: "*.hubble-relay.cilium.io"
@@ -49,7 +49,7 @@ spec:
                   - signing
                   - key encipherment
                   - client auth
-                  validity: 26280h
+                  validity: 8760h
           image: quay.io/cilium/certgen:v0.2.0@sha256:169d93fd8f2f9009db3b9d5ccd37c2b753d0989e1e7cd8fe79f9160c459eef4f
           imagePullPolicy: IfNotPresent
           name: certgen
