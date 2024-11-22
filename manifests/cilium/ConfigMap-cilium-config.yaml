@@ -106,6 +106,7 @@ data:
   procfs: /host/proc
   proxy-connect-timeout: "2"
   proxy-idle-timeout-seconds: "60"
+  proxy-initial-fetch-timeout: "30"
   proxy-max-connection-duration-seconds: "0"
   proxy-max-requests-per-connection: "0"
   proxy-xff-num-trusted-hops-egress: "0"
