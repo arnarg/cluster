@@ -64,3 +64,13 @@ rules:
       - update
       - list
       - watch
+  - apiGroups:
+      - monitoring.coreos.com
+    resources:
+      - servicemonitors
+    verbs:
+      - get
+      - list
+      - update
+      - create
+      - delete
