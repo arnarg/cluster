@@ -65,7 +65,7 @@ spec:
           envFrom:
             - secretRef:
                 name: acme-env
-          image: docker.io/traefik:v3.2.1
+          image: docker.io/traefik:v3.2.2
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
