@@ -1213,11 +1213,11 @@ with lib; let
         };
         "limits" = mkOption {
           description = "Limits describes the maximum amount of compute resources allowed.\nMore info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/";
-          type = types.nullOr (types.attrsOf types.int);
+          type = types.nullOr (types.attrsOf (types.either types.int types.str));
         };
         "requests" = mkOption {
           description = "Requests describes the minimum amount of compute resources required.\nIf Requests is omitted for a container, it defaults to Limits if that is explicitly specified,\notherwise to an implementation-defined value. Requests cannot exceed Limits.\nMore info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/";
-          type = types.nullOr (types.attrsOf types.int);
+          type = types.nullOr (types.attrsOf (types.either types.int types.str));
         };
       };
 
@@ -1465,11 +1465,11 @@ with lib; let
         };
         "limits" = mkOption {
           description = "Limits describes the maximum amount of compute resources allowed.\nMore info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/";
-          type = types.nullOr (types.attrsOf types.int);
+          type = types.nullOr (types.attrsOf (types.either types.int types.str));
         };
         "requests" = mkOption {
           description = "Requests describes the minimum amount of compute resources required.\nIf Requests is omitted for a container, it defaults to Limits if that is explicitly specified,\notherwise to an implementation-defined value. Requests cannot exceed Limits.\nMore info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/";
-          type = types.nullOr (types.attrsOf types.int);
+          type = types.nullOr (types.attrsOf (types.either types.int types.str));
         };
       };
 
