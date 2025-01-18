@@ -47,6 +47,7 @@ spec:
             - --providers.kubernetesingress.ingressendpoint.publishedservice=traefik/traefik
             - --entryPoints.web.http.redirections.entryPoint.to=:443
             - --entryPoints.web.http.redirections.entryPoint.scheme=https
+            - --entryPoints.web.http.redirections.entryPoint.permanent=true
             - --entryPoints.websecure.http.tls=true
             - --entryPoints.websecure.http.tls.certResolver=letsencrypt
             - --log.level=INFO
@@ -65,7 +66,7 @@ spec:
           envFrom:
             - secretRef:
                 name: acme-env
-          image: docker.io/traefik:v3.2.2
+          image: docker.io/traefik:v3.3.2
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
