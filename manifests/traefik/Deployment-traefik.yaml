@@ -52,6 +52,7 @@ spec:
             - --entryPoints.websecure.http.tls.certResolver=letsencrypt
             - --log.level=INFO
             - --certificatesresolvers.letsencrypt.acme.dnsChallenge.provider=cloudflare
+            - --certificatesresolvers.letsencrypt.acme.dnsChallenge.resolvers=anirban.ns.cloudflare.com:53,chin.ns.cloudflare.com:53
             - --certificatesresolvers.letsencrypt.acme.email=acme@codedbearder.com
             - --certificatesresolvers.letsencrypt.acme.storage=/data/acme.json
           env:
