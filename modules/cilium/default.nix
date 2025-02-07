@@ -21,6 +21,9 @@
       # Default CIDR in k3s.
       ipam.operator.clusterPoolIPv4PodCIDRList = ["10.42.0.0/16"];
 
+      # Force to be null to workaround issue where it's not qouted
+      ipam.multiPoolPreAllocation = null;
+
       # Policy enforcement.
       policyEnforcementMode = "always";
       policyAuditMode = false;
