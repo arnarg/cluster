@@ -18,8 +18,8 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cm: a6e86a7c976ff4b8542d967eda4ec504567b5999fe2b09dc7fd0c295b69a3943
-        checksum/cmd-params: 3e6dec3233327b893891512c392dad04e06733b6b1846a3cce37f234bd3f6b37
+        checksum/cm: a1219f23df01e9123fb5a33f7ea0f8e155892912d6eec7707a589a0edcb0143c
+        checksum/cmd-params: 6bfa9679c9b84b06d5c7872cbc7a4c4ccf3a92a652ef60fdc81a9059f7788b39
       labels:
         app.kubernetes.io/component: repo-server
         app.kubernetes.io/instance: argocd
@@ -188,6 +188,12 @@ spec:
                   key: reposerver.plugin.tar.exclusions
                   name: argocd-cmd-params-cm
                   optional: true
+            - name: ARGOCD_REPO_SERVER_PLUGIN_USE_MANIFEST_GENERATE_PATHS
+              valueFrom:
+                configMapKeyRef:
+                  key: reposerver.plugin.use.manifest.generate.paths
+                  name: argocd-cmd-params-cm
+                  optional: true
             - name: ARGOCD_REPO_SERVER_ALLOW_OUT_OF_BOUNDS_SYMLINKS
               valueFrom:
                 configMapKeyRef:
@@ -254,7 +260,7 @@ spec:
               value: /helm-working-dir
             - name: HELM_DATA_HOME
               value: /helm-working-dir
-          image: quay.io/argoproj/argocd:v2.13.4
+          image: quay.io/argoproj/argocd:v2.14.2
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
@@ -320,7 +326,7 @@ spec:
             - -n
             - /usr/local/bin/argocd
             - /var/run/argocd/argocd-cmp-server
-          image: quay.io/argoproj/argocd:v2.13.4
+          image: quay.io/argoproj/argocd:v2.14.2
           imagePullPolicy: IfNotPresent
           name: copyutil
           resources: {}
@@ -336,6 +342,8 @@ spec:
           volumeMounts:
             - mountPath: /var/run/argocd
               name: var-files
+      nodeSelector:
+        kubernetes.io/os: linux
       serviceAccountName: argocd-repo-server
       terminationGracePeriodSeconds: 30
       volumes:

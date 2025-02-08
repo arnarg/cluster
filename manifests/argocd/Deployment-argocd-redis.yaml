@@ -63,6 +63,8 @@ spec:
             - mountPath: /health
               name: health
       dnsPolicy: ClusterFirst
+      nodeSelector:
+        kubernetes.io/os: linux
       securityContext:
         runAsNonRoot: true
         runAsUser: 999
