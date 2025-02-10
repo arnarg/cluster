@@ -1,7 +1,7 @@
+import sys
 import os
 import re
 import openai
-import requests
 
 BASE_URL = "https://api.hyperbolic.xyz/v1"
 
@@ -72,44 +72,24 @@ def do_review(api_key: str, diff: str):
 </details>"""
 
 
-def get_diff(repo: str, id: str):
-    url = f"https://github.com/{repo}/pull/{id}.diff"
-
-    res = requests.get(url)
-
-    if res.status_code != 200:
-        raise Exception(f"Unexpected status code {res.status_code}: {res.text}")
-
-    return res.text
-
-
-def create_comment(repo: str, token: str, id: str, body: str):
-    url = f"https://api.github.com/repos/{repo}/issues/{id}/comments"
-
-    headers = {
-        "Accept": "application/vnd.github+json",
-        "Authorization": f"Bearer {token}",
-        "X-GitHub-Api-Version": "2022-11-28",
-    }
-
-    payload = {
-        "body": body,
-    }
-
-    res = requests.post(url, headers=headers, json=payload)
-
-    if res.status_code != 201:
-        raise Exception(f"Unexpected status code {res.status_code}: {res.text}")
+def print_result(result: str):
+    if (
+        os.environ.get("GITHUB_ACTIONS") == "true"
+        and os.environ.get("GITHUB_OUTPUT") is not None
+    ):
+        with open(os.environ.get("GITHUB_OUTPUT"), "a") as output:
+            output.write("review<<EOF\n")
+            output.write(result + "\n")
+            output.write("EOF\n")
+    else:
+        print(result)
 
 
 if __name__ == "__main__":
-    repo = os.environ["GITHUB_REPOSITORY"]
-    pr_id = os.environ["GITHUB_PR_ID"]
-    token = os.environ["GITHUB_TOKEN"]
     api_key = os.environ["HYPERBOLIC_API_KEY"]
 
-    diff = get_diff(repo, pr_id)
+    diff = sys.stdin.read()
 
     md = do_review(api_key, diff)
 
-    create_comment(repo, token, pr_id, md)
+    print_result(md)
