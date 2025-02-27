@@ -22,5 +22,65 @@ in {
         operator.create = true;
       };
     };
+
+    resources = {
+      ciliumNetworkPolicies = {
+        # Allow 1password-connect pod to access kube-apiserver
+        allow-kube-apiserver-egress.spec = {
+          endpointSelector.matchLabels = {
+            app = "onepassword-connect";
+            "app.kubernetes.io/component" = "connect";
+          };
+          egress = [
+            {
+              toEntities = ["kube-apiserver"];
+              toPorts = [
+                {
+                  ports = [
+                    {
+                      port = "6443";
+                      protocol = "TCP";
+                    }
+                  ];
+                }
+              ];
+            }
+          ];
+        };
+
+        allow-world-egress.spec = {
+          endpointSelector.matchLabels = {
+            app = "onepassword-connect";
+            "app.kubernetes.io/name" = "argocd-repo-server";
+          };
+          egress = [
+            # Enable DNS proxying
+            {
+              toEndpoints = [
+                {
+                  matchLabels = {
+                    "k8s:io.kubernetes.pod.namespace" = "kube-system";
+                    "k8s:k8s-app" = "kube-dns";
+                  };
+                }
+              ];
+              toPorts = [
+                {
+                  ports = [
+                    {
+                      port = "53";
+                      protocol = "ANY";
+                    }
+                  ];
+                  rules.dns = [
+                    {matchPattern = "*";}
+                  ];
+                }
+              ];
+            }
+          ];
+        };
+      };
+    };
   };
 }
