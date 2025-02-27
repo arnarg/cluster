@@ -25,11 +25,11 @@ in {
 
     resources = {
       ciliumNetworkPolicies = {
-        # Allow 1password-connect pod to access kube-apiserver
+        # Allow 1password-connect operator pod to access kube-apiserver
         allow-kube-apiserver-egress.spec = {
           endpointSelector.matchLabels = {
-            app = "onepassword-connect";
-            "app.kubernetes.io/component" = "connect";
+            name = "onepassword-connect";
+            "app.kubernetes.io/component" = "operator";
           };
           egress = [
             {
@@ -50,8 +50,8 @@ in {
 
         allow-world-egress.spec = {
           endpointSelector.matchLabels = {
-            app = "onepassword-connect";
-            "app.kubernetes.io/name" = "argocd-repo-server";
+            name = "onepassword-connect";
+            "app.kubernetes.io/component" = "operator";
           };
           egress = [
             # Enable DNS proxying
