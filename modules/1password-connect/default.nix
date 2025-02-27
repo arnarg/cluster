@@ -1,6 +1,8 @@
 {charts, ...}: let
   namespace = "1password";
 in {
+  nixidy.resourceImports = [./generated.nix];
+
   applications."1password-connect" = {
     inherit namespace;
     createNamespace = true;

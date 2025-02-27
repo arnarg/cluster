@@ -73,6 +73,11 @@
           src = nixhelm.chartsDerivations.${system}.isindir.sops-secrets-operator;
           crds = ["crds/isindir.github.com_sopssecrets.yaml"];
         };
+        onepassword = nixidy.packages.${system}.generators.fromCRD {
+          name = "onepassword";
+          src = nixhelm.chartsDerivations.${system}."1password".connect;
+          crds = ["crds/onepassworditem-crd.yaml"];
+        };
         traefik = nixidy.packages.${system}.generators.fromCRD {
           name = "traefik";
           src = nixhelm.chartsDerivations.${system}.traefik.traefik;
@@ -95,6 +100,9 @@
 
             echo "generate sops"
             cat ${self.packages.${system}.generators.sops} > modules/sops-secrets-operator/generated.nix
+
+            echo "generate onepassword"
+            cat ${self.packages.${system}.generators.onepassword} > modules/1password-connect/generated.nix
 
             echo "generate cilium"
             cat ${self.packages.${system}.generators.cilium} > modules/cilium/generated.nix

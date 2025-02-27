@@ -123,6 +123,11 @@ in {
       };
 
       resources = {
+        # 1password secret with ACME credentials
+        onePasswordItems.acme-creds.spec = {
+          itemPath = "vaults/Cluster/items/TraefikAcme";
+        };
+
         # Network policy allowing tailscale proxy to
         # make DNS requests to traefik.
         networkPolicies.allow-tailscale-ingress.spec = {
