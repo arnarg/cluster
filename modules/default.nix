@@ -1,5 +1,6 @@
 {lib, ...}: {
   imports = [
+    ./1password-connect
     ./argocd
     ./cilium
     ./k8s-gateway
