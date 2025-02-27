@@ -75,10 +75,11 @@ in {
           ];
         };
 
+        # Allow 1password-connect to talk to 1password API
         allow-world-egress.spec = {
           endpointSelector.matchLabels = {
-            name = "onepassword-connect";
-            "app.kubernetes.io/component" = "operator";
+            app = "onepassword-connect";
+            "app.kubernetes.io/component" = "connect";
           };
           egress = [
             # Enable DNS proxying
