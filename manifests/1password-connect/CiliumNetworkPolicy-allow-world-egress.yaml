@@ -18,5 +18,5 @@ spec:
               - matchPattern: '*'
   endpointSelector:
     matchLabels:
-      app: onepassword-connect
-      app.kubernetes.io/name: argocd-repo-server
+      app.kubernetes.io/component: operator
+      name: onepassword-connect
