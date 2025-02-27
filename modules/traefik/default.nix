@@ -91,7 +91,7 @@
       # Key name is `CF_DNS_API_TOKEN`.
       envFrom = [
         {
-          secretRef.name = "acme-env";
+          secretRef.name = "acme-creds";
         }
       ];
     }
@@ -239,11 +239,6 @@ in {
           ];
         };
       };
-
-      yamls = [
-        # Load SOPS encrypted secret
-        (builtins.readFile ./traefik-secret.sops.yaml)
-      ];
     };
   };
 }
