@@ -18,5 +18,5 @@ spec:
               - matchPattern: '*'
   endpointSelector:
     matchLabels:
-      app.kubernetes.io/component: operator
-      name: onepassword-connect
+      app: onepassword-connect
+      app.kubernetes.io/component: connect
