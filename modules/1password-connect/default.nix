@@ -48,6 +48,33 @@ in {
           ];
         };
 
+        # Allow 1password-connect operator to talk to 1password-connect
+        allow-connect-operator.spec = {
+          endpointSelector.matchLabels = {
+            app = "onepassword-connect";
+            "app.kubernetes.io/component" = "connect";
+          };
+          ingress = [
+            {
+              fromEndpoints = [
+                {
+                  matchLabels = {
+                    name = "onepassword-connect";
+                    "app.kubernetes.io/component" = "operator";
+                  };
+                }
+              ];
+              toPorts = [
+                {
+                  ports = [
+                    {port = "8080";}
+                  ];
+                }
+              ];
+            }
+          ];
+        };
+
         allow-world-egress.spec = {
           endpointSelector.matchLabels = {
             name = "onepassword-connect";
