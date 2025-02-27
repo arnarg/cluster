@@ -106,6 +106,22 @@ in {
                 }
               ];
             }
+            # Allow HTTPS to my.1password.com
+            {
+              toFQDNs = [
+                {matchName = "my.1password.com";}
+              ];
+              toPorts = [
+                {
+                  ports = [
+                    {
+                      port = "443";
+                      protocol = "TCP";
+                    }
+                  ];
+                }
+              ];
+            }
           ];
         };
       };
