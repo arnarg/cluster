@@ -79,7 +79,7 @@ jobs:
         env:
           HYPERBOLIC_API_KEY: ${{ secrets.HYPERBOLIC_API_KEY }}
         run: |
-          git diff origin/main ${{env.BRANCH}} | python .github/llm-review/main.py
+          git diff origin/main ${{env.BRANCH}} -- manifests | python .github/llm-review/main.py
 
       - uses: thomaseizinger/create-pull-request@1.4.0
         if: ${{ steps.commit.outputs.pushed == 'true' }}
