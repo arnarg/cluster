@@ -125,7 +125,7 @@ in {
       resources = {
         # 1password secret with ACME credentials
         onePasswordItems.acme-creds.spec = {
-          itemPath = "vaults/Cluster/items/TraefikAcme";
+          itemPath = "vaults/Cluster/items/traefik_acme";
         };
 
         # Network policy allowing tailscale proxy to
