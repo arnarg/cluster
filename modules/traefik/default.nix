@@ -122,12 +122,10 @@ in {
         chart = charts.traefik.traefik;
       };
 
-      resources = {
-        # 1password secret with ACME credentials
-        onePasswordItems.acme-creds.spec = {
-          itemPath = "vaults/Cluster/items/traefik_acme";
-        };
+      # 1password secret with ACME credentials
+      opSecrets.acme-creds.itemName = "traefik_acme";
 
+      resources = {
         # Network policy allowing tailscale proxy to
         # make DNS requests to traefik.
         networkPolicies.allow-tailscale-ingress.spec = {

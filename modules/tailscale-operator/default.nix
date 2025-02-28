@@ -72,16 +72,14 @@ in {
         ''
       ];
 
+      # Load tailscale credentials from 1password
+      opSecrets.operator-oauth.itemName = "tailscale_oauth";
+
       resources = {
         # The tailscale namespace needs a privileged pod security
         # policy.
         namespaces."${namespace}" = {
           metadata.labels."pod-security.kubernetes.io/enforce" = lib.mkForce "privileged";
-        };
-
-        # Load tailscale credentials from 1password
-        onePasswordItems.operator-oauth.spec = {
-          itemPath = "vaults/Cluster/items/tailscale_oauth";
         };
 
         # Add labels to tailscale-operator pod

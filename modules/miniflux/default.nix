@@ -9,13 +9,12 @@ in {
     inherit namespace;
     createNamespace = true;
 
+    # Load credentials from 1password
+    opSecrets.miniflux-creds.itemName = "miniflux_creds";
+
     resources = let
       port = 8080;
     in {
-      onePasswordItems.miniflux-creds.spec = {
-        itemPath = "vaults/Cluster/items/miniflux_creds";
-      };
-
       deployments.miniflux = {
         metadata.labels = labels;
         spec = {

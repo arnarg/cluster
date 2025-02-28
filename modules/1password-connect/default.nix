@@ -1,7 +1,12 @@
 {charts, ...}: let
   namespace = "1password";
 in {
-  nixidy.resourceImports = [./generated.nix];
+  nixidy.resourceImports = [
+    # Hacky way of introducing nice to have
+    # helpers into applications.*
+    ./secrets.nix
+    ./generated.nix
+  ];
 
   applications."1password-connect" = {
     inherit namespace;

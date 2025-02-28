@@ -7,13 +7,12 @@ in {
     inherit namespace;
     createNamespace = true;
 
+    # Load credentials from 1password
+    opSecrets.shiori-creds.itemName = "shiori_creds";
+
     resources = let
       port = 8080;
     in {
-      onePasswordItems.shiori-creds.spec = {
-        itemPath = "vaults/Cluster/items/shiori_creds";
-      };
-
       deployments.shiori = {
         metadata.labels = labels;
         spec = {
