@@ -70,9 +70,6 @@ in {
                 - port: "3478"
                   protocol: UDP
         ''
-
-        # Load SOPS encrypted secret
-        (builtins.readFile ./tailscale-secret.sops.yaml)
       ];
 
       resources = {
@@ -80,6 +77,11 @@ in {
         # policy.
         namespaces."${namespace}" = {
           metadata.labels."pod-security.kubernetes.io/enforce" = lib.mkForce "privileged";
+        };
+
+        # Load tailscale credentials from 1password
+        onePasswordItems.operator-oauth.spec = {
+          itemPath = "vaults/Cluster/items/tailscale_oauth";
         };
 
         # Add labels to tailscale-operator pod

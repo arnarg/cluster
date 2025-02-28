@@ -12,6 +12,10 @@ in {
     resources = let
       port = 8080;
     in {
+      onePasswordItems.miniflux-creds.spec = {
+        itemPath = "vaults/Cluster/items/miniflux_creds";
+      };
+
       deployments.miniflux = {
         metadata.labels = labels;
         spec = {
@@ -142,10 +146,5 @@ in {
         ];
       };
     };
-
-    yamls = [
-      # Read SOPS encrypted secret
-      (builtins.readFile ./miniflux-secret.sops.yaml)
-    ];
   };
 }

@@ -10,6 +10,10 @@ in {
     resources = let
       port = 8080;
     in {
+      onePasswordItems.shiori-creds.spec = {
+        itemPath = "vaults/Cluster/items/shiori_creds";
+      };
+
       deployments.shiori = {
         metadata.labels = labels;
         spec = {
@@ -159,10 +163,5 @@ in {
         };
       };
     };
-
-    yamls = [
-      # Read SOPS encrypted secret
-      (builtins.readFile ./shiori-secret.sops.yaml)
-    ];
   };
 }
