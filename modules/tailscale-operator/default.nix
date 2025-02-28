@@ -26,7 +26,7 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    nixidy.resourceImports = [./generated.nix];
+    nixidy.applicationImports = [./generated.nix];
 
     applications.tailscale-operator = {
       inherit namespace;
