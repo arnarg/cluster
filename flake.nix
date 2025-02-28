@@ -68,11 +68,6 @@
           };
           crds = ["cmd/k8s-operator/deploy/crds/tailscale.com_proxyclasses.yaml"];
         };
-        sops = nixidy.packages.${system}.generators.fromCRD {
-          name = "sops";
-          src = nixhelm.chartsDerivations.${system}.isindir.sops-secrets-operator;
-          crds = ["crds/isindir.github.com_sopssecrets.yaml"];
-        };
         onepassword = nixidy.packages.${system}.generators.fromCRD {
           name = "onepassword";
           src = nixhelm.chartsDerivations.${system}."1password".connect;
@@ -97,9 +92,6 @@
         program =
           (pkgs.writeShellScript "generate-modules" ''
             set -eo pipefail
-
-            echo "generate sops"
-            cat ${self.packages.${system}.generators.sops} > modules/sops-secrets-operator/generated.nix
 
             echo "generate onepassword"
             cat ${self.packages.${system}.generators.onepassword} > modules/1password-connect/generated.nix
@@ -158,7 +150,6 @@
     devShells.default = pkgs.mkShell {
       buildInputs = [
         nixidy.packages.${system}.default
-        pkgs.sops
       ];
     };
   }));

@@ -8,7 +8,6 @@
     ./traefik
     ./nfs
     ./shiori
-    ./sops-secrets-operator
     ./tailscale-operator
   ];
 
