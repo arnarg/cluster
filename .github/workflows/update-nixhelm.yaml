@@ -10,6 +10,7 @@ on:
 
 jobs:
   upgrade:
+    environment: main
     runs-on: ubuntu-latest
     env:
       BRANCH: promote/env/prod
