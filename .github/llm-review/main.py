@@ -1,7 +1,6 @@
 import pathlib
 import sys
 import os
-import re
 import openai
 
 BASE_URL = "https://api.hyperbolic.xyz/v1"
@@ -38,6 +37,15 @@ def do_completion(api_key: str, system: str, prompt: str):
 
     response = completion.choices[0].message.content
 
+    # DeepSeek-R1 outputs <think>...</think> in the
+    # start of the content.
+    # I split the string on </think> and take the
+    # last element to effectively discard the thinking.
+    parts = response.split("</think>")
+    if len(parts) > 0:
+        return parts[-1]
+
+    # Otherwise we just return the response
     return response
 
 
