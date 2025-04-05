@@ -18,8 +18,8 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cm: a48796cfdf69d5ecc6525bceb275159fab81340bcd81a9802fab32833064cdb2
-        checksum/cmd-params: 5c135aade12c377edbaca39f332c101667614cd3ac7fb93667aee108cbcdb1a4
+        checksum/cm: c7d2252ed1731b70dbb095945375538154c841b0213a2b0b13a8ed632477d604
+        checksum/cmd-params: 1850ce6c441faab2b53b998beb8226921172de4f6cd38c22a0cd2b864848f73b
       labels:
         app.kubernetes.io/component: server
         app.kubernetes.io/instance: argocd
@@ -217,7 +217,7 @@ spec:
                 secretKeyRef:
                   key: auth
                   name: argocd-redis
-                  optional: true
+                  optional: false
             - name: REDIS_SENTINEL_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -338,7 +338,7 @@ spec:
                   key: hydrator.enabled
                   name: argocd-cmd-params-cm
                   optional: true
-          image: quay.io/argoproj/argocd:v2.14.8
+          image: quay.io/argoproj/argocd:v2.14.9
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
