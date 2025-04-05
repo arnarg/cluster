@@ -15,6 +15,10 @@ data:
   controller.self.heal.timeout.seconds: "5"
   controller.status.processors: "20"
   controller.sync.timeout.seconds: "0"
+  dexserver.log.format: text
+  dexserver.log.level: info
+  notificationscontroller.log.format: text
+  notificationscontroller.log.level: info
   otlp.address: ""
   redis.server: argocd-redis:6379
   repo.server: argocd-repo-server:8081

@@ -39,8 +39,6 @@ spec:
         - args:
             - /usr/local/bin/argocd-notifications
             - --metrics-port=9001
-            - --loglevel=info
-            - --logformat=text
             - --namespace=argocd
             - --argocd-repo-server=argocd-repo-server:8081
             - --secret-name=argocd-notifications-secret
@@ -75,7 +73,7 @@ spec:
                   key: notificationscontroller.repo.server.plaintext
                   name: argocd-cmd-params-cm
                   optional: true
-          image: quay.io/argoproj/argocd:v2.14.8
+          image: quay.io/argoproj/argocd:v2.14.9
           imagePullPolicy: IfNotPresent
           name: notifications-controller
           ports:
