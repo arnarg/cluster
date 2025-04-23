@@ -6,10 +6,17 @@ import openai
 BASE_URL = "https://api.hyperbolic.xyz/v1"
 
 
-def get_sys_prompt() -> str:
+def get_desc_prompt() -> str:
     dir = pathlib.Path(__file__).parent.resolve()
 
-    with open(f"{dir}/prompt.md", "r") as stream:
+    with open(f"{dir}/description.md", "r") as stream:
+        return stream.read()
+
+
+def get_title_prompt() -> str:
+    dir = pathlib.Path(__file__).parent.resolve()
+
+    with open(f"{dir}/title.md", "r") as stream:
         return stream.read()
 
 
@@ -49,17 +56,19 @@ def do_completion(api_key: str, system: str, prompt: str):
     return response
 
 
-def print_result(result: str):
+def print_result(title: str, description: str):
     if (
         os.environ.get("GITHUB_ACTIONS") == "true"
         and os.environ.get("GITHUB_OUTPUT") is not None
     ):
         with open(os.environ.get("GITHUB_OUTPUT"), "a") as output:
+            output.write(f"title={title.strip()}\n")
             output.write("review<<EOF\n")
-            output.write(result + "\n")
+            output.write(description + "\n")
             output.write("EOF\n")
     else:
-        print(result)
+        print(f"# {title.strip()}")
+        print(description)
 
 
 if __name__ == "__main__":
@@ -67,8 +76,12 @@ if __name__ == "__main__":
 
     diff = sys.stdin.read()
 
-    sys_prompt = get_sys_prompt()
+    title_prompt = get_title_prompt()
 
-    md = do_completion(api_key, sys_prompt, diff)
+    title = do_completion(api_key, title_prompt, diff)
 
-    print_result(md)
+    desc_prompt = get_desc_prompt()
+
+    desc = do_completion(api_key, desc_prompt, diff)
+
+    print_result(title, desc)

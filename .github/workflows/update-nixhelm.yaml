@@ -89,5 +89,5 @@ jobs:
           github_token: ${{github.token}}
           head: ${{env.BRANCH}}
           base: main
-          title: Update nixhelm input
+          title: ${{steps.review.outputs.title || 'Update nixhelm input'}}
           body: ${{steps.review.outputs.review || ''}}
