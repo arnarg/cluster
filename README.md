@@ -1,4 +1,6 @@
-# arnarg/cluster
+![Logo saying "cluster" in the style of a pink black metal band logo.](./logo.svg)
+
+---
 
 GitOps for my Kubernetes cluster defined with [nixidy](https://github.com/arnarg/nixidy).
 
