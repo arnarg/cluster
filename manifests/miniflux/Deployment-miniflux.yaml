@@ -38,7 +38,7 @@ spec:
               value: 0.0.0.0:8080
             - name: RUN_MIGRATIONS
               value: "1"
-          image: ghcr.io/miniflux/miniflux:2.2.0-distroless
+          image: ghcr.io/miniflux/miniflux:2.2.8-distroless
           name: miniflux
           ports:
             - containerPort: 8080
