@@ -23,7 +23,7 @@ in {
           template = {
             metadata.labels = labels;
             spec.containers.miniflux = {
-              image = "ghcr.io/miniflux/miniflux:2.2.0-distroless";
+              image = "ghcr.io/miniflux/miniflux:2.2.8-distroless";
               ports.http.containerPort = port;
               env = {
                 DATABASE_URL.valueFrom.secretKeyRef = {
