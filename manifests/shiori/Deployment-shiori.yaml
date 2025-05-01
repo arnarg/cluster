@@ -35,7 +35,7 @@ spec:
                 secretKeyRef:
                   key: secretKey
                   name: shiori-creds
-          image: ghcr.io/go-shiori/shiori:v1.7.0
+          image: ghcr.io/go-shiori/shiori:v1.7.4
           name: shiori
           ports:
             - containerPort: 8080
