@@ -22,7 +22,7 @@ in {
             metadata.labels = labels;
             spec = {
               containers.shiori = {
-                image = "ghcr.io/go-shiori/shiori:v1.7.0";
+                image = "ghcr.io/go-shiori/shiori:v1.7.4";
                 args = [
                   "serve"
                   "--address"
