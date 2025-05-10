@@ -18,7 +18,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cmd-params: 574df03bbd53de294c02406aa03967ddf0f2444e1fbc7b3fd11ed64c44688a9e
+        checksum/cmd-params: a77cd032c5c70b543a2e5fd12a7072847c528f72b1cfa33a3a396a6b6ee0504f
       labels:
         app.kubernetes.io/component: applicationset-controller
         app.kubernetes.io/instance: argocd
@@ -98,6 +98,12 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   key: applicationsetcontroller.log.level
+                  name: argocd-cmd-params-cm
+                  optional: true
+            - name: ARGOCD_LOG_FORMAT_TIMESTAMP
+              valueFrom:
+                configMapKeyRef:
+                  key: log.format.timestamp
                   name: argocd-cmd-params-cm
                   optional: true
             - name: ARGOCD_APPLICATIONSET_CONTROLLER_DRY_RUN
@@ -190,7 +196,7 @@ spec:
                   key: applicationsetcontroller.requeue.after
                   name: argocd-cmd-params-cm
                   optional: true
-          image: quay.io/argoproj/argocd:v2.14.11
+          image: quay.io/argoproj/argocd:v3.0.0
           imagePullPolicy: IfNotPresent
           name: applicationset-controller
           ports:

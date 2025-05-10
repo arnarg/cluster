@@ -19,8 +19,8 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cm: b87ccc7a94dc78dd18aee90335f2842289ada3c565df68cff2b3221729b7fa15
-        checksum/cmd-params: 574df03bbd53de294c02406aa03967ddf0f2444e1fbc7b3fd11ed64c44688a9e
+        checksum/cm: 2e584662e3b7e188a7fac3d3da651fd6791096c0b875199cb413e9fe23db40c4
+        checksum/cmd-params: a77cd032c5c70b543a2e5fd12a7072847c528f72b1cfa33a3a396a6b6ee0504f
       labels:
         app.kubernetes.io/component: application-controller
         app.kubernetes.io/instance: argocd
@@ -104,6 +104,12 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   key: controller.log.level
+                  name: argocd-cmd-params-cm
+                  optional: true
+            - name: ARGOCD_LOG_FORMAT_TIMESTAMP
+              valueFrom:
+                configMapKeyRef:
+                  key: log.format.timestamp
                   name: argocd-cmd-params-cm
                   optional: true
             - name: ARGOCD_APPLICATION_CONTROLLER_METRICS_CACHE_EXPIRATION
@@ -232,6 +238,12 @@ spec:
                   key: otlp.headers
                   name: argocd-cmd-params-cm
                   optional: true
+            - name: ARGOCD_APPLICATION_CONTROLLER_OTLP_ATTRS
+              valueFrom:
+                configMapKeyRef:
+                  key: otlp.attrs
+                  name: argocd-cmd-params-cm
+                  optional: true
             - name: ARGOCD_APPLICATION_NAMESPACES
               valueFrom:
                 configMapKeyRef:
@@ -294,7 +306,7 @@ spec:
                   optional: true
             - name: KUBECACHEDIR
               value: /tmp/kubecache
-          image: quay.io/argoproj/argocd:v2.14.11
+          image: quay.io/argoproj/argocd:v3.0.0
           imagePullPolicy: IfNotPresent
           name: application-controller
           ports:
