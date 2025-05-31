@@ -17,6 +17,7 @@ data:
   controller.sync.timeout.seconds: "0"
   dexserver.log.format: text
   dexserver.log.level: info
+  hydrator.enabled: "false"
   notificationscontroller.log.format: text
   notificationscontroller.log.level: info
   otlp.address: ""
