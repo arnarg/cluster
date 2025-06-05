@@ -27,7 +27,7 @@ def do_completion(api_key: str, system: str, prompt: str):
     )
 
     completion = client.chat.completions.create(
-        model="deepseek-ai/DeepSeek-R1",
+        model="deepseek-ai/DeepSeek-R1-0528",
         temperature=0.1,
         max_tokens=4096,
         messages=[
