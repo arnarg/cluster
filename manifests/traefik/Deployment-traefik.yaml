@@ -32,6 +32,7 @@ spec:
       automountServiceAccountToken: true
       containers:
         - args:
+            - --global.checkNewVersion
             - --entryPoints.metrics.address=:9100/tcp
             - --entryPoints.traefik.address=:8080/tcp
             - --entryPoints.web.address=:8000/tcp
@@ -67,7 +68,7 @@ spec:
           envFrom:
             - secretRef:
                 name: acme-creds
-          image: docker.io/traefik:v3.4.0
+          image: docker.io/traefik:v3.4.1
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
