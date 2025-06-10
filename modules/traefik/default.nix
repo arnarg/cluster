@@ -18,7 +18,10 @@
       };
 
       # Don't send update checks and anonymous data collection.
-      globalArguments = [];
+      global = {
+        checkNewVersion = false;
+        sendAnonymousUsage = false;
+      };
 
       # Automatically set host to published services.
       providers.kubernetesIngress.publishedService.enabled = true;
