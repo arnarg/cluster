@@ -67,7 +67,7 @@ END EXAMPLES
 2. Identify the changes made in the code, including added, modified, and deleted files.
 3. Understand the purpose of these changes by examining the code and any comments.
 4. Write a concise pull request title, that should be no more than 70 characters long.
-5. Output only the PR title.
+5. Output only the pull request title on a single line, no further explanation, just pull request title.
 
 # INPUT
 
