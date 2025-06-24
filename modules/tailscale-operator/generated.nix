@@ -1788,6 +1788,8 @@ in {
         mkAliasDefinitions options.resources."proxyClasses";
     };
 
+    # make all namespaced resources default to the
+    # application's namespace
     defaults = [];
   };
 }

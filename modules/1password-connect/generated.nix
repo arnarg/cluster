@@ -283,6 +283,8 @@ in {
         mkAliasDefinitions options.resources."onePasswordItems";
     };
 
+    # make all namespaced resources default to the
+    # application's namespace
     defaults = [
       {
         group = "onepassword.com";

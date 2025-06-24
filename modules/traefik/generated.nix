@@ -1752,6 +1752,8 @@ in {
         mkAliasDefinitions options.resources."traefikServices";
     };
 
+    # make all namespaced resources default to the
+    # application's namespace
     defaults = [
       {
         group = "traefik.io";
