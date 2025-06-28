@@ -61,6 +61,7 @@ spec:
                       description: SecretReference references a kubernetes secret.
                       properties:
                         secretName:
+                          maxLength: 253
                           type: string
                       required:
                         - secretName
@@ -73,6 +74,7 @@ spec:
                       description: SecretReference references a kubernetes secret.
                       properties:
                         secretName:
+                          maxLength: 253
                           type: string
                       required:
                         - secretName
@@ -148,6 +150,7 @@ spec:
                       description: SecretReference references a kubernetes secret.
                       properties:
                         secretName:
+                          maxLength: 253
                           type: string
                       required:
                         - secretName
@@ -178,6 +181,7 @@ spec:
                       description: SecretReference references a kubernetes secret.
                       properties:
                         secretName:
+                          maxLength: 253
                           type: string
                       required:
                         - secretName
@@ -190,6 +194,7 @@ spec:
                       description: SecretReference references a kubernetes secret.
                       properties:
                         secretName:
+                          maxLength: 253
                           type: string
                       required:
                         - secretName
@@ -218,6 +223,7 @@ spec:
                       description: SecretReference references a kubernetes secret.
                       properties:
                         secretName:
+                          maxLength: 253
                           type: string
                       required:
                         - secretName
@@ -288,6 +294,7 @@ spec:
                       description: SecretReference references a kubernetes secret.
                       properties:
                         secretName:
+                          maxLength: 253
                           type: string
                       required:
                         - secretName
@@ -318,6 +325,7 @@ spec:
                       description: SecretReference references a kubernetes secret.
                       properties:
                         secretName:
+                          maxLength: 253
                           type: string
                       required:
                         - secretName
