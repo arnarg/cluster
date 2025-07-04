@@ -203,23 +203,50 @@ with lib; let
           description = "TailscaleConfig contains options to configure the tailscale-specific\nparameters of proxies.";
           type = types.nullOr (submoduleOf "tailscale.com.v1alpha1.ProxyClassSpecTailscale");
         };
+        "useLetsEncryptStagingEnvironment" = mkOption {
+          description = "Set UseLetsEncryptStagingEnvironment to true to issue TLS\ncertificates for any HTTPS endpoints exposed to the tailnet from\nLetsEncrypt's staging environment.\nhttps://letsencrypt.org/docs/staging-environment/\nThis setting only affects Tailscale Ingress resources.\nBy default Ingress TLS certificates are issued from LetsEncrypt's\nproduction environment.\nChanging this setting true -> false, will result in any\nexisting certs being re-issued from the production environment.\nChanging this setting false (default) -> true, when certs have already\nbeen provisioned from production environment will NOT result in certs\nbeing re-issued from the staging environment before they need to be\nrenewed.";
+          type = types.nullOr types.bool;
+        };
       };
 
       config = {
         "metrics" = mkOverride 1002 null;
         "statefulSet" = mkOverride 1002 null;
         "tailscale" = mkOverride 1002 null;
+        "useLetsEncryptStagingEnvironment" = mkOverride 1002 null;
       };
     };
     "tailscale.com.v1alpha1.ProxyClassSpecMetrics" = {
       options = {
         "enable" = mkOption {
-          description = "Setting enable to true will make the proxy serve Tailscale metrics\nat <pod-ip>:9001/debug/metrics.\nDefaults to false.";
+          description = "Setting enable to true will make the proxy serve Tailscale metrics\nat <pod-ip>:9002/metrics.\nA metrics Service named <proxy-statefulset>-metrics will also be created in the operator's namespace and will\nserve the metrics at <service-ip>:9002/metrics.\n\nIn 1.78.x and 1.80.x, this field also serves as the default value for\n.spec.statefulSet.pod.tailscaleContainer.debug.enable. From 1.82.0, both\nfields will independently default to false.\n\nDefaults to false.";
           type = types.bool;
+        };
+        "serviceMonitor" = mkOption {
+          description = "Enable to create a Prometheus ServiceMonitor for scraping the proxy's Tailscale metrics.\nThe ServiceMonitor will select the metrics Service that gets created when metrics are enabled.\nThe ingested metrics for each Service monitor will have labels to identify the proxy:\nts_proxy_type: ingress_service|ingress_resource|connector|proxygroup\nts_proxy_parent_name: name of the parent resource (i.e name of the Connector, Tailscale Ingress, Tailscale Service or ProxyGroup)\nts_proxy_parent_namespace: namespace of the parent resource (if the parent resource is not cluster scoped)\njob: ts_<proxy type>_[<parent namespace>]_<parent_name>";
+          type = types.nullOr (submoduleOf "tailscale.com.v1alpha1.ProxyClassSpecMetricsServiceMonitor");
         };
       };
 
-      config = {};
+      config = {
+        "serviceMonitor" = mkOverride 1002 null;
+      };
+    };
+    "tailscale.com.v1alpha1.ProxyClassSpecMetricsServiceMonitor" = {
+      options = {
+        "enable" = mkOption {
+          description = "If Enable is set to true, a Prometheus ServiceMonitor will be created. Enable can only be set to true if metrics are enabled.";
+          type = types.bool;
+        };
+        "labels" = mkOption {
+          description = "Labels to add to the ServiceMonitor.\nLabels must be valid Kubernetes labels.\nhttps://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+      };
+
+      config = {
+        "labels" = mkOverride 1002 null;
+      };
     };
     "tailscale.com.v1alpha1.ProxyClassSpecStatefulSet" = {
       options = {
@@ -286,6 +313,10 @@ with lib; let
           description = "Proxy Pod's tolerations.\nBy default Tailscale Kubernetes operator does not apply any\ntolerations.\nhttps://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#scheduling";
           type = types.nullOr (types.listOf (submoduleOf "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodTolerations"));
         };
+        "topologySpreadConstraints" = mkOption {
+          description = "Proxy Pod's topology spread constraints.\nBy default Tailscale Kubernetes operator does not apply any topology spread constraints.\nhttps://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/";
+          type = types.nullOr (types.listOf (submoduleOf "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodTopologySpreadConstraints"));
+        };
       };
 
       config = {
@@ -299,6 +330,7 @@ with lib; let
         "tailscaleContainer" = mkOverride 1002 null;
         "tailscaleInitContainer" = mkOverride 1002 null;
         "tolerations" = mkOverride 1002 null;
+        "topologySpreadConstraints" = mkOverride 1002 null;
       };
     };
     "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodAffinity" = {
@@ -516,11 +548,11 @@ with lib; let
           type = types.nullOr (submoduleOf "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodAffinityPodAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector");
         };
         "matchLabelKeys" = mkOption {
-          description = "MatchLabelKeys is a set of pod label keys to select which pods will\nbe taken into consideration. The keys are used to lookup values from the\nincoming pod labels, those key-value labels are merged with `labelSelector` as `key in (value)`\nto select the group of existing pods which pods will be taken into consideration\nfor the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming\npod labels will be ignored. The default value is empty.\nThe same key is forbidden to exist in both matchLabelKeys and labelSelector.\nAlso, matchLabelKeys cannot be set when labelSelector isn't set.\nThis is an alpha field and requires enabling MatchLabelKeysInPodAffinity feature gate.";
+          description = "MatchLabelKeys is a set of pod label keys to select which pods will\nbe taken into consideration. The keys are used to lookup values from the\nincoming pod labels, those key-value labels are merged with `labelSelector` as `key in (value)`\nto select the group of existing pods which pods will be taken into consideration\nfor the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming\npod labels will be ignored. The default value is empty.\nThe same key is forbidden to exist in both matchLabelKeys and labelSelector.\nAlso, matchLabelKeys cannot be set when labelSelector isn't set.\nThis is a beta field and requires enabling MatchLabelKeysInPodAffinity feature gate (enabled by default).";
           type = types.nullOr (types.listOf types.str);
         };
         "mismatchLabelKeys" = mkOption {
-          description = "MismatchLabelKeys is a set of pod label keys to select which pods will\nbe taken into consideration. The keys are used to lookup values from the\nincoming pod labels, those key-value labels are merged with `labelSelector` as `key notin (value)`\nto select the group of existing pods which pods will be taken into consideration\nfor the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming\npod labels will be ignored. The default value is empty.\nThe same key is forbidden to exist in both mismatchLabelKeys and labelSelector.\nAlso, mismatchLabelKeys cannot be set when labelSelector isn't set.\nThis is an alpha field and requires enabling MatchLabelKeysInPodAffinity feature gate.";
+          description = "MismatchLabelKeys is a set of pod label keys to select which pods will\nbe taken into consideration. The keys are used to lookup values from the\nincoming pod labels, those key-value labels are merged with `labelSelector` as `key notin (value)`\nto select the group of existing pods which pods will be taken into consideration\nfor the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming\npod labels will be ignored. The default value is empty.\nThe same key is forbidden to exist in both mismatchLabelKeys and labelSelector.\nAlso, mismatchLabelKeys cannot be set when labelSelector isn't set.\nThis is a beta field and requires enabling MatchLabelKeysInPodAffinity feature gate (enabled by default).";
           type = types.nullOr (types.listOf types.str);
         };
         "namespaceSelector" = mkOption {
@@ -626,11 +658,11 @@ with lib; let
           type = types.nullOr (submoduleOf "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodAffinityPodAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector");
         };
         "matchLabelKeys" = mkOption {
-          description = "MatchLabelKeys is a set of pod label keys to select which pods will\nbe taken into consideration. The keys are used to lookup values from the\nincoming pod labels, those key-value labels are merged with `labelSelector` as `key in (value)`\nto select the group of existing pods which pods will be taken into consideration\nfor the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming\npod labels will be ignored. The default value is empty.\nThe same key is forbidden to exist in both matchLabelKeys and labelSelector.\nAlso, matchLabelKeys cannot be set when labelSelector isn't set.\nThis is an alpha field and requires enabling MatchLabelKeysInPodAffinity feature gate.";
+          description = "MatchLabelKeys is a set of pod label keys to select which pods will\nbe taken into consideration. The keys are used to lookup values from the\nincoming pod labels, those key-value labels are merged with `labelSelector` as `key in (value)`\nto select the group of existing pods which pods will be taken into consideration\nfor the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming\npod labels will be ignored. The default value is empty.\nThe same key is forbidden to exist in both matchLabelKeys and labelSelector.\nAlso, matchLabelKeys cannot be set when labelSelector isn't set.\nThis is a beta field and requires enabling MatchLabelKeysInPodAffinity feature gate (enabled by default).";
           type = types.nullOr (types.listOf types.str);
         };
         "mismatchLabelKeys" = mkOption {
-          description = "MismatchLabelKeys is a set of pod label keys to select which pods will\nbe taken into consideration. The keys are used to lookup values from the\nincoming pod labels, those key-value labels are merged with `labelSelector` as `key notin (value)`\nto select the group of existing pods which pods will be taken into consideration\nfor the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming\npod labels will be ignored. The default value is empty.\nThe same key is forbidden to exist in both mismatchLabelKeys and labelSelector.\nAlso, mismatchLabelKeys cannot be set when labelSelector isn't set.\nThis is an alpha field and requires enabling MatchLabelKeysInPodAffinity feature gate.";
+          description = "MismatchLabelKeys is a set of pod label keys to select which pods will\nbe taken into consideration. The keys are used to lookup values from the\nincoming pod labels, those key-value labels are merged with `labelSelector` as `key notin (value)`\nto select the group of existing pods which pods will be taken into consideration\nfor the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming\npod labels will be ignored. The default value is empty.\nThe same key is forbidden to exist in both mismatchLabelKeys and labelSelector.\nAlso, mismatchLabelKeys cannot be set when labelSelector isn't set.\nThis is a beta field and requires enabling MatchLabelKeysInPodAffinity feature gate (enabled by default).";
           type = types.nullOr (types.listOf types.str);
         };
         "namespaceSelector" = mkOption {
@@ -767,11 +799,11 @@ with lib; let
           type = types.nullOr (submoduleOf "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodAffinityPodAntiAffinityPreferredDuringSchedulingIgnoredDuringExecutionPodAffinityTermLabelSelector");
         };
         "matchLabelKeys" = mkOption {
-          description = "MatchLabelKeys is a set of pod label keys to select which pods will\nbe taken into consideration. The keys are used to lookup values from the\nincoming pod labels, those key-value labels are merged with `labelSelector` as `key in (value)`\nto select the group of existing pods which pods will be taken into consideration\nfor the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming\npod labels will be ignored. The default value is empty.\nThe same key is forbidden to exist in both matchLabelKeys and labelSelector.\nAlso, matchLabelKeys cannot be set when labelSelector isn't set.\nThis is an alpha field and requires enabling MatchLabelKeysInPodAffinity feature gate.";
+          description = "MatchLabelKeys is a set of pod label keys to select which pods will\nbe taken into consideration. The keys are used to lookup values from the\nincoming pod labels, those key-value labels are merged with `labelSelector` as `key in (value)`\nto select the group of existing pods which pods will be taken into consideration\nfor the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming\npod labels will be ignored. The default value is empty.\nThe same key is forbidden to exist in both matchLabelKeys and labelSelector.\nAlso, matchLabelKeys cannot be set when labelSelector isn't set.\nThis is a beta field and requires enabling MatchLabelKeysInPodAffinity feature gate (enabled by default).";
           type = types.nullOr (types.listOf types.str);
         };
         "mismatchLabelKeys" = mkOption {
-          description = "MismatchLabelKeys is a set of pod label keys to select which pods will\nbe taken into consideration. The keys are used to lookup values from the\nincoming pod labels, those key-value labels are merged with `labelSelector` as `key notin (value)`\nto select the group of existing pods which pods will be taken into consideration\nfor the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming\npod labels will be ignored. The default value is empty.\nThe same key is forbidden to exist in both mismatchLabelKeys and labelSelector.\nAlso, mismatchLabelKeys cannot be set when labelSelector isn't set.\nThis is an alpha field and requires enabling MatchLabelKeysInPodAffinity feature gate.";
+          description = "MismatchLabelKeys is a set of pod label keys to select which pods will\nbe taken into consideration. The keys are used to lookup values from the\nincoming pod labels, those key-value labels are merged with `labelSelector` as `key notin (value)`\nto select the group of existing pods which pods will be taken into consideration\nfor the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming\npod labels will be ignored. The default value is empty.\nThe same key is forbidden to exist in both mismatchLabelKeys and labelSelector.\nAlso, mismatchLabelKeys cannot be set when labelSelector isn't set.\nThis is a beta field and requires enabling MatchLabelKeysInPodAffinity feature gate (enabled by default).";
           type = types.nullOr (types.listOf types.str);
         };
         "namespaceSelector" = mkOption {
@@ -877,11 +909,11 @@ with lib; let
           type = types.nullOr (submoduleOf "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodAffinityPodAntiAffinityRequiredDuringSchedulingIgnoredDuringExecutionLabelSelector");
         };
         "matchLabelKeys" = mkOption {
-          description = "MatchLabelKeys is a set of pod label keys to select which pods will\nbe taken into consideration. The keys are used to lookup values from the\nincoming pod labels, those key-value labels are merged with `labelSelector` as `key in (value)`\nto select the group of existing pods which pods will be taken into consideration\nfor the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming\npod labels will be ignored. The default value is empty.\nThe same key is forbidden to exist in both matchLabelKeys and labelSelector.\nAlso, matchLabelKeys cannot be set when labelSelector isn't set.\nThis is an alpha field and requires enabling MatchLabelKeysInPodAffinity feature gate.";
+          description = "MatchLabelKeys is a set of pod label keys to select which pods will\nbe taken into consideration. The keys are used to lookup values from the\nincoming pod labels, those key-value labels are merged with `labelSelector` as `key in (value)`\nto select the group of existing pods which pods will be taken into consideration\nfor the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming\npod labels will be ignored. The default value is empty.\nThe same key is forbidden to exist in both matchLabelKeys and labelSelector.\nAlso, matchLabelKeys cannot be set when labelSelector isn't set.\nThis is a beta field and requires enabling MatchLabelKeysInPodAffinity feature gate (enabled by default).";
           type = types.nullOr (types.listOf types.str);
         };
         "mismatchLabelKeys" = mkOption {
-          description = "MismatchLabelKeys is a set of pod label keys to select which pods will\nbe taken into consideration. The keys are used to lookup values from the\nincoming pod labels, those key-value labels are merged with `labelSelector` as `key notin (value)`\nto select the group of existing pods which pods will be taken into consideration\nfor the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming\npod labels will be ignored. The default value is empty.\nThe same key is forbidden to exist in both mismatchLabelKeys and labelSelector.\nAlso, mismatchLabelKeys cannot be set when labelSelector isn't set.\nThis is an alpha field and requires enabling MatchLabelKeysInPodAffinity feature gate.";
+          description = "MismatchLabelKeys is a set of pod label keys to select which pods will\nbe taken into consideration. The keys are used to lookup values from the\nincoming pod labels, those key-value labels are merged with `labelSelector` as `key notin (value)`\nto select the group of existing pods which pods will be taken into consideration\nfor the incoming pod's pod (anti) affinity. Keys that don't exist in the incoming\npod labels will be ignored. The default value is empty.\nThe same key is forbidden to exist in both mismatchLabelKeys and labelSelector.\nAlso, mismatchLabelKeys cannot be set when labelSelector isn't set.\nThis is a beta field and requires enabling MatchLabelKeysInPodAffinity feature gate (enabled by default).";
           type = types.nullOr (types.listOf types.str);
         };
         "namespaceSelector" = mkOption {
@@ -1018,6 +1050,10 @@ with lib; let
           description = "The UID to run the entrypoint of the container process.\nDefaults to user specified in image metadata if unspecified.\nMay also be set in SecurityContext.  If set in both SecurityContext and\nPodSecurityContext, the value specified in SecurityContext takes precedence\nfor that container.\nNote that this field cannot be set when spec.os.name is windows.";
           type = types.nullOr types.int;
         };
+        "seLinuxChangePolicy" = mkOption {
+          description = "seLinuxChangePolicy defines how the container's SELinux label is applied to all volumes used by the Pod.\nIt has no effect on nodes that do not support SELinux or to volumes does not support SELinux.\nValid values are \"MountOption\" and \"Recursive\".\n\n\"Recursive\" means relabeling of all files on all Pod volumes by the container runtime.\nThis may be slow for large volumes, but allows mixing privileged and unprivileged Pods sharing the same volume on the same node.\n\n\"MountOption\" mounts all eligible Pod volumes with `-o context` mount option.\nThis requires all Pods that share the same volume to use the same SELinux label.\nIt is not possible to share the same volume among privileged and unprivileged Pods.\nEligible volumes are in-tree FibreChannel and iSCSI volumes, and all CSI volumes\nwhose CSI driver announces SELinux support by setting spec.seLinuxMount: true in their\nCSIDriver instance. Other volumes are always re-labelled recursively.\n\"MountOption\" value is allowed only when SELinuxMount feature gate is enabled.\n\nIf not specified and SELinuxMount feature gate is enabled, \"MountOption\" is used.\nIf not specified and SELinuxMount feature gate is disabled, \"MountOption\" is used for ReadWriteOncePod volumes\nand \"Recursive\" for all other volumes.\n\nThis field affects only Pods that have SELinux label set, either in PodSecurityContext or in SecurityContext of all containers.\n\nAll Pods that use the same volume should use the same seLinuxChangePolicy, otherwise some pods can get stuck in ContainerCreating state.\nNote that this field cannot be set when spec.os.name is windows.";
+          type = types.nullOr types.str;
+        };
         "seLinuxOptions" = mkOption {
           description = "The SELinux context to be applied to all containers.\nIf unspecified, the container runtime will allocate a random SELinux context for each\ncontainer.  May also be set in SecurityContext.  If set in\nboth SecurityContext and PodSecurityContext, the value specified in SecurityContext\ntakes precedence for that container.\nNote that this field cannot be set when spec.os.name is windows.";
           type = types.nullOr (submoduleOf "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodSecurityContextSeLinuxOptions");
@@ -1027,8 +1063,12 @@ with lib; let
           type = types.nullOr (submoduleOf "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodSecurityContextSeccompProfile");
         };
         "supplementalGroups" = mkOption {
-          description = "A list of groups applied to the first process run in each container, in addition\nto the container's primary GID, the fsGroup (if specified), and group memberships\ndefined in the container image for the uid of the container process. If unspecified,\nno additional groups are added to any container. Note that group memberships\ndefined in the container image for the uid of the container process are still effective,\neven if they are not included in this list.\nNote that this field cannot be set when spec.os.name is windows.";
+          description = "A list of groups applied to the first process run in each container, in\naddition to the container's primary GID and fsGroup (if specified).  If\nthe SupplementalGroupsPolicy feature is enabled, the\nsupplementalGroupsPolicy field determines whether these are in addition\nto or instead of any group memberships defined in the container image.\nIf unspecified, no additional groups are added, though group memberships\ndefined in the container image may still be used, depending on the\nsupplementalGroupsPolicy field.\nNote that this field cannot be set when spec.os.name is windows.";
           type = types.nullOr (types.listOf types.int);
+        };
+        "supplementalGroupsPolicy" = mkOption {
+          description = "Defines how supplemental groups of the first container processes are calculated.\nValid values are \"Merge\" and \"Strict\". If not specified, \"Merge\" is used.\n(Alpha) Using the field requires the SupplementalGroupsPolicy feature gate to be enabled\nand the container runtime must implement support for this feature.\nNote that this field cannot be set when spec.os.name is windows.";
+          type = types.nullOr types.str;
         };
         "sysctls" = mkOption {
           description = "Sysctls hold a list of namespaced sysctls used for the pod. Pods with unsupported\nsysctls (by the container runtime) might fail to launch.\nNote that this field cannot be set when spec.os.name is windows.";
@@ -1048,9 +1088,11 @@ with lib; let
         "runAsGroup" = mkOverride 1002 null;
         "runAsNonRoot" = mkOverride 1002 null;
         "runAsUser" = mkOverride 1002 null;
+        "seLinuxChangePolicy" = mkOverride 1002 null;
         "seLinuxOptions" = mkOverride 1002 null;
         "seccompProfile" = mkOverride 1002 null;
         "supplementalGroups" = mkOverride 1002 null;
+        "supplementalGroupsPolicy" = mkOverride 1002 null;
         "sysctls" = mkOverride 1002 null;
         "windowsOptions" = mkOverride 1002 null;
       };
@@ -1157,6 +1199,10 @@ with lib; let
     };
     "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodTailscaleContainer" = {
       options = {
+        "debug" = mkOption {
+          description = "Configuration for enabling extra debug information in the container.\nNot recommended for production use.";
+          type = types.nullOr (submoduleOf "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodTailscaleContainerDebug");
+        };
         "env" = mkOption {
           description = "List of environment variables to set in the container.\nhttps://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#environment-variables\nNote that environment variables provided here will take precedence\nover Tailscale-specific environment variables set by the operator,\nhowever running proxies with custom values for Tailscale environment\nvariables (i.e TS_USERSPACE) is not recommended and might break in\nthe future.";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodTailscaleContainerEnv" "name" []);
@@ -1175,17 +1221,30 @@ with lib; let
           type = types.nullOr (submoduleOf "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodTailscaleContainerResources");
         };
         "securityContext" = mkOption {
-          description = "Container security context.\nSecurity context specified here will override the security context by the operator.\nBy default the operator:\n- sets 'privileged: true' for the init container\n- set NET_ADMIN capability for tailscale container for proxies that\nare created for Services or Connector.\nhttps://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context";
+          description = "Container security context.\nSecurity context specified here will override the security context set by the operator.\nBy default the operator sets the Tailscale container and the Tailscale init container to privileged\nfor proxies created for Tailscale ingress and egress Service, Connector and ProxyGroup.\nYou can reduce the permissions of the Tailscale container to cap NET_ADMIN by\ninstalling device plugin in your cluster and configuring the proxies tun device to be created\nby the device plugin, see  https://github.com/tailscale/tailscale/issues/10814#issuecomment-2479977752\nhttps://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context";
           type = types.nullOr (submoduleOf "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodTailscaleContainerSecurityContext");
         };
       };
 
       config = {
+        "debug" = mkOverride 1002 null;
         "env" = mkOverride 1002 null;
         "image" = mkOverride 1002 null;
         "imagePullPolicy" = mkOverride 1002 null;
         "resources" = mkOverride 1002 null;
         "securityContext" = mkOverride 1002 null;
+      };
+    };
+    "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodTailscaleContainerDebug" = {
+      options = {
+        "enable" = mkOption {
+          description = "Enable tailscaled's HTTP pprof endpoints at <pod-ip>:9001/debug/pprof/\nand internal debug metrics endpoint at <pod-ip>:9001/debug/metrics, where\n9001 is a container port named \"debug\". The endpoints and their responses\nmay change in backwards incompatible ways in the future, and should not\nbe considered stable.\n\nIn 1.78.x and 1.80.x, this setting will default to the value of\n.spec.metrics.enable, and requests to the \"metrics\" port matching the\nmux pattern /debug/ will be forwarded to the \"debug\" port. In 1.82.x,\nthis setting will default to false, and no requests will be proxied.";
+          type = types.nullOr types.bool;
+        };
+      };
+
+      config = {
+        "enable" = mkOverride 1002 null;
       };
     };
     "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodTailscaleContainerEnv" = {
@@ -1233,9 +1292,15 @@ with lib; let
           description = "Name must match the name of one entry in pod.spec.resourceClaims of\nthe Pod where this field is used. It makes that resource available\ninside a container.";
           type = types.str;
         };
+        "request" = mkOption {
+          description = "Request is the name chosen for a request in the referenced claim.\nIf empty, everything from the claim is made available, otherwise\nonly the result of this request.";
+          type = types.nullOr types.str;
+        };
       };
 
-      config = {};
+      config = {
+        "request" = mkOverride 1002 null;
+      };
     };
     "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodTailscaleContainerSecurityContext" = {
       options = {
@@ -1256,7 +1321,7 @@ with lib; let
           type = types.nullOr types.bool;
         };
         "procMount" = mkOption {
-          description = "procMount denotes the type of proc mount to use for the containers.\nThe default is DefaultProcMount which uses the container runtime defaults for\nreadonly paths and masked paths.\nThis requires the ProcMountType feature flag to be enabled.\nNote that this field cannot be set when spec.os.name is windows.";
+          description = "procMount denotes the type of proc mount to use for the containers.\nThe default value is Default which uses the container runtime defaults for\nreadonly paths and masked paths.\nThis requires the ProcMountType feature flag to be enabled.\nNote that this field cannot be set when spec.os.name is windows.";
           type = types.nullOr types.str;
         };
         "readOnlyRootFilesystem" = mkOption {
@@ -1409,6 +1474,10 @@ with lib; let
     };
     "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodTailscaleInitContainer" = {
       options = {
+        "debug" = mkOption {
+          description = "Configuration for enabling extra debug information in the container.\nNot recommended for production use.";
+          type = types.nullOr (submoduleOf "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodTailscaleInitContainerDebug");
+        };
         "env" = mkOption {
           description = "List of environment variables to set in the container.\nhttps://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#environment-variables\nNote that environment variables provided here will take precedence\nover Tailscale-specific environment variables set by the operator,\nhowever running proxies with custom values for Tailscale environment\nvariables (i.e TS_USERSPACE) is not recommended and might break in\nthe future.";
           type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodTailscaleInitContainerEnv" "name" []);
@@ -1427,17 +1496,30 @@ with lib; let
           type = types.nullOr (submoduleOf "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodTailscaleInitContainerResources");
         };
         "securityContext" = mkOption {
-          description = "Container security context.\nSecurity context specified here will override the security context by the operator.\nBy default the operator:\n- sets 'privileged: true' for the init container\n- set NET_ADMIN capability for tailscale container for proxies that\nare created for Services or Connector.\nhttps://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context";
+          description = "Container security context.\nSecurity context specified here will override the security context set by the operator.\nBy default the operator sets the Tailscale container and the Tailscale init container to privileged\nfor proxies created for Tailscale ingress and egress Service, Connector and ProxyGroup.\nYou can reduce the permissions of the Tailscale container to cap NET_ADMIN by\ninstalling device plugin in your cluster and configuring the proxies tun device to be created\nby the device plugin, see  https://github.com/tailscale/tailscale/issues/10814#issuecomment-2479977752\nhttps://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#security-context";
           type = types.nullOr (submoduleOf "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodTailscaleInitContainerSecurityContext");
         };
       };
 
       config = {
+        "debug" = mkOverride 1002 null;
         "env" = mkOverride 1002 null;
         "image" = mkOverride 1002 null;
         "imagePullPolicy" = mkOverride 1002 null;
         "resources" = mkOverride 1002 null;
         "securityContext" = mkOverride 1002 null;
+      };
+    };
+    "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodTailscaleInitContainerDebug" = {
+      options = {
+        "enable" = mkOption {
+          description = "Enable tailscaled's HTTP pprof endpoints at <pod-ip>:9001/debug/pprof/\nand internal debug metrics endpoint at <pod-ip>:9001/debug/metrics, where\n9001 is a container port named \"debug\". The endpoints and their responses\nmay change in backwards incompatible ways in the future, and should not\nbe considered stable.\n\nIn 1.78.x and 1.80.x, this setting will default to the value of\n.spec.metrics.enable, and requests to the \"metrics\" port matching the\nmux pattern /debug/ will be forwarded to the \"debug\" port. In 1.82.x,\nthis setting will default to false, and no requests will be proxied.";
+          type = types.nullOr types.bool;
+        };
+      };
+
+      config = {
+        "enable" = mkOverride 1002 null;
       };
     };
     "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodTailscaleInitContainerEnv" = {
@@ -1485,9 +1567,15 @@ with lib; let
           description = "Name must match the name of one entry in pod.spec.resourceClaims of\nthe Pod where this field is used. It makes that resource available\ninside a container.";
           type = types.str;
         };
+        "request" = mkOption {
+          description = "Request is the name chosen for a request in the referenced claim.\nIf empty, everything from the claim is made available, otherwise\nonly the result of this request.";
+          type = types.nullOr types.str;
+        };
       };
 
-      config = {};
+      config = {
+        "request" = mkOverride 1002 null;
+      };
     };
     "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodTailscaleInitContainerSecurityContext" = {
       options = {
@@ -1508,7 +1596,7 @@ with lib; let
           type = types.nullOr types.bool;
         };
         "procMount" = mkOption {
-          description = "procMount denotes the type of proc mount to use for the containers.\nThe default is DefaultProcMount which uses the container runtime defaults for\nreadonly paths and masked paths.\nThis requires the ProcMountType feature flag to be enabled.\nNote that this field cannot be set when spec.os.name is windows.";
+          description = "procMount denotes the type of proc mount to use for the containers.\nThe default value is Default which uses the container runtime defaults for\nreadonly paths and masked paths.\nThis requires the ProcMountType feature flag to be enabled.\nNote that this field cannot be set when spec.os.name is windows.";
           type = types.nullOr types.str;
         };
         "readOnlyRootFilesystem" = mkOption {
@@ -1691,10 +1779,91 @@ with lib; let
         "value" = mkOverride 1002 null;
       };
     };
+    "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodTopologySpreadConstraints" = {
+      options = {
+        "labelSelector" = mkOption {
+          description = "LabelSelector is used to find matching pods.\nPods that match this label selector are counted to determine the number of pods\nin their corresponding topology domain.";
+          type = types.nullOr (submoduleOf "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodTopologySpreadConstraintsLabelSelector");
+        };
+        "matchLabelKeys" = mkOption {
+          description = "MatchLabelKeys is a set of pod label keys to select the pods over which\nspreading will be calculated. The keys are used to lookup values from the\nincoming pod labels, those key-value labels are ANDed with labelSelector\nto select the group of existing pods over which spreading will be calculated\nfor the incoming pod. The same key is forbidden to exist in both MatchLabelKeys and LabelSelector.\nMatchLabelKeys cannot be set when LabelSelector isn't set.\nKeys that don't exist in the incoming pod labels will\nbe ignored. A null or empty list means only match against labelSelector.\n\nThis is a beta field and requires the MatchLabelKeysInPodTopologySpread feature gate to be enabled (enabled by default).";
+          type = types.nullOr (types.listOf types.str);
+        };
+        "maxSkew" = mkOption {
+          description = "MaxSkew describes the degree to which pods may be unevenly distributed.\nWhen `whenUnsatisfiable=DoNotSchedule`, it is the maximum permitted difference\nbetween the number of matching pods in the target topology and the global minimum.\nThe global minimum is the minimum number of matching pods in an eligible domain\nor zero if the number of eligible domains is less than MinDomains.\nFor example, in a 3-zone cluster, MaxSkew is set to 1, and pods with the same\nlabelSelector spread as 2/2/1:\nIn this case, the global minimum is 1.\n| zone1 | zone2 | zone3 |\n|  P P  |  P P  |   P   |\n- if MaxSkew is 1, incoming pod can only be scheduled to zone3 to become 2/2/2;\nscheduling it onto zone1(zone2) would make the ActualSkew(3-1) on zone1(zone2)\nviolate MaxSkew(1).\n- if MaxSkew is 2, incoming pod can be scheduled onto any zone.\nWhen `whenUnsatisfiable=ScheduleAnyway`, it is used to give higher precedence\nto topologies that satisfy it.\nIt's a required field. Default value is 1 and 0 is not allowed.";
+          type = types.int;
+        };
+        "minDomains" = mkOption {
+          description = "MinDomains indicates a minimum number of eligible domains.\nWhen the number of eligible domains with matching topology keys is less than minDomains,\nPod Topology Spread treats \"global minimum\" as 0, and then the calculation of Skew is performed.\nAnd when the number of eligible domains with matching topology keys equals or greater than minDomains,\nthis value has no effect on scheduling.\nAs a result, when the number of eligible domains is less than minDomains,\nscheduler won't schedule more than maxSkew Pods to those domains.\nIf value is nil, the constraint behaves as if MinDomains is equal to 1.\nValid values are integers greater than 0.\nWhen value is not nil, WhenUnsatisfiable must be DoNotSchedule.\n\nFor example, in a 3-zone cluster, MaxSkew is set to 2, MinDomains is set to 5 and pods with the same\nlabelSelector spread as 2/2/2:\n| zone1 | zone2 | zone3 |\n|  P P  |  P P  |  P P  |\nThe number of domains is less than 5(MinDomains), so \"global minimum\" is treated as 0.\nIn this situation, new pod with the same labelSelector cannot be scheduled,\nbecause computed skew will be 3(3 - 0) if new Pod is scheduled to any of the three zones,\nit will violate MaxSkew.";
+          type = types.nullOr types.int;
+        };
+        "nodeAffinityPolicy" = mkOption {
+          description = "NodeAffinityPolicy indicates how we will treat Pod's nodeAffinity/nodeSelector\nwhen calculating pod topology spread skew. Options are:\n- Honor: only nodes matching nodeAffinity/nodeSelector are included in the calculations.\n- Ignore: nodeAffinity/nodeSelector are ignored. All nodes are included in the calculations.\n\nIf this value is nil, the behavior is equivalent to the Honor policy.\nThis is a beta-level feature default enabled by the NodeInclusionPolicyInPodTopologySpread feature flag.";
+          type = types.nullOr types.str;
+        };
+        "nodeTaintsPolicy" = mkOption {
+          description = "NodeTaintsPolicy indicates how we will treat node taints when calculating\npod topology spread skew. Options are:\n- Honor: nodes without taints, along with tainted nodes for which the incoming pod\nhas a toleration, are included.\n- Ignore: node taints are ignored. All nodes are included.\n\nIf this value is nil, the behavior is equivalent to the Ignore policy.\nThis is a beta-level feature default enabled by the NodeInclusionPolicyInPodTopologySpread feature flag.";
+          type = types.nullOr types.str;
+        };
+        "topologyKey" = mkOption {
+          description = "TopologyKey is the key of node labels. Nodes that have a label with this key\nand identical values are considered to be in the same topology.\nWe consider each <key, value> as a \"bucket\", and try to put balanced number\nof pods into each bucket.\nWe define a domain as a particular instance of a topology.\nAlso, we define an eligible domain as a domain whose nodes meet the requirements of\nnodeAffinityPolicy and nodeTaintsPolicy.\ne.g. If TopologyKey is \"kubernetes.io/hostname\", each Node is a domain of that topology.\nAnd, if TopologyKey is \"topology.kubernetes.io/zone\", each zone is a domain of that topology.\nIt's a required field.";
+          type = types.str;
+        };
+        "whenUnsatisfiable" = mkOption {
+          description = "WhenUnsatisfiable indicates how to deal with a pod if it doesn't satisfy\nthe spread constraint.\n- DoNotSchedule (default) tells the scheduler not to schedule it.\n- ScheduleAnyway tells the scheduler to schedule the pod in any location,\n  but giving higher precedence to topologies that would help reduce the\n  skew.\nA constraint is considered \"Unsatisfiable\" for an incoming pod\nif and only if every possible node assignment for that pod would violate\n\"MaxSkew\" on some topology.\nFor example, in a 3-zone cluster, MaxSkew is set to 1, and pods with the same\nlabelSelector spread as 3/1/1:\n| zone1 | zone2 | zone3 |\n| P P P |   P   |   P   |\nIf WhenUnsatisfiable is set to DoNotSchedule, incoming pod can only be scheduled\nto zone2(zone3) to become 3/2/1(3/1/2) as ActualSkew(2-1) on zone2(zone3) satisfies\nMaxSkew(1). In other words, the cluster can still be imbalanced, but scheduler\nwon't make it *more* imbalanced.\nIt's a required field.";
+          type = types.str;
+        };
+      };
+
+      config = {
+        "labelSelector" = mkOverride 1002 null;
+        "matchLabelKeys" = mkOverride 1002 null;
+        "minDomains" = mkOverride 1002 null;
+        "nodeAffinityPolicy" = mkOverride 1002 null;
+        "nodeTaintsPolicy" = mkOverride 1002 null;
+      };
+    };
+    "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodTopologySpreadConstraintsLabelSelector" = {
+      options = {
+        "matchExpressions" = mkOption {
+          description = "matchExpressions is a list of label selector requirements. The requirements are ANDed.";
+          type = types.nullOr (types.listOf (submoduleOf "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodTopologySpreadConstraintsLabelSelectorMatchExpressions"));
+        };
+        "matchLabels" = mkOption {
+          description = "matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels\nmap is equivalent to an element of matchExpressions, whose key field is \"key\", the\noperator is \"In\", and the values array contains only \"value\". The requirements are ANDed.";
+          type = types.nullOr (types.attrsOf types.str);
+        };
+      };
+
+      config = {
+        "matchExpressions" = mkOverride 1002 null;
+        "matchLabels" = mkOverride 1002 null;
+      };
+    };
+    "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodTopologySpreadConstraintsLabelSelectorMatchExpressions" = {
+      options = {
+        "key" = mkOption {
+          description = "key is the label key that the selector applies to.";
+          type = types.str;
+        };
+        "operator" = mkOption {
+          description = "operator represents a key's relationship to a set of values.\nValid operators are In, NotIn, Exists and DoesNotExist.";
+          type = types.str;
+        };
+        "values" = mkOption {
+          description = "values is an array of string values. If the operator is In or NotIn,\nthe values array must be non-empty. If the operator is Exists or DoesNotExist,\nthe values array must be empty. This array is replaced during a strategic\nmerge patch.";
+          type = types.nullOr (types.listOf types.str);
+        };
+      };
+
+      config = {
+        "values" = mkOverride 1002 null;
+      };
+    };
     "tailscale.com.v1alpha1.ProxyClassSpecTailscale" = {
       options = {
         "acceptRoutes" = mkOption {
-          description = "AcceptRoutes can be set to true to make the proxy instance accept\nroutes advertized by other nodes on the tailnet, such as subnet\nroutes.\nThis is equivalent of passing --accept-routes flag to a tailscale Linux client.\nhttps://tailscale.com/kb/1019/subnets#use-your-subnet-routes-from-other-machines\nDefaults to false.";
+          description = "AcceptRoutes can be set to true to make the proxy instance accept\nroutes advertized by other nodes on the tailnet, such as subnet\nroutes.\nThis is equivalent of passing --accept-routes flag to a tailscale Linux client.\nhttps://tailscale.com/kb/1019/subnets#use-your-subnet-routes-from-other-devices\nDefaults to false.";
           type = types.nullOr types.bool;
         };
       };
@@ -1754,14 +1923,14 @@ in {
     resources =
       {
         "tailscale.com"."v1alpha1"."ProxyClass" = mkOption {
-          description = "ProxyClass describes a set of configuration parameters that can be applied to\nproxy resources created by the Tailscale Kubernetes operator.\nTo apply a given ProxyClass to resources created for a tailscale Ingress or\nService, use tailscale.com/proxy-class=<proxyclass-name> label. To apply a\ngiven ProxyClass to resources created for a Connector, use\nconnector.spec.proxyClass field.\nProxyClass is a cluster scoped resource.\nMore info:\nhttps://tailscale.com/kb/1236/kubernetes-operator#cluster-resource-customization-using-proxyclass-custom-resource.";
+          description = "ProxyClass describes a set of configuration parameters that can be applied to\nproxy resources created by the Tailscale Kubernetes operator.\nTo apply a given ProxyClass to resources created for a tailscale Ingress or\nService, use tailscale.com/proxy-class=<proxyclass-name> label. To apply a\ngiven ProxyClass to resources created for a Connector, use\nconnector.spec.proxyClass field.\nProxyClass is a cluster scoped resource.\nMore info:\nhttps://tailscale.com/kb/1445/kubernetes-operator-customization#cluster-resource-customization-using-proxyclass-custom-resource";
           type = types.attrsOf (submoduleForDefinition "tailscale.com.v1alpha1.ProxyClass" "proxyclasses" "ProxyClass" "tailscale.com" "v1alpha1");
           default = {};
         };
       }
       // {
         "proxyClasses" = mkOption {
-          description = "ProxyClass describes a set of configuration parameters that can be applied to\nproxy resources created by the Tailscale Kubernetes operator.\nTo apply a given ProxyClass to resources created for a tailscale Ingress or\nService, use tailscale.com/proxy-class=<proxyclass-name> label. To apply a\ngiven ProxyClass to resources created for a Connector, use\nconnector.spec.proxyClass field.\nProxyClass is a cluster scoped resource.\nMore info:\nhttps://tailscale.com/kb/1236/kubernetes-operator#cluster-resource-customization-using-proxyclass-custom-resource.";
+          description = "ProxyClass describes a set of configuration parameters that can be applied to\nproxy resources created by the Tailscale Kubernetes operator.\nTo apply a given ProxyClass to resources created for a tailscale Ingress or\nService, use tailscale.com/proxy-class=<proxyclass-name> label. To apply a\ngiven ProxyClass to resources created for a Connector, use\nconnector.spec.proxyClass field.\nProxyClass is a cluster scoped resource.\nMore info:\nhttps://tailscale.com/kb/1445/kubernetes-operator-customization#cluster-resource-customization-using-proxyclass-custom-resource";
           type = types.attrsOf (submoduleForDefinition "tailscale.com.v1alpha1.ProxyClass" "proxyclasses" "ProxyClass" "tailscale.com" "v1alpha1");
           default = {};
         };
