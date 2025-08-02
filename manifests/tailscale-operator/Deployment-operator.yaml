@@ -30,12 +30,15 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+            - name: OPERATOR_LOGIN_SERVER
+            - name: OPERATOR_INGRESS_CLASS_NAME
+              value: tailscale
             - name: CLIENT_ID_FILE
               value: /oauth/client_id
             - name: CLIENT_SECRET_FILE
               value: /oauth/client_secret
             - name: PROXY_IMAGE
-              value: tailscale/tailscale:v1.84.3
+              value: tailscale/tailscale:v1.86.2
             - name: PROXY_TAGS
               value: tag:k8s
             - name: APISERVER_PROXY
@@ -50,7 +53,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.uid
-          image: tailscale/k8s-operator:v1.84.3
+          image: tailscale/k8s-operator:v1.86.2
           imagePullPolicy: Always
           name: operator
           volumeMounts:

@@ -170,7 +170,6 @@ rules:
       - ciliumendpoints.cilium.io
       - ciliumendpointslices.cilium.io
       - ciliumenvoyconfigs.cilium.io
-      - ciliumexternalworkloads.cilium.io
       - ciliumidentities.cilium.io
       - ciliumlocalredirectpolicies.cilium.io
       - ciliumnetworkpolicies.cilium.io
@@ -179,6 +178,7 @@ rules:
       - ciliumcidrgroups.cilium.io
       - ciliuml2announcementpolicies.cilium.io
       - ciliumpodippools.cilium.io
+      - ciliumgatewayclassconfigs.cilium.io
     resources:
       - customresourcedefinitions
     verbs:
