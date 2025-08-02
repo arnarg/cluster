@@ -7,6 +7,8 @@ data:
   applicationsetcontroller.log.level: info
   applicationsetcontroller.namespaces: ""
   applicationsetcontroller.policy: sync
+  commitserver.log.format: text
+  commitserver.log.level: info
   controller.ignore.normalizer.jq.timeout: 1s
   controller.log.format: text
   controller.log.level: info

@@ -1,7 +1,6 @@
 apiVersion: v1
 data:
   agent-not-ready-taint-key: node.cilium.io/agent-not-ready
-  arping-refresh-period: 30s
   auto-direct-node-routes: "false"
   bpf-distributed-lru: "false"
   bpf-events-drop-enabled: "true"
@@ -17,6 +16,7 @@ data:
   bpf-lb-source-range-all-types: "false"
   bpf-map-dynamic-size-ratio: "0.0025"
   bpf-policy-map-max: "16384"
+  bpf-policy-stats-map-max: "65536"
   bpf-root: /sys/fs/bpf
   cgroup-root: /run/cilium/cgroupv2
   cilium-endpoint-gc-interval: 5m0s
@@ -41,7 +41,6 @@ data:
   enable-bpf-clock-probe: "false"
   enable-endpoint-health-checking: "true"
   enable-endpoint-lockdown-on-policy-overflow: "false"
-  enable-experimental-lb: "false"
   enable-health-check-loadbalancer-ip: "false"
   enable-health-check-nodeport: "true"
   enable-health-checking: "true"
@@ -54,18 +53,15 @@ data:
   enable-ipv6-big-tcp: "false"
   enable-ipv6-masquerade: "true"
   enable-k8s-networkpolicy: "true"
-  enable-k8s-terminating-endpoint: "true"
-  enable-l2-neigh-discovery: "true"
+  enable-l2-neigh-discovery: "false"
   enable-l7-proxy: "true"
   enable-lb-ipam: "true"
-  enable-local-redirect-policy: "false"
   enable-masquerade-to-route-source: "false"
   enable-metrics: "true"
   enable-node-selector-labels: "false"
   enable-non-default-deny-policies: "true"
   enable-policy: always
   enable-policy-secrets-sync: "true"
-  enable-runtime-device-detection: "true"
   enable-sctp: "false"
   enable-source-ip-verification: "true"
   enable-svc-source-range-check: "true"
@@ -80,9 +76,8 @@ data:
   health-check-icmp-failure-threshold: "3"
   http-retry-count: "3"
   hubble-disable-tls: "false"
-  hubble-export-file-max-backups: "5"
-  hubble-export-file-max-size-mb: "10"
   hubble-listen-address: :4244
+  hubble-network-policy-correlation-enabled: "true"
   hubble-socket-path: /var/run/cilium/hubble.sock
   hubble-tls-cert-file: /var/lib/cilium/tls/hubble/server.crt
   hubble-tls-client-ca-files: /var/lib/cilium/tls/hubble/client-ca.crt
@@ -90,6 +85,7 @@ data:
   identity-allocation-mode: crd
   identity-gc-interval: 15m0s
   identity-heartbeat-timeout: 30m0s
+  identity-management-mode: agent
   install-no-conntrack-iptables-rules: "false"
   ipam: cluster-pool
   ipam-cilium-node-update-rate: 15s
@@ -103,6 +99,7 @@ data:
   mesh-auth-gc-interval: 5m0s
   mesh-auth-queue-size: "1024"
   mesh-auth-rotated-identities-queue-size: "1024"
+  metrics-sampling-interval: 5m
   monitor-aggregation: medium
   monitor-aggregation-flags: all
   monitor-aggregation-interval: 5s
@@ -115,6 +112,7 @@ data:
   operator-prometheus-serve-addr: :9963
   policy-audit-mode: "false"
   policy-cidr-match-mode: ""
+  policy-default-local-cluster: "false"
   policy-secrets-namespace: cilium-secrets
   policy-secrets-only-from-secrets-namespace: "true"
   preallocate-bpf-maps: "false"
@@ -138,6 +136,7 @@ data:
   tofqdns-endpoint-max-ip-per-hostname: "1000"
   tofqdns-idle-connection-grace-period: 0s
   tofqdns-max-deferred-connection-deletes: "10000"
+  tofqdns-preallocate-identities: "true"
   tofqdns-proxy-response-max-delay: 100ms
   tunnel-protocol: vxlan
   tunnel-source-port-range: 0-0
