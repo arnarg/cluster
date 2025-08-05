@@ -86,15 +86,12 @@ END EXAMPLES
 
 5. **Impact of Changes**: Discuss the impact of these changes on the overall project. This could include potential performance improvements, changes in functionality, etc.
 
-6. **Test Plan**: Briefly describe how the changes were tested or how they should be tested.
-
-7. **Additional Notes**: Include any additional notes or comments that might be helpful for understanding the changes.
+6. **Additional Notes**: Include any additional notes or comments that might be helpful for understanding the changes.
 
 Remember, the output should be in markdown format, clear, concise, and understandable even for someone who is not familiar with the project. The output should start with the "Summary" section.
 
 Don't put the content itself in a markdown code block.
 
 # INPUT
-
 
 $> git --no-pager diff main

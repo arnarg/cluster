@@ -20,14 +20,14 @@ def get_title_prompt() -> str:
         return stream.read()
 
 
-def do_completion(api_key: str, system: str, prompt: str):
+def do_completion(api_key: str, model: str, system: str, prompt: str):
     client = openai.OpenAI(
         base_url=BASE_URL,
         api_key=api_key,
     )
 
     completion = client.chat.completions.create(
-        model="deepseek-ai/DeepSeek-R1-0528",
+        model=model,
         temperature=0.1,
         max_tokens=4096,
         messages=[
@@ -76,12 +76,22 @@ if __name__ == "__main__":
 
     diff = sys.stdin.read()
 
-    title_prompt = get_title_prompt()
-
-    title = do_completion(api_key, title_prompt, diff)
-
+    # Generate pull request description
     desc_prompt = get_desc_prompt()
+    desc = do_completion(
+        api_key,
+        "moonshotai/Kimi-K2-Instruct",
+        desc_prompt,
+        diff,
+    )
 
-    desc = do_completion(api_key, desc_prompt, diff)
+    # Generate pull request title
+    title_prompt = get_title_prompt()
+    title = do_completion(
+        api_key,
+        "deepseek-ai/DeepSeek-V3",
+        title_prompt,
+        desc,
+    )
 
     print_result(title, desc)
