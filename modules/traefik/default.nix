@@ -120,6 +120,8 @@ in {
     applications.traefik = {
       inherit namespace;
 
+      createNamespace = true;
+
       helm.releases.traefik = {
         inherit values;
         chart = charts.traefik.traefik;

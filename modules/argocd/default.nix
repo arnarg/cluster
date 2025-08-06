@@ -52,6 +52,8 @@ in {
     applications.argocd = {
       inherit namespace;
 
+      createNamespace = true;
+
       helm.releases.argocd = {
         inherit values;
         chart = charts.argoproj.argo-cd;
