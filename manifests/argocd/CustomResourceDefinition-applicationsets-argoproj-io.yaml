@@ -1419,6 +1419,8 @@ spec:
                           files:
                             items:
                               properties:
+                                exclude:
+                                  type: boolean
                                 path:
                                   type: string
                               required:
@@ -4129,6 +4131,8 @@ spec:
                                     files:
                                       items:
                                         properties:
+                                          exclude:
+                                            type: boolean
                                           path:
                                             type: string
                                         required:
@@ -6275,6 +6279,10 @@ spec:
                                           type: string
                                         insecure:
                                           type: boolean
+                                        labels:
+                                          items:
+                                            type: string
+                                          type: array
                                         owner:
                                           type: string
                                         repo:
@@ -9963,6 +9971,8 @@ spec:
                                     files:
                                       items:
                                         properties:
+                                          exclude:
+                                            type: boolean
                                           path:
                                             type: string
                                         required:
@@ -12109,6 +12119,10 @@ spec:
                                           type: string
                                         insecure:
                                           type: boolean
+                                        labels:
+                                          items:
+                                            type: string
+                                          type: array
                                         owner:
                                           type: string
                                         repo:
@@ -15234,6 +15248,10 @@ spec:
                                 type: string
                               insecure:
                                 type: boolean
+                              labels:
+                                items:
+                                  type: string
+                                type: array
                               owner:
                                 type: string
                               repo:
