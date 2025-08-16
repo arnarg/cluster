@@ -18,8 +18,8 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cm: de31391c10babc04f345f31de86dd92fa2b459e735d92656df9b16bce5986036
-        checksum/cmd-params: 6d9e0cd3d33e0e95771f530ef1ccfdac71098f85fa1b72c6afff4e978cc1bcd0
+        checksum/cm: 2cf33fc5d5408908e54934ce016e3de53a60c6ba36d247f32280962227ecdd0b
+        checksum/cmd-params: d14dbcaf39b66b2f30780317869af7c5b6d8a987a7d5ce0e6cd94f9e525a3831
       labels:
         app.kubernetes.io/component: server
         app.kubernetes.io/instance: argocd
@@ -168,12 +168,6 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   key: server.oidc.cache.expiration
-                  name: argocd-cmd-params-cm
-                  optional: true
-            - name: ARGOCD_SERVER_LOGIN_ATTEMPTS_EXPIRATION
-              valueFrom:
-                configMapKeyRef:
-                  key: server.login.attempts.expiration
                   name: argocd-cmd-params-cm
                   optional: true
             - name: ARGOCD_SERVER_STATIC_ASSETS
@@ -338,6 +332,12 @@ spec:
                   key: applicationsetcontroller.enable.scm.providers
                   name: argocd-cmd-params-cm
                   optional: true
+            - name: ARGOCD_APPLICATIONSET_CONTROLLER_ENABLE_GITHUB_API_METRICS
+              valueFrom:
+                configMapKeyRef:
+                  key: applicationsetcontroller.enable.github.api.metrics
+                  name: argocd-cmd-params-cm
+                  optional: true
             - name: ARGOCD_HYDRATOR_ENABLED
               valueFrom:
                 configMapKeyRef:
@@ -350,7 +350,7 @@ spec:
                   key: server.sync.replace.allowed
                   name: argocd-cmd-params-cm
                   optional: true
-          image: quay.io/argoproj/argocd:v3.0.12
+          image: quay.io/argoproj/argocd:v3.1.0
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
