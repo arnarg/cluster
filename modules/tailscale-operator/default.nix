@@ -73,7 +73,7 @@ in {
       ];
 
       # Load tailscale credentials from 1password
-      opSecrets.operator-oauth.itemName = "tailscale_oauth";
+      templates.opSecret.operator-oauth.itemName = "tailscale_oauth";
 
       resources = {
         # The tailscale namespace needs a privileged pod security

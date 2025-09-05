@@ -9,27 +9,29 @@ in {
     inherit namespace;
     createNamespace = true;
 
-    # Load credentials from 1password
-    opSecrets.shiori-creds.itemName = "shiori_creds";
+    templates = {
+      # Load credentials from 1password
+      opSecret.shiori-creds.itemName = "shiori_creds";
 
-    # Render the webApplication template
-    templates.webApplication.shiori = {
-      inherit port;
-      image = "ghcr.io/go-shiori/shiori:v1.7.4";
-      env = {
-        SHIORI_DIR.value = "/data";
-        SHIORI_HTTP_SECRET_KEY.valueFrom.secretKeyRef = {
-          name = "shiori-creds";
-          key = "secretKey";
+      # Render the webApplication template
+      webApplication.shiori = {
+        inherit port;
+        image = "ghcr.io/go-shiori/shiori:v1.7.4";
+        env = {
+          SHIORI_DIR.value = "/data";
+          SHIORI_HTTP_SECRET_KEY.valueFrom.secretKeyRef = {
+            name = "shiori-creds";
+            key = "secretKey";
+          };
+          SHIORI_DATABASE_URL.valueFrom.secretKeyRef = {
+            name = "shiori-creds";
+            key = "databaseConn";
+          };
         };
-        SHIORI_DATABASE_URL.valueFrom.secretKeyRef = {
-          name = "shiori-creds";
-          key = "databaseConn";
+        ingress = {
+          inherit (config.networking.traefik) ingressClassName;
+          host = "shiori.${config.networking.domain}";
         };
-      };
-      ingress = {
-        inherit (config.networking.traefik) ingressClassName;
-        host = "shiori.${config.networking.domain}";
       };
     };
 

@@ -11,33 +11,35 @@ in {
     inherit namespace;
     createNamespace = true;
 
-    # Load credentials from 1password
-    opSecrets.miniflux-creds.itemName = "miniflux_creds";
+    templates = {
+      # Load credentials from 1password
+      opSecret.miniflux-creds.itemName = "miniflux_creds";
 
-    # Render the webApplication template
-    templates.webApplication.miniflux = {
-      inherit port;
-      image = "ghcr.io/miniflux/miniflux:2.2.8-distroless";
-      env = {
-        DATABASE_URL.valueFrom.secretKeyRef = {
-          name = "miniflux-creds";
-          key = "databaseConn";
+      # Render the webApplication template
+      webApplication.miniflux = {
+        inherit port;
+        image = "ghcr.io/miniflux/miniflux:2.2.8-distroless";
+        env = {
+          DATABASE_URL.valueFrom.secretKeyRef = {
+            name = "miniflux-creds";
+            key = "databaseConn";
+          };
+          ADMIN_USERNAME.valueFrom.secretKeyRef = {
+            name = "miniflux-creds";
+            key = "adminUser";
+          };
+          ADMIN_PASSWORD.valueFrom.secretKeyRef = {
+            name = "miniflux-creds";
+            key = "adminPassword";
+          };
+          LISTEN_ADDR.value = "0.0.0.0:${toString port}";
+          RUN_MIGRATIONS.value = "1";
+          CREATE_ADMIN.value = "1";
         };
-        ADMIN_USERNAME.valueFrom.secretKeyRef = {
-          name = "miniflux-creds";
-          key = "adminUser";
+        ingress = {
+          inherit (config.networking.traefik) ingressClassName;
+          host = "reader.${config.networking.domain}";
         };
-        ADMIN_PASSWORD.valueFrom.secretKeyRef = {
-          name = "miniflux-creds";
-          key = "adminPassword";
-        };
-        LISTEN_ADDR.value = "0.0.0.0:${toString port}";
-        RUN_MIGRATIONS.value = "1";
-        CREATE_ADMIN.value = "1";
-      };
-      ingress = {
-        inherit (config.networking.traefik) ingressClassName;
-        host = "reader.${config.networking.domain}";
       };
     };
 

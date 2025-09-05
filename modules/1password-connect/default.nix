@@ -1,10 +1,35 @@
-{charts, ...}: let
+{
+  lib,
+  charts,
+  ...
+}: let
   namespace = "1password";
 in {
   nixidy.applicationImports = [
-    ./secrets.nix
     ./generated.nix
   ];
+
+  templates.opSecret = {
+    options = with lib; {
+      vault = mkOption {
+        type = types.str;
+        default = "Cluster";
+      };
+      itemName = mkOption {
+        type = types.str;
+      };
+    };
+
+    output = {
+      name,
+      config,
+      ...
+    }: {
+      onePasswordItems."${name}".spec = {
+        itemPath = "vaults/${config.vault}/items/${config.itemName}";
+      };
+    };
+  };
 
   applications."1password-connect" = {
     inherit namespace;

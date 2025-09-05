@@ -128,7 +128,7 @@ in {
       };
 
       # 1password secret with ACME credentials
-      opSecrets.acme-creds.itemName = "traefik_acme";
+      templates.opSecret.acme-creds.itemName = "traefik_acme";
 
       resources = {
         # Network policy allowing tailscale proxy to
