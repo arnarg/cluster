@@ -9,6 +9,8 @@
     ./nfs
     ./shiori
     ./tailscale-operator
+
+    ./templates.nix
   ];
 
   options = with lib; {

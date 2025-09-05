@@ -4,6 +4,8 @@
   labels = {
     "app.kubernetes.io/name" = "miniflux";
   };
+
+  port = 8080;
 in {
   applications.miniflux = {
     inherit namespace;
@@ -12,71 +14,34 @@ in {
     # Load credentials from 1password
     opSecrets.miniflux-creds.itemName = "miniflux_creds";
 
-    resources = let
-      port = 8080;
-    in {
-      deployments.miniflux = {
-        metadata.labels = labels;
-        spec = {
-          replicas = 1;
-          selector.matchLabels = labels;
-          template = {
-            metadata.labels = labels;
-            spec.containers.miniflux = {
-              image = "ghcr.io/miniflux/miniflux:2.2.8-distroless";
-              ports.http.containerPort = port;
-              env = {
-                DATABASE_URL.valueFrom.secretKeyRef = {
-                  name = "miniflux-creds";
-                  key = "databaseConn";
-                };
-                ADMIN_USERNAME.valueFrom.secretKeyRef = {
-                  name = "miniflux-creds";
-                  key = "adminUser";
-                };
-                ADMIN_PASSWORD.valueFrom.secretKeyRef = {
-                  name = "miniflux-creds";
-                  key = "adminPassword";
-                };
-                LISTEN_ADDR.value = "0.0.0.0:${toString port}";
-                RUN_MIGRATIONS.value = "1";
-                CREATE_ADMIN.value = "1";
-              };
-            };
-          };
+    # Render the webApplication template
+    templates.webApplication.miniflux = {
+      inherit port;
+      image = "ghcr.io/miniflux/miniflux:2.2.8-distroless";
+      env = {
+        DATABASE_URL.valueFrom.secretKeyRef = {
+          name = "miniflux-creds";
+          key = "databaseConn";
         };
-      };
-
-      services.miniflux.spec = {
-        type = "ClusterIP";
-        selector = labels;
-        ports.http = {
-          port = 80;
-          protocol = "TCP";
-          targetPort = port;
+        ADMIN_USERNAME.valueFrom.secretKeyRef = {
+          name = "miniflux-creds";
+          key = "adminUser";
         };
+        ADMIN_PASSWORD.valueFrom.secretKeyRef = {
+          name = "miniflux-creds";
+          key = "adminPassword";
+        };
+        LISTEN_ADDR.value = "0.0.0.0:${toString port}";
+        RUN_MIGRATIONS.value = "1";
+        CREATE_ADMIN.value = "1";
       };
-
-      ingresses.miniflux.spec = {
+      ingress = {
         inherit (config.networking.traefik) ingressClassName;
-
-        rules = [
-          {
-            host = "reader.${config.networking.domain}";
-            http.paths = [
-              {
-                path = "/";
-                pathType = "Prefix";
-                backend.service = {
-                  name = "miniflux";
-                  port.name = "http";
-                };
-              }
-            ];
-          }
-        ];
+        host = "reader.${config.networking.domain}";
       };
+    };
 
+    resources = {
       networkPolicies.allow-traefik-ingress.spec = {
         podSelector.matchLabels = labels;
         policyTypes = ["Ingress"];
