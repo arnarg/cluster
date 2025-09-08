@@ -18,7 +18,7 @@ in {
       # Render the webApplication template
       webApplication.miniflux = {
         inherit port;
-        image = "ghcr.io/miniflux/miniflux:2.2.8-distroless";
+        image = "ghcr.io/miniflux/miniflux:2.2.12-distroless";
         env = {
           DATABASE_URL.valueFrom.secretKeyRef = {
             name = "miniflux-creds";
