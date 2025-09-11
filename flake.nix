@@ -43,7 +43,7 @@
     };
 
     packages = {
-      nixidy = nixidy.packages.${system}.default;
+      nixidy = nixidy.packages.${system}.cli;
       generators = {
         cilium = nixidy.packages.${system}.generators.fromCRD {
           name = "cilium";
