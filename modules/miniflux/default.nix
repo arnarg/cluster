@@ -108,6 +108,16 @@ in {
                 ];
               }
             ];
+            icmps = [
+              {
+                fields = [
+                  {
+                    type = "Echo";
+                    family = "IPv4";
+                  }
+                ];
+              }
+            ];
           }
         ];
       };
