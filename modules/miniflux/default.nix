@@ -1,4 +1,5 @@
-{config, ...}: let
+{ config, ... }:
+let
   namespace = "miniflux";
 
   labels = {
@@ -6,7 +7,8 @@
   };
 
   port = 8080;
-in {
+in
+{
   applications.miniflux = {
     inherit namespace;
     createNamespace = true;
@@ -44,9 +46,14 @@ in {
     };
 
     resources = {
+      # Set custom dnsConfig in miniflux deployment
+      deployments.miniflux.spec.template.spec.dnsConfig = {
+        options.ndots.value = "1";
+      };
+
       networkPolicies.allow-traefik-ingress.spec = {
         podSelector.matchLabels = labels;
-        policyTypes = ["Ingress"];
+        policyTypes = [ "Ingress" ];
         ingress = [
           {
             from = [
@@ -97,23 +104,13 @@ in {
         endpointSelector.matchLabels = labels;
         egress = [
           {
-            toEntities = ["world"];
+            toEntities = [ "world" ];
             toPorts = [
               {
                 ports = [
                   {
                     port = "443";
                     protocol = "TCP";
-                  }
-                ];
-              }
-            ];
-            icmps = [
-              {
-                fields = [
-                  {
-                    type = "Echo";
-                    family = "IPv4";
                   }
                 ];
               }
