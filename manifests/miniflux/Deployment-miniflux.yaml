@@ -43,3 +43,7 @@ spec:
           ports:
             - containerPort: 8080
               name: http
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"

@@ -5,11 +5,7 @@ metadata:
   namespace: miniflux
 spec:
   egress:
-    - icmps:
-        - fields:
-            - family: IPv4
-              type: Echo
-      toEntities:
+    - toEntities:
         - world
       toPorts:
         - ports:
