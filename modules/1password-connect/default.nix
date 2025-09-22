@@ -2,9 +2,11 @@
   lib,
   charts,
   ...
-}: let
+}:
+let
   namespace = "1password";
-in {
+in
+{
   nixidy.applicationImports = [
     ./generated.nix
   ];
@@ -20,15 +22,17 @@ in {
       };
     };
 
-    output = {
-      name,
-      config,
-      ...
-    }: {
-      onePasswordItems."${name}".spec = {
-        itemPath = "vaults/${config.vault}/items/${config.itemName}";
+    output =
+      {
+        name,
+        config,
+        ...
+      }:
+      {
+        onePasswordItems."${name}".spec = {
+          itemPath = "vaults/${config.vault}/items/${config.itemName}";
+        };
       };
-    };
   };
 
   applications."1password-connect" = {
@@ -39,7 +43,7 @@ in {
       chart = charts."1password".connect;
 
       # Chart includes tests
-      extraOpts = ["--skip-tests"];
+      extraOpts = [ "--skip-tests" ];
 
       values = {
         # Set service type to ClusterIP
@@ -63,7 +67,7 @@ in {
           };
           egress = [
             {
-              toEntities = ["kube-apiserver"];
+              toEntities = [ "kube-apiserver" ];
               toPorts = [
                 {
                   ports = [
@@ -97,7 +101,7 @@ in {
               toPorts = [
                 {
                   ports = [
-                    {port = "8080";}
+                    { port = "8080"; }
                   ];
                 }
               ];
@@ -131,7 +135,7 @@ in {
                     }
                   ];
                   rules.dns = [
-                    {matchPattern = "*";}
+                    { matchPattern = "*"; }
                   ];
                 }
               ];
@@ -139,7 +143,7 @@ in {
             # Allow HTTPS to my.1password.com
             {
               toFQDNs = [
-                {matchName = "my.1password.com";}
+                { matchName = "my.1password.com"; }
               ];
               toPorts = [
                 {

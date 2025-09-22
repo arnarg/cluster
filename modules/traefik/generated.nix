@@ -5,157 +5,175 @@
   config,
   ...
 }:
-with lib; let
+with lib;
+let
   hasAttrNotNull = attr: set: hasAttr attr set && set.${attr} != null;
 
-  attrsToList = values:
-    if values != null
-    then
+  attrsToList =
+    values:
+    if values != null then
       sort (
         a: b:
-          if (hasAttrNotNull "_priority" a && hasAttrNotNull "_priority" b)
-          then a._priority < b._priority
-          else false
+        if (hasAttrNotNull "_priority" a && hasAttrNotNull "_priority" b) then
+          a._priority < b._priority
+        else
+          false
       ) (mapAttrsToList (n: v: v) values)
-    else values;
+    else
+      values;
 
-  getDefaults = resource: group: version: kind:
-    catAttrs "default" (filter (
+  getDefaults =
+    resource: group: version: kind:
+    catAttrs "default" (
+      filter (
         default:
-          (default.resource == null || default.resource == resource)
-          && (default.group == null || default.group == group)
-          && (default.version == null || default.version == version)
-          && (default.kind == null || default.kind == kind)
-      )
-      config.defaults);
+        (default.resource == null || default.resource == resource)
+        && (default.group == null || default.group == group)
+        && (default.version == null || default.version == version)
+        && (default.kind == null || default.kind == kind)
+      ) config.defaults
+    );
 
-  types =
-    lib.types
-    // rec {
-      str = mkOptionType {
-        name = "str";
-        description = "string";
-        check = isString;
-        merge = mergeEqualOption;
-      };
-
-      # Either value of type `finalType` or `coercedType`, the latter is
-      # converted to `finalType` using `coerceFunc`.
-      coercedTo = coercedType: coerceFunc: finalType:
-        mkOptionType rec {
-          inherit (finalType) getSubOptions getSubModules;
-
-          name = "coercedTo";
-          description = "${finalType.description} or ${coercedType.description}";
-          check = x: finalType.check x || coercedType.check x;
-          merge = loc: defs: let
-            coerceVal = val:
-              if finalType.check val
-              then val
-              else let
-                coerced = coerceFunc val;
-              in
-                assert finalType.check coerced; coerced;
-          in
-            finalType.merge loc (map (def: def // {value = coerceVal def.value;}) defs);
-          substSubModules = m: coercedTo coercedType coerceFunc (finalType.substSubModules m);
-          typeMerge = t1: t2: null;
-          functor = (defaultFunctor name) // {wrapped = finalType;};
-        };
+  types = lib.types // rec {
+    str = mkOptionType {
+      name = "str";
+      description = "string";
+      check = isString;
+      merge = mergeEqualOption;
     };
+
+    # Either value of type `finalType` or `coercedType`, the latter is
+    # converted to `finalType` using `coerceFunc`.
+    coercedTo =
+      coercedType: coerceFunc: finalType:
+      mkOptionType rec {
+        inherit (finalType) getSubOptions getSubModules;
+
+        name = "coercedTo";
+        description = "${finalType.description} or ${coercedType.description}";
+        check = x: finalType.check x || coercedType.check x;
+        merge =
+          loc: defs:
+          let
+            coerceVal =
+              val:
+              if finalType.check val then
+                val
+              else
+                let
+                  coerced = coerceFunc val;
+                in
+                assert finalType.check coerced;
+                coerced;
+          in
+          finalType.merge loc (map (def: def // { value = coerceVal def.value; }) defs);
+        substSubModules = m: coercedTo coercedType coerceFunc (finalType.substSubModules m);
+        typeMerge = t1: t2: null;
+        functor = (defaultFunctor name) // {
+          wrapped = finalType;
+        };
+      };
+  };
 
   mkOptionDefault = mkOverride 1001;
 
-  mergeValuesByKey = attrMergeKey: listMergeKeys: values:
-    listToAttrs (imap0
-      (i: value:
+  mergeValuesByKey =
+    attrMergeKey: listMergeKeys: values:
+    listToAttrs (
+      imap0 (
+        i: value:
         nameValuePair (
-          if hasAttr attrMergeKey value
-          then
-            if isAttrs value.${attrMergeKey}
-            then toString value.${attrMergeKey}.content
-            else (toString value.${attrMergeKey})
+          if hasAttr attrMergeKey value then
+            if isAttrs value.${attrMergeKey} then
+              toString value.${attrMergeKey}.content
+            else
+              (toString value.${attrMergeKey})
           else
             # generate merge key for list elements if it's not present
             "__kubenix_list_merge_key_"
-            + (concatStringsSep "" (map (
-                key:
-                  if isAttrs value.${key}
-                  then toString value.${key}.content
-                  else (toString value.${key})
-              )
-              listMergeKeys))
-        ) (value // {_priority = i;}))
-      values);
+            + (concatStringsSep "" (
+              map (
+                key: if isAttrs value.${key} then toString value.${key}.content else (toString value.${key})
+              ) listMergeKeys
+            ))
+        ) (value // { _priority = i; })
+      ) values
+    );
 
-  submoduleOf = ref:
-    types.submodule ({name, ...}: {
-      options = definitions."${ref}".options or {};
-      config = definitions."${ref}".config or {};
-    });
+  submoduleOf =
+    ref:
+    types.submodule (
+      { name, ... }:
+      {
+        options = definitions."${ref}".options or { };
+        config = definitions."${ref}".config or { };
+      }
+    );
 
-  globalSubmoduleOf = ref:
-    types.submodule ({name, ...}: {
-      options = config.definitions."${ref}".options or {};
-      config = config.definitions."${ref}".config or {};
-    });
+  globalSubmoduleOf =
+    ref:
+    types.submodule (
+      { name, ... }:
+      {
+        options = config.definitions."${ref}".options or { };
+        config = config.definitions."${ref}".config or { };
+      }
+    );
 
-  submoduleWithMergeOf = ref: mergeKey:
-    types.submodule ({name, ...}: let
-      convertName = name:
-        if definitions."${ref}".options.${mergeKey}.type == types.int
-        then toInt name
-        else name;
-    in {
-      options =
-        definitions."${ref}".options
-        // {
+  submoduleWithMergeOf =
+    ref: mergeKey:
+    types.submodule (
+      { name, ... }:
+      let
+        convertName =
+          name: if definitions."${ref}".options.${mergeKey}.type == types.int then toInt name else name;
+      in
+      {
+        options = definitions."${ref}".options // {
           # position in original array
           _priority = mkOption {
             type = types.nullOr types.int;
             default = null;
           };
         };
-      config =
-        definitions."${ref}".config
-        // {
+        config = definitions."${ref}".config // {
           ${mergeKey} = mkOverride 1002 (
             # use name as mergeKey only if it is not coming from mergeValuesByKey
-            if (!hasPrefix "__kubenix_list_merge_key_" name)
-            then convertName name
-            else null
+            if (!hasPrefix "__kubenix_list_merge_key_" name) then convertName name else null
           );
         };
-    });
+      }
+    );
 
-  submoduleForDefinition = ref: resource: kind: group: version: let
-    apiVersion =
-      if group == "core"
-      then version
-      else "${group}/${version}";
-  in
-    types.submodule ({name, ...}: {
-      inherit (definitions."${ref}") options;
+  submoduleForDefinition =
+    ref: resource: kind: group: version:
+    let
+      apiVersion = if group == "core" then version else "${group}/${version}";
+    in
+    types.submodule (
+      { name, ... }:
+      {
+        inherit (definitions."${ref}") options;
 
-      imports = getDefaults resource group version kind;
-      config = mkMerge [
-        definitions."${ref}".config
-        {
-          kind = mkOptionDefault kind;
-          apiVersion = mkOptionDefault apiVersion;
+        imports = getDefaults resource group version kind;
+        config = mkMerge [
+          definitions."${ref}".config
+          {
+            kind = mkOptionDefault kind;
+            apiVersion = mkOptionDefault apiVersion;
 
-          # metdata.name cannot use option default, due deep config
-          metadata.name = mkOptionDefault name;
-        }
-      ];
-    });
+            # metdata.name cannot use option default, due deep config
+            metadata.name = mkOptionDefault name;
+          }
+        ];
+      }
+    );
 
-  coerceAttrsOfSubmodulesToListByKey = ref: attrMergeKey: listMergeKeys: (
-    types.coercedTo
-    (types.listOf (submoduleOf ref))
-    (mergeValuesByKey attrMergeKey listMergeKeys)
-    (types.attrsOf (submoduleWithMergeOf ref attrMergeKey))
-  );
+  coerceAttrsOfSubmodulesToListByKey =
+    ref: attrMergeKey: listMergeKeys:
+    (types.coercedTo (types.listOf (submoduleOf ref)) (mergeValuesByKey attrMergeKey listMergeKeys) (
+      types.attrsOf (submoduleWithMergeOf ref attrMergeKey)
+    ));
 
   definitions = {
     "traefik.io.v1alpha1.IngressRoute" = {
@@ -216,7 +234,10 @@ with lib; let
         };
         "middlewares" = mkOption {
           description = "Middlewares defines the list of references to Middleware resources.\nMore info: https://doc.traefik.io/traefik/v3.5/routing/providers/kubernetes-crd/#kind-middleware";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "traefik.io.v1alpha1.IngressRouteSpecRoutesMiddlewares" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "traefik.io.v1alpha1.IngressRouteSpecRoutesMiddlewares" "name"
+              [ ]
+          );
           apply = attrsToList;
         };
         "observability" = mkOption {
@@ -229,7 +250,9 @@ with lib; let
         };
         "services" = mkOption {
           description = "Services defines the list of Service.\nIt can contain any combination of TraefikService and/or reference to a Kubernetes Service.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "traefik.io.v1alpha1.IngressRouteSpecRoutesServices" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "traefik.io.v1alpha1.IngressRouteSpecRoutesServices" "name" [ ]
+          );
           apply = attrsToList;
         };
         "syntax" = mkOption {
@@ -326,7 +349,9 @@ with lib; let
         };
         "responseForwarding" = mkOption {
           description = "ResponseForwarding defines how Traefik forwards the response from the upstream Kubernetes Service to the client.";
-          type = types.nullOr (submoduleOf "traefik.io.v1alpha1.IngressRouteSpecRoutesServicesResponseForwarding");
+          type = types.nullOr (
+            submoduleOf "traefik.io.v1alpha1.IngressRouteSpecRoutesServicesResponseForwarding"
+          );
         };
         "scheme" = mkOption {
           description = "Scheme defines the scheme to use for the request to the upstream Kubernetes Service.\nIt defaults to https when Kubernetes Service port is 443, http otherwise.";
@@ -634,7 +659,10 @@ with lib; let
         };
         "middlewares" = mkOption {
           description = "Middlewares defines the list of references to MiddlewareTCP resources.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "traefik.io.v1alpha1.IngressRouteTCPSpecRoutesMiddlewares" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "traefik.io.v1alpha1.IngressRouteTCPSpecRoutesMiddlewares" "name"
+              [ ]
+          );
           apply = attrsToList;
         };
         "priority" = mkOption {
@@ -643,7 +671,10 @@ with lib; let
         };
         "services" = mkOption {
           description = "Services defines the list of TCP services.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "traefik.io.v1alpha1.IngressRouteTCPSpecRoutesServices" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "traefik.io.v1alpha1.IngressRouteTCPSpecRoutesServices" "name"
+              [ ]
+          );
           apply = attrsToList;
         };
         "syntax" = mkOption {
@@ -699,7 +730,9 @@ with lib; let
         };
         "proxyProtocol" = mkOption {
           description = "ProxyProtocol defines the PROXY protocol configuration.\nMore info: https://doc.traefik.io/traefik/v3.5/routing/services/#proxy-protocol";
-          type = types.nullOr (submoduleOf "traefik.io.v1alpha1.IngressRouteTCPSpecRoutesServicesProxyProtocol");
+          type = types.nullOr (
+            submoduleOf "traefik.io.v1alpha1.IngressRouteTCPSpecRoutesServicesProxyProtocol"
+          );
         };
         "serversTransport" = mkOption {
           description = "ServersTransport defines the name of ServersTransportTCP resource to use.\nIt allows to configure the transport between Traefik and your servers.\nCan only be used on a Kubernetes Service.";
@@ -750,7 +783,9 @@ with lib; let
         };
         "domains" = mkOption {
           description = "Domains defines the list of domains that will be used to issue certificates.\nMore info: https://doc.traefik.io/traefik/v3.5/routing/routers/#domains";
-          type = types.nullOr (types.listOf (submoduleOf "traefik.io.v1alpha1.IngressRouteTCPSpecTlsDomains"));
+          type = types.nullOr (
+            types.listOf (submoduleOf "traefik.io.v1alpha1.IngressRouteTCPSpecTlsDomains")
+          );
         };
         "options" = mkOption {
           description = "Options defines the reference to a TLSOption, that specifies the parameters of the TLS connection.\nIf not defined, the `default` TLSOption is used.\nMore info: https://doc.traefik.io/traefik/v3.5/https/tls/#tls-options";
@@ -873,7 +908,10 @@ with lib; let
       options = {
         "services" = mkOption {
           description = "Services defines the list of UDP services.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "traefik.io.v1alpha1.IngressRouteUDPSpecRoutesServices" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "traefik.io.v1alpha1.IngressRouteUDPSpecRoutesServices" "name"
+              [ ]
+          );
           apply = attrsToList;
         };
       };
@@ -979,7 +1017,10 @@ with lib; let
         };
         "mirrors" = mkOption {
           description = "Mirrors defines the list of mirrors where Traefik will duplicate the traffic.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "traefik.io.v1alpha1.TraefikServiceSpecMirroringMirrors" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "traefik.io.v1alpha1.TraefikServiceSpecMirroringMirrors" "name"
+              [ ]
+          );
           apply = attrsToList;
         };
         "name" = mkOption {
@@ -1008,7 +1049,9 @@ with lib; let
         };
         "responseForwarding" = mkOption {
           description = "ResponseForwarding defines how Traefik forwards the response from the upstream Kubernetes Service to the client.";
-          type = types.nullOr (submoduleOf "traefik.io.v1alpha1.TraefikServiceSpecMirroringResponseForwarding");
+          type = types.nullOr (
+            submoduleOf "traefik.io.v1alpha1.TraefikServiceSpecMirroringResponseForwarding"
+          );
         };
         "scheme" = mkOption {
           description = "Scheme defines the scheme to use for the request to the upstream Kubernetes Service.\nIt defaults to https when Kubernetes Service port is 443, http otherwise.";
@@ -1122,7 +1165,9 @@ with lib; let
       options = {
         "healthCheck" = mkOption {
           description = "Healthcheck defines health checks for ExternalName services.";
-          type = types.nullOr (submoduleOf "traefik.io.v1alpha1.TraefikServiceSpecMirroringMirrorsHealthCheck");
+          type = types.nullOr (
+            submoduleOf "traefik.io.v1alpha1.TraefikServiceSpecMirroringMirrorsHealthCheck"
+          );
         };
         "kind" = mkOption {
           description = "Kind defines the kind of the Service.";
@@ -1158,7 +1203,9 @@ with lib; let
         };
         "responseForwarding" = mkOption {
           description = "ResponseForwarding defines how Traefik forwards the response from the upstream Kubernetes Service to the client.";
-          type = types.nullOr (submoduleOf "traefik.io.v1alpha1.TraefikServiceSpecMirroringMirrorsResponseForwarding");
+          type = types.nullOr (
+            submoduleOf "traefik.io.v1alpha1.TraefikServiceSpecMirroringMirrorsResponseForwarding"
+          );
         };
         "scheme" = mkOption {
           description = "Scheme defines the scheme to use for the request to the upstream Kubernetes Service.\nIt defaults to https when Kubernetes Service port is 443, http otherwise.";
@@ -1282,7 +1329,9 @@ with lib; let
       options = {
         "cookie" = mkOption {
           description = "Cookie defines the sticky cookie configuration.";
-          type = types.nullOr (submoduleOf "traefik.io.v1alpha1.TraefikServiceSpecMirroringMirrorsStickyCookie");
+          type = types.nullOr (
+            submoduleOf "traefik.io.v1alpha1.TraefikServiceSpecMirroringMirrorsStickyCookie"
+          );
         };
       };
 
@@ -1402,7 +1451,10 @@ with lib; let
       options = {
         "services" = mkOption {
           description = "Services defines the list of Kubernetes Service and/or TraefikService to load-balance, with weight.";
-          type = types.nullOr (coerceAttrsOfSubmodulesToListByKey "traefik.io.v1alpha1.TraefikServiceSpecWeightedServices" "name" []);
+          type = types.nullOr (
+            coerceAttrsOfSubmodulesToListByKey "traefik.io.v1alpha1.TraefikServiceSpecWeightedServices" "name"
+              [ ]
+          );
           apply = attrsToList;
         };
         "sticky" = mkOption {
@@ -1420,7 +1472,9 @@ with lib; let
       options = {
         "healthCheck" = mkOption {
           description = "Healthcheck defines health checks for ExternalName services.";
-          type = types.nullOr (submoduleOf "traefik.io.v1alpha1.TraefikServiceSpecWeightedServicesHealthCheck");
+          type = types.nullOr (
+            submoduleOf "traefik.io.v1alpha1.TraefikServiceSpecWeightedServicesHealthCheck"
+          );
         };
         "kind" = mkOption {
           description = "Kind defines the kind of the Service.";
@@ -1452,7 +1506,9 @@ with lib; let
         };
         "responseForwarding" = mkOption {
           description = "ResponseForwarding defines how Traefik forwards the response from the upstream Kubernetes Service to the client.";
-          type = types.nullOr (submoduleOf "traefik.io.v1alpha1.TraefikServiceSpecWeightedServicesResponseForwarding");
+          type = types.nullOr (
+            submoduleOf "traefik.io.v1alpha1.TraefikServiceSpecWeightedServicesResponseForwarding"
+          );
         };
         "scheme" = mkOption {
           description = "Scheme defines the scheme to use for the request to the upstream Kubernetes Service.\nIt defaults to https when Kubernetes Service port is 443, http otherwise.";
@@ -1575,7 +1631,9 @@ with lib; let
       options = {
         "cookie" = mkOption {
           description = "Cookie defines the sticky cookie configuration.";
-          type = types.nullOr (submoduleOf "traefik.io.v1alpha1.TraefikServiceSpecWeightedServicesStickyCookie");
+          type = types.nullOr (
+            submoduleOf "traefik.io.v1alpha1.TraefikServiceSpecWeightedServicesStickyCookie"
+          );
         };
       };
 
@@ -1680,54 +1738,86 @@ with lib; let
       };
     };
   };
-in {
+in
+{
   # all resource versions
   options = {
-    resources =
-      {
-        "traefik.io"."v1alpha1"."IngressRoute" = mkOption {
-          description = "IngressRoute is the CRD implementation of a Traefik HTTP Router.";
-          type = types.attrsOf (submoduleForDefinition "traefik.io.v1alpha1.IngressRoute" "ingressroutes" "IngressRoute" "traefik.io" "v1alpha1");
-          default = {};
-        };
-        "traefik.io"."v1alpha1"."IngressRouteTCP" = mkOption {
-          description = "IngressRouteTCP is the CRD implementation of a Traefik TCP Router.";
-          type = types.attrsOf (submoduleForDefinition "traefik.io.v1alpha1.IngressRouteTCP" "ingressroutetcps" "IngressRouteTCP" "traefik.io" "v1alpha1");
-          default = {};
-        };
-        "traefik.io"."v1alpha1"."IngressRouteUDP" = mkOption {
-          description = "IngressRouteUDP is a CRD implementation of a Traefik UDP Router.";
-          type = types.attrsOf (submoduleForDefinition "traefik.io.v1alpha1.IngressRouteUDP" "ingressrouteudps" "IngressRouteUDP" "traefik.io" "v1alpha1");
-          default = {};
-        };
-        "traefik.io"."v1alpha1"."TraefikService" = mkOption {
-          description = "TraefikService is the CRD implementation of a Traefik Service.\nTraefikService object allows to:\n- Apply weight to Services on load-balancing\n- Mirror traffic on services\nMore info: https://doc.traefik.io/traefik/v3.5/routing/providers/kubernetes-crd/#kind-traefikservice";
-          type = types.attrsOf (submoduleForDefinition "traefik.io.v1alpha1.TraefikService" "traefikservices" "TraefikService" "traefik.io" "v1alpha1");
-          default = {};
-        };
-      }
-      // {
-        "ingressRoutes" = mkOption {
-          description = "IngressRoute is the CRD implementation of a Traefik HTTP Router.";
-          type = types.attrsOf (submoduleForDefinition "traefik.io.v1alpha1.IngressRoute" "ingressroutes" "IngressRoute" "traefik.io" "v1alpha1");
-          default = {};
-        };
-        "ingressRouteTCPs" = mkOption {
-          description = "IngressRouteTCP is the CRD implementation of a Traefik TCP Router.";
-          type = types.attrsOf (submoduleForDefinition "traefik.io.v1alpha1.IngressRouteTCP" "ingressroutetcps" "IngressRouteTCP" "traefik.io" "v1alpha1");
-          default = {};
-        };
-        "ingressRouteUDPs" = mkOption {
-          description = "IngressRouteUDP is a CRD implementation of a Traefik UDP Router.";
-          type = types.attrsOf (submoduleForDefinition "traefik.io.v1alpha1.IngressRouteUDP" "ingressrouteudps" "IngressRouteUDP" "traefik.io" "v1alpha1");
-          default = {};
-        };
-        "traefikServices" = mkOption {
-          description = "TraefikService is the CRD implementation of a Traefik Service.\nTraefikService object allows to:\n- Apply weight to Services on load-balancing\n- Mirror traffic on services\nMore info: https://doc.traefik.io/traefik/v3.5/routing/providers/kubernetes-crd/#kind-traefikservice";
-          type = types.attrsOf (submoduleForDefinition "traefik.io.v1alpha1.TraefikService" "traefikservices" "TraefikService" "traefik.io" "v1alpha1");
-          default = {};
-        };
+    resources = {
+      "traefik.io"."v1alpha1"."IngressRoute" = mkOption {
+        description = "IngressRoute is the CRD implementation of a Traefik HTTP Router.";
+        type = types.attrsOf (
+          submoduleForDefinition "traefik.io.v1alpha1.IngressRoute" "ingressroutes" "IngressRoute"
+            "traefik.io"
+            "v1alpha1"
+        );
+        default = { };
       };
+      "traefik.io"."v1alpha1"."IngressRouteTCP" = mkOption {
+        description = "IngressRouteTCP is the CRD implementation of a Traefik TCP Router.";
+        type = types.attrsOf (
+          submoduleForDefinition "traefik.io.v1alpha1.IngressRouteTCP" "ingressroutetcps" "IngressRouteTCP"
+            "traefik.io"
+            "v1alpha1"
+        );
+        default = { };
+      };
+      "traefik.io"."v1alpha1"."IngressRouteUDP" = mkOption {
+        description = "IngressRouteUDP is a CRD implementation of a Traefik UDP Router.";
+        type = types.attrsOf (
+          submoduleForDefinition "traefik.io.v1alpha1.IngressRouteUDP" "ingressrouteudps" "IngressRouteUDP"
+            "traefik.io"
+            "v1alpha1"
+        );
+        default = { };
+      };
+      "traefik.io"."v1alpha1"."TraefikService" = mkOption {
+        description = "TraefikService is the CRD implementation of a Traefik Service.\nTraefikService object allows to:\n- Apply weight to Services on load-balancing\n- Mirror traffic on services\nMore info: https://doc.traefik.io/traefik/v3.5/routing/providers/kubernetes-crd/#kind-traefikservice";
+        type = types.attrsOf (
+          submoduleForDefinition "traefik.io.v1alpha1.TraefikService" "traefikservices" "TraefikService"
+            "traefik.io"
+            "v1alpha1"
+        );
+        default = { };
+      };
+    }
+    // {
+      "ingressRoutes" = mkOption {
+        description = "IngressRoute is the CRD implementation of a Traefik HTTP Router.";
+        type = types.attrsOf (
+          submoduleForDefinition "traefik.io.v1alpha1.IngressRoute" "ingressroutes" "IngressRoute"
+            "traefik.io"
+            "v1alpha1"
+        );
+        default = { };
+      };
+      "ingressRouteTCPs" = mkOption {
+        description = "IngressRouteTCP is the CRD implementation of a Traefik TCP Router.";
+        type = types.attrsOf (
+          submoduleForDefinition "traefik.io.v1alpha1.IngressRouteTCP" "ingressroutetcps" "IngressRouteTCP"
+            "traefik.io"
+            "v1alpha1"
+        );
+        default = { };
+      };
+      "ingressRouteUDPs" = mkOption {
+        description = "IngressRouteUDP is a CRD implementation of a Traefik UDP Router.";
+        type = types.attrsOf (
+          submoduleForDefinition "traefik.io.v1alpha1.IngressRouteUDP" "ingressrouteudps" "IngressRouteUDP"
+            "traefik.io"
+            "v1alpha1"
+        );
+        default = { };
+      };
+      "traefikServices" = mkOption {
+        description = "TraefikService is the CRD implementation of a Traefik Service.\nTraefikService object allows to:\n- Apply weight to Services on load-balancing\n- Mirror traffic on services\nMore info: https://doc.traefik.io/traefik/v3.5/routing/providers/kubernetes-crd/#kind-traefikservice";
+        type = types.attrsOf (
+          submoduleForDefinition "traefik.io.v1alpha1.TraefikService" "traefikservices" "TraefikService"
+            "traefik.io"
+            "v1alpha1"
+        );
+        default = { };
+      };
+    };
   };
 
   config = {
@@ -1767,14 +1857,10 @@ in {
     ];
 
     resources = {
-      "traefik.io"."v1alpha1"."IngressRoute" =
-        mkAliasDefinitions options.resources."ingressRoutes";
-      "traefik.io"."v1alpha1"."IngressRouteTCP" =
-        mkAliasDefinitions options.resources."ingressRouteTCPs";
-      "traefik.io"."v1alpha1"."IngressRouteUDP" =
-        mkAliasDefinitions options.resources."ingressRouteUDPs";
-      "traefik.io"."v1alpha1"."TraefikService" =
-        mkAliasDefinitions options.resources."traefikServices";
+      "traefik.io"."v1alpha1"."IngressRoute" = mkAliasDefinitions options.resources."ingressRoutes";
+      "traefik.io"."v1alpha1"."IngressRouteTCP" = mkAliasDefinitions options.resources."ingressRouteTCPs";
+      "traefik.io"."v1alpha1"."IngressRouteUDP" = mkAliasDefinitions options.resources."ingressRouteUDPs";
+      "traefik.io"."v1alpha1"."TraefikService" = mkAliasDefinitions options.resources."traefikServices";
     };
 
     # make all namespaced resources default to the

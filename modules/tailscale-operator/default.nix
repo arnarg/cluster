@@ -3,17 +3,17 @@
   config,
   charts,
   ...
-}: let
+}:
+let
   cfg = config.networking.tailscale-operator;
 
   namespace = "tailscale";
 
-  values =
-    lib.attrsets.recursiveUpdate {
-      # Default values
-    }
-    cfg.values;
-in {
+  values = lib.attrsets.recursiveUpdate {
+    # Default values
+  } cfg.values;
+in
+{
   options.networking.tailscale-operator = with lib; {
     enable = mkOption {
       type = types.bool;
@@ -21,12 +21,12 @@ in {
     };
     values = mkOption {
       type = types.attrsOf types.anything;
-      default = {};
+      default = { };
     };
   };
 
   config = lib.mkIf cfg.enable {
-    nixidy.applicationImports = [./generated.nix];
+    nixidy.applicationImports = [ ./generated.nix ];
 
     applications.tailscale-operator = {
       inherit namespace;
@@ -83,7 +83,8 @@ in {
         };
 
         # Add labels to tailscale-operator pod
-        deployments.operator.spec.template.metadata.labels."argocd.argoproj.io/part-of" = "tailscale-operator";
+        deployments.operator.spec.template.metadata.labels."argocd.argoproj.io/part-of" =
+          "tailscale-operator";
 
         # Create a tailscale proxy class to set labels on proxies
         proxyClasses.prod.spec.statefulSet.pod.labels."argocd.argoproj.io/part-of" = "tailscale-operator";
@@ -95,7 +96,7 @@ in {
             endpointSelector.matchLabels."argocd.argoproj.io/part-of" = "tailscale-operator";
             egress = [
               {
-                toEntities = ["kube-apiserver"];
+                toEntities = [ "kube-apiserver" ];
                 toPorts = [
                   {
                     ports = [
@@ -134,7 +135,7 @@ in {
                       }
                     ];
                     rules.dns = [
-                      {matchPattern = "*";}
+                      { matchPattern = "*"; }
                     ];
                   }
                 ];
@@ -142,7 +143,7 @@ in {
               # Allow HTTPS to coordination and derp servers
               {
                 toFQDNs = [
-                  {matchPattern = "*.tailscale.com";}
+                  { matchPattern = "*.tailscale.com"; }
                 ];
                 toPorts = [
                   {
@@ -169,7 +170,7 @@ in {
             # Allow all UDP ports
             egress = [
               {
-                toEntities = ["world"];
+                toEntities = [ "world" ];
                 toPorts = [
                   {
                     ports = [
@@ -185,7 +186,7 @@ in {
             # Deny SSDP
             egressDeny = [
               {
-                toEntities = ["world"];
+                toEntities = [ "world" ];
                 toPorts = [
                   {
                     ports = [

@@ -1,4 +1,5 @@
-{lib, ...}: {
+{ lib, ... }:
+{
   imports = [
     ./1password-connect
     ./argocd
@@ -40,11 +41,13 @@
         # because the values of these labels change each release.
         # Here we add a transformer that strips them out after
         # templating the helm charts in each application.
-        helm.transformer = map (lib.kube.removeLabels [
-          "app.kubernetes.io/managed-by"
-          "app.kubernetes.io/version"
-          "helm.sh/chart"
-        ]);
+        helm.transformer = map (
+          lib.kube.removeLabels [
+            "app.kubernetes.io/managed-by"
+            "app.kubernetes.io/version"
+            "helm.sh/chart"
+          ]
+        );
       };
     };
   };

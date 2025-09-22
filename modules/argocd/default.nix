@@ -3,40 +3,40 @@
   config,
   charts,
   ...
-}: let
+}:
+let
   cfg = config.services.argocd;
 
   namespace = "argocd";
 
-  values =
-    lib.attrsets.recursiveUpdate {
-      server.ingress = {
-        inherit (config.networking.traefik) ingressClassName;
+  values = lib.attrsets.recursiveUpdate {
+    server.ingress = {
+      inherit (config.networking.traefik) ingressClassName;
 
-        enabled = true;
-        hostname = "argocd.${config.networking.domain}";
-      };
+      enabled = true;
+      hostname = "argocd.${config.networking.domain}";
+    };
 
-      repoServer.dnsConfig.options = [
-        {
-          name = "ndots";
-          value = "1";
-        }
-      ];
+    repoServer.dnsConfig.options = [
+      {
+        name = "ndots";
+        value = "1";
+      }
+    ];
 
-      configs = {
-        # Leave here until migration to nixidy is done.
-        cm."kustomize.buildOptions" = "--enable-helm";
+    configs = {
+      # Leave here until migration to nixidy is done.
+      cm."kustomize.buildOptions" = "--enable-helm";
 
-        # Traefik will terminate TLS so argocd-server
-        # can run with plain HTTP.
-        params."server.insecure" = "true";
-      };
+      # Traefik will terminate TLS so argocd-server
+      # can run with plain HTTP.
+      params."server.insecure" = "true";
+    };
 
-      global.networkPolicy.create = true;
-    }
-    cfg.values;
-in {
+    global.networkPolicy.create = true;
+  } cfg.values;
+in
+{
   options.services.argocd = with lib; {
     enable = mkOption {
       type = types.bool;
@@ -44,7 +44,7 @@ in {
     };
     values = mkOption {
       type = types.attrsOf types.anything;
-      default = {};
+      default = { };
     };
   };
 
@@ -64,7 +64,7 @@ in {
         # argocd-server.
         networkPolicies.allow-traefik-ingress.spec = {
           podSelector.matchLabels."app.kubernetes.io/name" = "argocd-server";
-          policyTypes = ["Ingress"];
+          policyTypes = [ "Ingress" ];
           ingress = [
             {
               from = [
@@ -107,7 +107,7 @@ in {
                       }
                     ];
                     rules.dns = [
-                      {matchPattern = "*";}
+                      { matchPattern = "*"; }
                     ];
                   }
                 ];
@@ -115,7 +115,7 @@ in {
               # Allow HTTPS to github.com
               {
                 toFQDNs = [
-                  {matchName = "github.com";}
+                  { matchName = "github.com"; }
                 ];
                 toPorts = [
                   {
@@ -136,7 +136,7 @@ in {
             endpointSelector.matchLabels."app.kubernetes.io/part-of" = "argocd";
             egress = [
               {
-                toEntities = ["kube-apiserver"];
+                toEntities = [ "kube-apiserver" ];
                 toPorts = [
                   {
                     ports = [

@@ -1,4 +1,5 @@
-{lib, ...}: {
+{ lib, ... }:
+{
   templates.webApplication = {
     options = with lib; {
       image = mkOption {
@@ -17,7 +18,7 @@
       };
       env = mkOption {
         type = with lib.types; attrsOf anything;
-        default = {};
+        default = { };
         description = "Environment variables to add to the web application's conainer.";
       };
       ingress = {
@@ -38,63 +39,66 @@
       };
     };
 
-    output = {
-      name,
-      config,
-      ...
-    }: let
-      cfg = config;
-      appLabels = {
-        "app.kubernetes.io/name" = name;
-      };
-    in {
-      deployments."${name}" = {
-        metadata.labels = appLabels;
-        spec = {
-          replicas = cfg.replicas;
-          selector.matchLabels = appLabels;
-          template = {
-            metadata.labels = appLabels;
-            spec.containers."${name}" = {
-              inherit (cfg) env;
-              image = cfg.image;
-              ports."http".containerPort = cfg.port;
+    output =
+      {
+        name,
+        config,
+        ...
+      }:
+      let
+        cfg = config;
+        appLabels = {
+          "app.kubernetes.io/name" = name;
+        };
+      in
+      {
+        deployments."${name}" = {
+          metadata.labels = appLabels;
+          spec = {
+            replicas = cfg.replicas;
+            selector.matchLabels = appLabels;
+            template = {
+              metadata.labels = appLabels;
+              spec.containers."${name}" = {
+                inherit (cfg) env;
+                image = cfg.image;
+                ports."http".containerPort = cfg.port;
+              };
             };
           };
         };
-      };
 
-      services."${name}".spec = {
-        type = "ClusterIP";
-        selector = appLabels;
-        ports.http = {
-          port = 80;
-          targetPort = cfg.port;
-          protocol = "TCP";
+        services."${name}".spec = {
+          type = "ClusterIP";
+          selector = appLabels;
+          ports.http = {
+            port = 80;
+            targetPort = cfg.port;
+            protocol = "TCP";
+          };
+        };
+
+        ingresses = lib.mkIf cfg.ingress.enable {
+          "${name}".spec = {
+            inherit (cfg.ingress) ingressClassName;
+
+            rules = [
+              {
+                host = cfg.ingress.host;
+                http.paths = [
+                  {
+                    path = "/";
+                    pathType = "Prefix";
+                    backend.service = {
+                      inherit name;
+                      port.name = "http";
+                    };
+                  }
+                ];
+              }
+            ];
+          };
         };
       };
-
-      ingresses = lib.mkIf cfg.ingress.enable {
-        "${name}".spec = {
-          inherit (cfg.ingress) ingressClassName;
-
-          rules = [
-            {
-              host = cfg.ingress.host;
-              http.paths = [
-                {
-                  path = "/";
-                  pathType = "Prefix";
-                  backend.service = {
-                    inherit name;
-                    port.name = "http";
-                  };
-                }
-              ];
-            }
-          ];
-        };
-      };
-    };
   };
 }

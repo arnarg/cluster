@@ -3,9 +3,11 @@
   config,
   charts,
   ...
-}: let
+}:
+let
   namespace = "k8s-gateway";
-in {
+in
+{
   applications.k8s-gateway = {
     inherit namespace;
     createNamespace = true;
@@ -17,7 +19,7 @@ in {
         inherit (config.networking) domain;
 
         # Only watch ingresses.
-        watchedResources = ["Ingress"];
+        watchedResources = [ "Ingress" ];
 
         # Fallthrough on miss.
         fallthrough.enabled = true;
@@ -25,15 +27,15 @@ in {
         # Add forward to cloudflare DNS.
         extraZonePlugins = [
           # Copied from standard values.yaml.
-          {name = "log";}
-          {name = "errors";}
+          { name = "log"; }
+          { name = "errors"; }
           {
             name = "health";
             configBlock = ''
               lameduck 5s
             '';
           }
-          {name = "ready";}
+          { name = "ready"; }
           {
             name = "prometheus";
             parameters = "0.0.0.0:9153";
@@ -46,9 +48,9 @@ in {
               tls_servername cloudflare-dns.com
             '';
           }
-          {name = "loop";}
-          {name = "reload";}
-          {name = "loadbalance";}
+          { name = "loop"; }
+          { name = "reload"; }
+          { name = "loadbalance"; }
         ];
       };
     };
@@ -58,12 +60,12 @@ in {
       # DNS over TLS requests to 1.1.1.1 and 1.0.0.1.
       networkPolicies.allow-upstream-tls-dns-egress.spec = {
         podSelector.matchLabels."app.kubernetes.io/name" = "k8s-gateway";
-        policyTypes = ["Egress"];
+        policyTypes = [ "Egress" ];
         egress = [
           {
             to = [
-              {ipBlock.cidr = "1.1.1.1/32";}
-              {ipBlock.cidr = "1.0.0.1/32";}
+              { ipBlock.cidr = "1.1.1.1/32"; }
+              { ipBlock.cidr = "1.0.0.1/32"; }
             ];
             ports = [
               {
@@ -79,7 +81,7 @@ in {
       # make DNS requests to k8s-gateway.
       networkPolicies.allow-tailscale-ingress.spec = {
         podSelector.matchLabels."app.kubernetes.io/name" = "k8s-gateway";
-        policyTypes = ["Ingress"];
+        policyTypes = [ "Ingress" ];
         ingress = [
           {
             from = [
@@ -103,7 +105,7 @@ in {
         endpointSelector.matchLabels."app.kubernetes.io/name" = "k8s-gateway";
         egress = [
           {
-            toEntities = ["kube-apiserver"];
+            toEntities = [ "kube-apiserver" ];
             toPorts = [
               {
                 ports = [
@@ -123,14 +125,26 @@ in {
       # https://github.com/ori-edge/k8s_gateway/issues/279#issuecomment-2309773449
       clusterRoles.k8s-gateway.rules = lib.mkForce [
         {
-          apiGroups = [""];
-          resources = ["services" "namespaces"];
-          verbs = ["list" "watch"];
+          apiGroups = [ "" ];
+          resources = [
+            "services"
+            "namespaces"
+          ];
+          verbs = [
+            "list"
+            "watch"
+          ];
         }
         {
-          apiGroups = ["extensions" "networking.k8s.io"];
-          resources = ["ingresses"];
-          verbs = ["list" "watch"];
+          apiGroups = [
+            "extensions"
+            "networking.k8s.io"
+          ];
+          resources = [ "ingresses" ];
+          verbs = [
+            "list"
+            "watch"
+          ];
         }
       ];
     };

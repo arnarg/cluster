@@ -3,7 +3,8 @@
   config,
   charts,
   ...
-}: let
+}:
+let
   cfg = config.storage.csi.nfs;
 
   namespace = "kube-system";
@@ -12,7 +13,8 @@
 
   # Parse default values in the chart
   values = lib.head (lib.kube.fromYAML (builtins.readFile "${chart}/values.yaml"));
-in {
+in
+{
   options.storage.csi.nfs = with lib; {
     enable = mkOption {
       type = types.bool;
@@ -33,7 +35,7 @@ in {
     };
     values = mkOption {
       type = types.attrsOf types.anything;
-      default = {};
+      default = { };
     };
   };
 
@@ -53,7 +55,7 @@ in {
           parameters.share = cfg.share;
           reclaimPolicy = "Retain";
           volumeBindingMode = "Immediate";
-          mountOptions = ["nfsvers=4.1"];
+          mountOptions = [ "nfsvers=4.1" ];
         };
 
         # Allow csi-driver-nfs access to kube-apiserver
@@ -62,7 +64,7 @@ in {
           endpointSelector.matchLabels.app = "snapshot-controller";
           egress = [
             {
-              toEntities = ["kube-apiserver"];
+              toEntities = [ "kube-apiserver" ];
               toPorts = [
                 {
                   ports = [

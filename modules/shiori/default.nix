@@ -1,10 +1,14 @@
-{config, ...}: let
+{ config, ... }:
+let
   namespace = "shiori";
 
-  labels = {"app.kubernetes.io/name" = "shiori";};
+  labels = {
+    "app.kubernetes.io/name" = "shiori";
+  };
 
   port = 8080;
-in {
+in
+{
   applications.shiori = {
     inherit namespace;
     createNamespace = true;
@@ -59,7 +63,7 @@ in {
           inherit (config.storage.csi.nfs) storageClassName;
 
           volumeMode = "Filesystem";
-          accessModes = ["ReadWriteOnce"];
+          accessModes = [ "ReadWriteOnce" ];
           resources.requests.storage = "10Gi";
         };
       };
@@ -76,7 +80,7 @@ in {
 
       networkPolicies.allow-traefik-ingress.spec = {
         podSelector.matchLabels = labels;
-        policyTypes = ["Ingress"];
+        policyTypes = [ "Ingress" ];
         ingress = [
           {
             from = [
@@ -128,7 +132,7 @@ in {
           endpointSelector.matchLabels = labels;
           egress = [
             {
-              toEntities = ["world"];
+              toEntities = [ "world" ];
               toPorts = [
                 {
                   ports = [
