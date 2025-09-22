@@ -52,8 +52,8 @@
               src = pkgs.fetchFromGitHub {
                 owner = "cilium";
                 repo = "cilium";
-                rev = "v1.17.5";
-                hash = "sha256-frpu1kJICbZFwmH/KQ2pZHcS2M+XvLvxZpzVxok2eM8=";
+                rev = "v1.18.2";
+                hash = "sha256-FhXLLppugsdnMo9AiTvch44QtLcNUtj9w5wqE14fo+4=";
               };
               crds = [
                 "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml"
@@ -65,8 +65,8 @@
               src = pkgs.fetchFromGitHub {
                 owner = "tailscale";
                 repo = "tailscale";
-                rev = "v1.84.2";
-                hash = "sha256-dSYophk7oogLmlRBr05Quhx+iMUuJU2VXhAZVtJLTts=";
+                rev = "v1.88.2";
+                hash = "sha256-pVigC0C6skzO65sx+QO7Rz/p7Q1FTO0Bw4TIwFPG1yY=";
               };
               crds = [ "cmd/k8s-operator/deploy/crds/tailscale.com_proxyclasses.yaml" ];
             };
