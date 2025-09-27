@@ -26,6 +26,11 @@ spec:
       ports:
         - port: redis
           protocol: TCP
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - port: metrics
+          protocol: TCP
   podSelector:
     matchLabels:
       app.kubernetes.io/instance: argocd

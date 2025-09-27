@@ -30,6 +30,10 @@ spec:
       ports:
         - port: repo-server
           protocol: TCP
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - port: metrics
   podSelector:
     matchLabels:
       app.kubernetes.io/instance: argocd
