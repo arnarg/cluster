@@ -1,46 +1,26 @@
 apiVersion: v1
 data:
-  application.namespaces: ""
   applicationsetcontroller.enable.leader.election: "false"
-  applicationsetcontroller.enable.progressive.syncs: "false"
   applicationsetcontroller.log.format: text
   applicationsetcontroller.log.level: info
-  applicationsetcontroller.namespaces: ""
-  applicationsetcontroller.policy: sync
   commitserver.log.format: text
   commitserver.log.level: info
-  controller.ignore.normalizer.jq.timeout: 1s
   controller.log.format: text
   controller.log.level: info
-  controller.operation.processors: "10"
-  controller.repo.server.timeout.seconds: "60"
-  controller.self.heal.timeout.seconds: "5"
-  controller.status.processors: "20"
-  controller.sync.timeout.seconds: "0"
   dexserver.log.format: text
   dexserver.log.level: info
-  hydrator.enabled: "false"
   notificationscontroller.log.format: text
   notificationscontroller.log.level: info
-  otlp.address: ""
   redis.server: argocd-redis:6379
   repo.server: argocd-repo-server:8081
   reposerver.log.format: text
   reposerver.log.level: info
-  reposerver.parallelism.limit: "0"
-  server.basehref: /
   server.dex.server: https://argocd-dex-server:5556
   server.dex.server.strict.tls: "false"
-  server.disable.auth: "false"
-  server.enable.gzip: "true"
-  server.enable.proxy.extension: "false"
   server.insecure: "true"
   server.log.format: text
   server.log.level: info
   server.repo.server.strict.tls: "false"
-  server.rootpath: ""
-  server.staticassets: /shared/app
-  server.x.frame.options: sameorigin
 kind: ConfigMap
 metadata:
   labels:
