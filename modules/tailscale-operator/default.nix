@@ -36,42 +36,6 @@ in
         chart = charts.tailscale.tailscale-operator;
       };
 
-      yamls = [
-        ''
-          apiVersion: cilium.io/v2
-          kind: CiliumNetworkPolicy
-          metadata:
-            name: allow-egress
-            namespace: ${namespace}
-          spec:
-            description: "Policy for egress to allow tailscale components to talk to traefik, k8s-gateway and tailscale required traffic"
-            endpointSelector:
-              # The proxies do not have predictable labels
-              # so I have to allow the whole namespace.
-              matchLabels:
-                k8s:io.kubernetes.pod.namespace: tailscale
-            egress:
-            # Talk to k8s-gateway
-            - toEndpoints:
-              - matchLabels:
-                  app.kubernetes.io/name: k8s-gateway
-                  k8s:io.kubernetes.pod.namespace: k8s-gateway
-              toPorts:
-              - ports:
-                - port: "1053"
-                  protocol: UDP
-            # Talk to required Tailscale ports
-            - toEntities:
-              - world
-              toPorts:
-              - ports:
-                - port: "443"
-                  protocol: TCP
-                - port: "3478"
-                  protocol: UDP
-        ''
-      ];
-
       # Load tailscale credentials from 1password
       templates.opSecret.operator-oauth.itemName = "tailscale_oauth";
 
@@ -192,6 +156,53 @@ in
                     ports = [
                       {
                         port = "1900";
+                        protocol = "UDP";
+                      }
+                    ];
+                  }
+                ];
+              }
+            ];
+          };
+
+          # Allow egress to traefik, k8s-gateway and tailscale required traffic
+          allow-egress.spec = {
+            description = "Policy for egress to allow tailscale components to talk to traefik, k8s-gateway and tailscale required traffic.";
+            endpointSelector.matchLabels."argocd.argoproj.io/part-of" = "tailscale-operator";
+            egress = [
+              # Talk to k8s-gateway
+              {
+                toEndpoints = [
+                  {
+                    matchLabels = {
+                      "app.kubernetes.io/name" = "k8s-gateway";
+                      "k8s:io.kubernetes.pod.namespace" = "k8s-gateway";
+                    };
+                  }
+                ];
+                toPorts = [
+                  {
+                    ports = [
+                      {
+                        port = "1053";
+                        protocol = "UDP";
+                      }
+                    ];
+                  }
+                ];
+              }
+              # Talk to required Tailscale ports
+              {
+                toEntities = [ "world" ];
+                toPorts = [
+                  {
+                    ports = [
+                      {
+                        port = "443";
+                        protocol = "TCP";
+                      }
+                      {
+                        port = "3478";
                         protocol = "UDP";
                       }
                     ];
