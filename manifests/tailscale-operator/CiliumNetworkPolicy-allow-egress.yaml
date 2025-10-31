@@ -4,7 +4,7 @@ metadata:
   name: allow-egress
   namespace: tailscale
 spec:
-  description: Policy for egress to allow tailscale components to talk to traefik, k8s-gateway and tailscale required traffic
+  description: Policy for egress to allow tailscale components to talk to traefik, k8s-gateway and tailscale required traffic.
   egress:
     - toEndpoints:
         - matchLabels:
@@ -24,4 +24,4 @@ spec:
               protocol: UDP
   endpointSelector:
     matchLabels:
-      k8s:io.kubernetes.pod.namespace: tailscale
+      argocd.argoproj.io/part-of: tailscale-operator
