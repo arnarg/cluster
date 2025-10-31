@@ -38,9 +38,6 @@
           modules = [
             ./modules
             ./configuration.nix
-            {
-              nixidy.build.revision = if (self ? rev) then self.rev else self.dirtyRev;
-            }
           ];
         };
 
