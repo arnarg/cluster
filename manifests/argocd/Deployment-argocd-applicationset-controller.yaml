@@ -18,7 +18,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cmd-params: 7871c3e875c2dbb685a8cdf9be338e7532163f4513cf47d763daa459fe61c5c9
+        checksum/cmd-params: 0d316d0820bf2784e00758d3ff4e1dd5ff1376c0f26e90cf21d9a9f95b69c430
       labels:
         app.kubernetes.io/component: applicationset-controller
         app.kubernetes.io/instance: argocd
@@ -208,7 +208,7 @@ spec:
                   key: applicationsetcontroller.status.max.resources.count
                   name: argocd-cmd-params-cm
                   optional: true
-          image: quay.io/argoproj/argocd:v3.1.9
+          image: quay.io/argoproj/argocd:v3.2.0
           imagePullPolicy: IfNotPresent
           name: applicationset-controller
           ports:
@@ -242,6 +242,8 @@ spec:
               name: gpg-keyring
             - mountPath: /app/config/reposerver/tls
               name: argocd-repo-server-tls
+            - mountPath: /home/argocd/params
+              name: argocd-cmd-params-cm
             - mountPath: /tmp
               name: tmp
       dnsPolicy: ClusterFirst
@@ -274,3 +276,10 @@ spec:
                 path: ca.crt
             optional: true
             secretName: argocd-repo-server-tls
+        - configMap:
+            items:
+              - key: applicationsetcontroller.profile.enabled
+                path: profiler.enabled
+            name: argocd-cmd-params-cm
+            optional: true
+          name: argocd-cmd-params-cm
