@@ -84,9 +84,13 @@ rules:
       - leases
     verbs:
       - create
-      - delete
+  - apiGroups:
+      - coordination.k8s.io
+    resourceNames:
+      - 58ac56fa.applicationsets.argoproj.io
+    resources:
+      - leases
+    verbs:
       - get
-      - list
-      - patch
       - update
-      - watch
+      - create
