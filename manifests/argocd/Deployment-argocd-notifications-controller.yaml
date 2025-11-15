@@ -20,7 +20,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cmd-params: 0d316d0820bf2784e00758d3ff4e1dd5ff1376c0f26e90cf21d9a9f95b69c430
+        checksum/cmd-params: c38304dd91690d9f16eefb855c9f324cfe5e5be6e97fc039b9fd1661495b5025
       labels:
         app.kubernetes.io/component: notifications-controller
         app.kubernetes.io/instance: argocd
