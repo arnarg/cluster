@@ -1,0 +1,16 @@
+addressType: FQDN
+apiVersion: discovery.k8s.io/v1
+endpoints:
+  - addresses:
+      - lab.codedbearder.com
+    conditions:
+      ready: true
+kind: EndpointSlice
+metadata:
+  labels:
+    kubernetes.io/service-name: tm
+  name: tm
+  namespace: external
+ports:
+  - name: http
+    port: 9091

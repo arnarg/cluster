@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tm
+  namespace: external
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: tm.cdbrdr.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: tm
+                port:
+                  name: http
+            path: /
+            pathType: Prefix

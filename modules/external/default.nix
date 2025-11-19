@@ -54,6 +54,51 @@ in
           }
         ];
       };
+
+      services.tm.spec.ports = [
+        {
+          name = "http";
+          port = 80;
+          targetPort = 9091;
+        }
+      ];
+
+      endpointSlices.tm = {
+        metadata.labels."kubernetes.io/service-name" = "tm";
+        addressType = "FQDN";
+        endpoints = [
+          {
+            addresses = [ "lab.codedbearder.com" ];
+            conditions.ready = true;
+          }
+        ];
+        ports = [
+          {
+            name = "http";
+            port = 9091;
+          }
+        ];
+      };
+
+      ingresses.tm.spec = {
+        inherit (config.networking.traefik) ingressClassName;
+
+        rules = [
+          {
+            host = "tm.${config.networking.domain}";
+            http.paths = [
+              {
+                path = "/";
+                pathType = "Prefix";
+                backend.service = {
+                  name = "tm";
+                  port.name = "http";
+                };
+              }
+            ];
+          }
+        ];
+      };
     };
   };
 }
