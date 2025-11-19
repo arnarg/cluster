@@ -159,113 +159,115 @@ in
         };
 
         # Allow egress to lab.
-        ciliumNetworkPolicies.allow-lab-egress.spec = {
-          endpointSelector.matchLabels."app.kubernetes.io/name" = "traefik";
-          egress = [
-            {
-              # Services happen to be hosted on the same node
-              # as the kube-apiserver
-              toEntities = [ "kube-apiserver" ];
-              toPorts = [
-                {
-                  ports = [
-                    {
-                      port = "9091";
-                      protocol = "TCP";
-                    }
-                    {
-                      port = "443";
-                      protocol = "TCP";
-                    }
-                  ];
-                }
-              ];
-            }
-          ];
-        };
+        ciliumNetworkPolicies = {
+          allow-lab-egress.spec = {
+            endpointSelector.matchLabels."app.kubernetes.io/name" = "traefik";
+            egress = [
+              {
+                # Services happen to be hosted on the same node
+                # as the kube-apiserver
+                toEntities = [ "kube-apiserver" ];
+                toPorts = [
+                  {
+                    ports = [
+                      {
+                        port = "9091";
+                        protocol = "TCP";
+                      }
+                      {
+                        port = "443";
+                        protocol = "TCP";
+                      }
+                    ];
+                  }
+                ];
+              }
+            ];
+          };
 
-        # Allow traefik to talk to kube-apiserver
-        ciliumNetworkPolicies.allow-kube-apiserver-egress.spec = {
-          endpointSelector.matchLabels."app.kubernetes.io/name" = "traefik";
-          egress = [
-            {
-              toEntities = [ "kube-apiserver" ];
-              toPorts = [
-                {
-                  ports = [
-                    {
-                      port = "6443";
-                      protocol = "TCP";
-                    }
-                  ];
-                }
-              ];
-            }
-          ];
-        };
+          # Allow traefik to talk to kube-apiserver
+          allow-kube-apiserver-egress.spec = {
+            endpointSelector.matchLabels."app.kubernetes.io/name" = "traefik";
+            egress = [
+              {
+                toEntities = [ "kube-apiserver" ];
+                toPorts = [
+                  {
+                    ports = [
+                      {
+                        port = "6443";
+                        protocol = "TCP";
+                      }
+                    ];
+                  }
+                ];
+              }
+            ];
+          };
 
-        # Allow traefik external access to cloudflare and let's encrypt
-        ciliumNetworkPolicies.allow-world-egress.spec = {
-          endpointSelector.matchLabels."app.kubernetes.io/name" = "traefik";
-          egress = [
-            # Enable DNS proxying
-            {
-              toEndpoints = [
-                {
-                  matchLabels = {
-                    "k8s:io.kubernetes.pod.namespace" = "kube-system";
-                    "k8s:k8s-app" = "kube-dns";
-                  };
-                }
-              ];
-              toPorts = [
-                {
-                  ports = [
-                    {
-                      port = "53";
-                      protocol = "ANY";
-                    }
-                  ];
-                  rules.dns = [
-                    { matchPattern = "*"; }
-                  ];
-                }
-              ];
-            }
-            # Allow HTTPS to cloudflare and let's encrypt
-            {
-              toFQDNs = [
-                { matchName = "api.cloudflare.com"; }
-                { matchName = "acme-v02.api.letsencrypt.org"; }
-              ];
-              toPorts = [
-                {
-                  ports = [
-                    {
-                      port = "443";
-                      protocol = "TCP";
-                    }
-                  ];
-                }
-              ];
-            }
-            # Allow DNS lookups with cloudflare
-            {
-              toFQDNs = [
-                { matchPattern = "*.ns.cloudflare.com"; }
-              ];
-              toPorts = [
-                {
-                  ports = [
-                    {
-                      port = "53";
-                      protocol = "UDP";
-                    }
-                  ];
-                }
-              ];
-            }
-          ];
+          # Allow traefik external access to cloudflare and let's encrypt
+          allow-world-egress.spec = {
+            endpointSelector.matchLabels."app.kubernetes.io/name" = "traefik";
+            egress = [
+              # Enable DNS proxying
+              {
+                toEndpoints = [
+                  {
+                    matchLabels = {
+                      "k8s:io.kubernetes.pod.namespace" = "kube-system";
+                      "k8s:k8s-app" = "kube-dns";
+                    };
+                  }
+                ];
+                toPorts = [
+                  {
+                    ports = [
+                      {
+                        port = "53";
+                        protocol = "ANY";
+                      }
+                    ];
+                    rules.dns = [
+                      { matchPattern = "*"; }
+                    ];
+                  }
+                ];
+              }
+              # Allow HTTPS to cloudflare and let's encrypt
+              {
+                toFQDNs = [
+                  { matchName = "api.cloudflare.com"; }
+                  { matchName = "acme-v02.api.letsencrypt.org"; }
+                ];
+                toPorts = [
+                  {
+                    ports = [
+                      {
+                        port = "443";
+                        protocol = "TCP";
+                      }
+                    ];
+                  }
+                ];
+              }
+              # Allow DNS lookups with cloudflare
+              {
+                toFQDNs = [
+                  { matchPattern = "*.ns.cloudflare.com"; }
+                ];
+                toPorts = [
+                  {
+                    ports = [
+                      {
+                        port = "53";
+                        protocol = "UDP";
+                      }
+                    ];
+                  }
+                ];
+              }
+            ];
+          };
         };
       };
     };
