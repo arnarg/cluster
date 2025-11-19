@@ -158,6 +158,32 @@ in
           ];
         };
 
+        # Allow egress to lab.
+        ciliumNetworkPolicies.allow-lab-egress.spec = {
+          endpointSelector.matchLabels."app.kubernetes.io/name" = "traefik";
+          egress = [
+            {
+              # Services happen to be hosted on the same node
+              # as the kube-apiserver
+              toEntities = [ "kube-apiserver" ];
+              toPorts = [
+                {
+                  ports = [
+                    {
+                      port = "9091";
+                      protocol = "TCP";
+                    }
+                    {
+                      port = "443";
+                      protocol = "TCP";
+                    }
+                  ];
+                }
+              ];
+            }
+          ];
+        };
+
         # Allow traefik to talk to kube-apiserver
         ciliumNetworkPolicies.allow-kube-apiserver-egress.spec = {
           endpointSelector.matchLabels."app.kubernetes.io/name" = "traefik";
@@ -234,22 +260,6 @@ in
                     {
                       port = "53";
                       protocol = "UDP";
-                    }
-                  ];
-                }
-              ];
-            }
-            # Allow HTTPS to lab.codedbearder.com
-            {
-              toFQDNs = [
-                { matchName = "lab.codedbearder.com"; }
-              ];
-              toPorts = [
-                {
-                  ports = [
-                    {
-                      port = "443";
-                      protocol = "TCP";
                     }
                   ];
                 }
