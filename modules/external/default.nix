@@ -20,10 +20,10 @@ in
 
       endpointSlices.lab = {
         metadata.labels."kubernetes.io/service-name" = "lab";
-        addressType = "FQDN";
+        addressType = "IPv4";
         endpoints = [
           {
-            addresses = [ "lab.codedbearder.com" ];
+            addresses = [ "192.168.0.10" ];
             conditions.ready = true;
           }
         ];
@@ -65,10 +65,10 @@ in
 
       endpointSlices.tm = {
         metadata.labels."kubernetes.io/service-name" = "tm";
-        addressType = "FQDN";
+        addressType = "IPv4";
         endpoints = [
           {
-            addresses = [ "lab.codedbearder.com" ];
+            addresses = [ "192.168.0.10" ];
             conditions.ready = true;
           }
         ];
