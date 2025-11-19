@@ -10,6 +10,7 @@
     ./nfs
     ./shiori
     ./tailscale-operator
+    ./external
 
     ./templates.nix
   ];

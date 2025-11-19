@@ -239,6 +239,22 @@ in
                 }
               ];
             }
+            # Allow HTTPS to lab.codedbearder.com
+            {
+              toFQDNs = [
+                { matchName = "lab.codedbearder.com"; }
+              ];
+              toPorts = [
+                {
+                  ports = [
+                    {
+                      port = "443";
+                      protocol = "TCP";
+                    }
+                  ];
+                }
+              ];
+            }
           ];
         };
       };
