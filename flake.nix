@@ -57,29 +57,24 @@
                 "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml"
               ];
             };
-            tailscale = nixidy.packages.${system}.generators.fromCRD {
+            tailscale = nixidy.packages.${system}.generators.fromChartCRD {
               name = "tailscale";
-              src = pkgs.fetchFromGitHub {
-                owner = "tailscale";
-                repo = "tailscale";
-                rev = "v1.88.2";
-                hash = "sha256-pVigC0C6skzO65sx+QO7Rz/p7Q1FTO0Bw4TIwFPG1yY=";
-              };
-              crds = [ "cmd/k8s-operator/deploy/crds/tailscale.com_proxyclasses.yaml" ];
+              chart = nixhelm.chartsDerivations.${system}.tailscale.tailscale-operator;
+              crds = [ "ProxyClass" ];
             };
-            onepassword = nixidy.packages.${system}.generators.fromCRD {
+            onepassword = nixidy.packages.${system}.generators.fromChartCRD {
               name = "onepassword";
-              src = nixhelm.chartsDerivations.${system}."1password".connect;
-              crds = [ "crds/onepassworditem-crd.yaml" ];
+              chart = nixhelm.chartsDerivations.${system}."1password".connect;
+              crds = [ "OnePasswordItem" ];
             };
-            traefik = nixidy.packages.${system}.generators.fromCRD {
+            traefik = nixidy.packages.${system}.generators.fromChartCRD {
               name = "traefik";
-              src = nixhelm.chartsDerivations.${system}.traefik.traefik;
+              chart = nixhelm.chartsDerivations.${system}.traefik.traefik;
               crds = [
-                "crds/traefik.io_ingressroutes.yaml"
-                "crds/traefik.io_ingressroutetcps.yaml"
-                "crds/traefik.io_ingressrouteudps.yaml"
-                "crds/traefik.io_traefikservices.yaml"
+                "IngressRoute"
+                "IngressRouteTCP"
+                "IngressRouteUDP"
+                "TraefikService"
               ];
             };
           };

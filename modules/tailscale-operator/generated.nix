@@ -318,6 +318,14 @@ let
           description = "Annotations that will be added to the proxy Pod.\nAny annotations specified here will be merged with the default\nannotations applied to the Pod by the Tailscale Kubernetes operator.\nAnnotations must be valid Kubernetes annotations.\nhttps://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/#syntax-and-character-set";
           type = (types.nullOr (types.attrsOf types.str));
         };
+        "dnsConfig" = mkOption {
+          description = "DNSConfig defines DNS parameters for the proxy Pod in addition to those generated from DNSPolicy.\nWhen DNSPolicy is set to \"None\", DNSConfig must be specified.\nhttps://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config";
+          type = (types.nullOr (submoduleOf "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodDnsConfig"));
+        };
+        "dnsPolicy" = mkOption {
+          description = "DNSPolicy defines how DNS will be configured for the proxy Pod.\nBy default the Tailscale Kubernetes Operator does not set a DNS policy (uses cluster default).\nhttps://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy";
+          type = (types.nullOr types.str);
+        };
         "imagePullSecrets" = mkOption {
           description = "Proxy Pod's image pull Secrets.\nhttps://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#PodSpec";
           type = (
@@ -389,6 +397,8 @@ let
       config = {
         "affinity" = mkOverride 1002 null;
         "annotations" = mkOverride 1002 null;
+        "dnsConfig" = mkOverride 1002 null;
+        "dnsPolicy" = mkOverride 1002 null;
         "imagePullSecrets" = mkOverride 1002 null;
         "labels" = mkOverride 1002 null;
         "nodeName" = mkOverride 1002 null;
@@ -1335,6 +1345,57 @@ let
         };
 
       };
+    "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodDnsConfig" = {
+
+      options = {
+        "nameservers" = mkOption {
+          description = "A list of DNS name server IP addresses.\nThis will be appended to the base nameservers generated from DNSPolicy.\nDuplicated nameservers will be removed.";
+          type = (types.nullOr (types.listOf types.str));
+        };
+        "options" = mkOption {
+          description = "A list of DNS resolver options.\nThis will be merged with the base options generated from DNSPolicy.\nDuplicated entries will be removed. Resolution options given in Options\nwill override those that appear in the base DNSPolicy.";
+          type = (
+            types.nullOr (
+              coerceAttrsOfSubmodulesToListByKey
+                "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodDnsConfigOptions"
+                "name"
+                [ ]
+            )
+          );
+          apply = attrsToList;
+        };
+        "searches" = mkOption {
+          description = "A list of DNS search domains for host-name lookup.\nThis will be appended to the base search paths generated from DNSPolicy.\nDuplicated search paths will be removed.";
+          type = (types.nullOr (types.listOf types.str));
+        };
+      };
+
+      config = {
+        "nameservers" = mkOverride 1002 null;
+        "options" = mkOverride 1002 null;
+        "searches" = mkOverride 1002 null;
+      };
+
+    };
+    "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodDnsConfigOptions" = {
+
+      options = {
+        "name" = mkOption {
+          description = "Name is this DNS resolver option's name.\nRequired.";
+          type = (types.nullOr types.str);
+        };
+        "value" = mkOption {
+          description = "Value is this DNS resolver option's value.";
+          type = (types.nullOr types.str);
+        };
+      };
+
+      config = {
+        "name" = mkOverride 1002 null;
+        "value" = mkOverride 1002 null;
+      };
+
+    };
     "tailscale.com.v1alpha1.ProxyClassSpecStatefulSetPodImagePullSecrets" = {
 
       options = {
