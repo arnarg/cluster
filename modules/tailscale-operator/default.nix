@@ -30,6 +30,7 @@ in
 
     applications.tailscale-operator = {
       inherit namespace;
+      createNamespace = true; 
 
       helm.releases.tailscale-operator = {
         inherit values;
