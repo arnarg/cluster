@@ -11,7 +11,9 @@ in
 {
   applications.miniflux = {
     inherit namespace;
-    createNamespace = true;
+    createNamespace = false;
+
+    syncPolicy.syncOptions.createNamespace = true;
 
     templates = {
       # Load credentials from 1password
