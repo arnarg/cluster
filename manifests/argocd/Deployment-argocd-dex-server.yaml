@@ -18,7 +18,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cmd-params: 608fb7f196d763a4c515364d12e7dc44e1f37840ff43bbe6363138e8c5f197ad
+        checksum/cmd-params: e0f30a460117fc74f98f0ebde62df788962de85a5eaa79dd20b6d58232f66c00
       labels:
         app.kubernetes.io/component: dex-server
         app.kubernetes.io/instance: argocd
@@ -102,7 +102,7 @@ spec:
             - -n
             - /usr/local/bin/argocd
             - /shared/argocd-dex
-          image: quay.io/argoproj/argocd:v3.2.0
+          image: quay.io/argoproj/argocd:v3.2.1
           imagePullPolicy: IfNotPresent
           name: copyutil
           resources: {}
