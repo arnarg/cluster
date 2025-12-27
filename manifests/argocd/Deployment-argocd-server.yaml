@@ -18,8 +18,8 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cm: 3b687a107ce6c4fff34800bfc6e834e1b2b26b6335703a5af555b577fc503663
-        checksum/cmd-params: d818f3f0a816ca99b6a34ab463c8e351224718e5319d630953c778981868b8f1
+        checksum/cm: 2e33f2f03f488109de747997ef8a9948ca0ab9003cbbf95c7c9d8c5aa8cea1be
+        checksum/cmd-params: f8f162b7a0ce1ded8af6b8783074aab5b8b3602450009ebf72aa95df1e9c49cb
       labels:
         app.kubernetes.io/component: server
         app.kubernetes.io/instance: argocd
@@ -350,17 +350,8 @@ spec:
                   key: server.sync.replace.allowed
                   name: argocd-cmd-params-cm
                   optional: true
-          image: quay.io/argoproj/argocd:v3.2.2
+          image: quay.io/argoproj/argocd:v3.2.3
           imagePullPolicy: IfNotPresent
-          livenessProbe:
-            failureThreshold: 3
-            httpGet:
-              path: /healthz?full=true
-              port: server
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            successThreshold: 1
-            timeoutSeconds: 1
           name: server
           ports:
             - containerPort: 8080
@@ -369,15 +360,6 @@ spec:
             - containerPort: 8083
               name: metrics
               protocol: TCP
-          readinessProbe:
-            failureThreshold: 3
-            httpGet:
-              path: /healthz
-              port: server
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            successThreshold: 1
-            timeoutSeconds: 1
           resources: {}
           securityContext:
             allowPrivilegeEscalation: false
