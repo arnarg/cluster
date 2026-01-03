@@ -156,11 +156,11 @@
         "poetry2nix": "poetry2nix"
       },
       "locked": {
-        "lastModified": 1766799358,
-        "narHash": "sha256-NGfJXlQm20oon2sp6vUGC3IcE+5Kqau4yu8I0YRzNu8=",
+        "lastModified": 1767404047,
+        "narHash": "sha256-BcI4djThRTG0zxMRNKA5oEY/l5ye7GBo0szFIGP0nDg=",
         "owner": "farcaller",
         "repo": "nixhelm",
-        "rev": "77d7e0dc564bba5e06ca8231efa54241355095b9",
+        "rev": "f3702c816a8bfd98a21f44f9ae7d244ef474aff8",
         "type": "github"
       },
       "original": {
