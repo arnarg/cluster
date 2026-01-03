@@ -29,10 +29,11 @@ spec:
             - --extra-create-metadata=true
             - --feature-gates=HonorPVReclaimPolicy=true
             - --timeout=1200s
+            - --retry-interval-max=30m
           env:
             - name: ADDRESS
               value: /csi/csi.sock
-          image: registry.k8s.io/sig-storage/csi-provisioner:v5.0.2
+          image: registry.k8s.io/sig-storage/csi-provisioner:v5.3.0
           imagePullPolicy: IfNotPresent
           name: csi-provisioner
           resources:
@@ -50,15 +51,41 @@ spec:
             - mountPath: /csi
               name: socket-dir
         - args:
+            - -csi-address=$(ADDRESS)
+            - -v=2
+            - -leader-election
+            - --leader-election-namespace=kube-system
+            - -handle-volume-inuse-error=false
+          env:
+            - name: ADDRESS
+              value: /csi/csi.sock
+          image: registry.k8s.io/sig-storage/csi-resizer:v1.14.0
+          imagePullPolicy: IfNotPresent
+          name: csi-resizer
+          resources:
+            limits:
+              memory: 400Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - mountPath: /csi
+              name: socket-dir
+        - args:
             - --v=2
             - --csi-address=$(ADDRESS)
             - --leader-election-namespace=kube-system
             - --leader-election
             - --timeout=1200s
+            - --retry-interval-max=30m
           env:
             - name: ADDRESS
               value: /csi/csi.sock
-          image: registry.k8s.io/sig-storage/csi-snapshotter:v8.0.1
+          image: registry.k8s.io/sig-storage/csi-snapshotter:v8.3.0
           imagePullPolicy: IfNotPresent
           name: csi-snapshotter
           resources:
@@ -79,7 +106,7 @@ spec:
             - --probe-timeout=3s
             - --http-endpoint=localhost:29652
             - --v=2
-          image: registry.k8s.io/sig-storage/livenessprobe:v2.13.1
+          image: registry.k8s.io/sig-storage/livenessprobe:v2.17.0
           imagePullPolicy: IfNotPresent
           name: liveness-probe
           resources:
@@ -104,6 +131,7 @@ spec:
             - --mount-permissions=0
             - --working-mount-dir=/tmp
             - --default-ondelete-policy=delete
+            - --use-tar-command-in-snapshot=false
           env:
             - name: NODE_ID
               valueFrom:
@@ -111,7 +139,7 @@ spec:
                   fieldPath: spec.nodeName
             - name: CSI_ENDPOINT
               value: unix:///csi/csi.sock
-          image: registry.k8s.io/sig-storage/nfsplugin:v4.9.0
+          image: registry.k8s.io/sig-storage/nfsplugin:v4.12.1
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
@@ -161,6 +189,9 @@ spec:
           operator: Exists
         - effect: NoSchedule
           key: node-role.kubernetes.io/control-plane
+          operator: Exists
+        - effect: NoSchedule
+          key: CriticalAddonsOnly
           operator: Exists
       volumes:
         - hostPath:
