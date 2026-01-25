@@ -27,14 +27,14 @@ let
     providers.kubernetesIngress.publishedService.enabled = true;
 
     # Automatically redirect HTTP to HTTPS
-    ports.web.redirections.entryPoint = {
+    ports.web.http.redirections.entryPoint = {
       to = "websecure";
       scheme = "https";
       permanent = true;
     };
 
     # Use lets encrypt as a cert resolver.
-    ports.websecure.tls = {
+    ports.websecure.http.tls = {
       enabled = true;
       certResolver = "letsencrypt";
     };
