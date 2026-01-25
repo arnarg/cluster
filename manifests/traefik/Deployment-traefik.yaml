@@ -70,7 +70,7 @@ spec:
           envFrom:
             - secretRef:
                 name: acme-creds
-          image: docker.io/traefik:v3.6.6
+          image: docker.io/traefik:v3.6.7
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
