@@ -297,7 +297,7 @@ let
           apply = attrsToList;
         };
         "syntax" = mkOption {
-          description = "Syntax defines the router's rule syntax.\nMore info: https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/routing/rules-and-priority/#rulesyntax\nDeprecated: Please do not use this field and rewrite the router rules to use the v3 syntax.";
+          description = "Syntax defines the router's rule syntax.\nMore info: https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/http/routing/rules-and-priority/#rulesyntax\n\nDeprecated: Please do not use this field and rewrite the router rules to use the v3 syntax.";
           type = (types.nullOr types.str);
         };
       };
@@ -779,7 +779,7 @@ let
           apply = attrsToList;
         };
         "syntax" = mkOption {
-          description = "Syntax defines the router's rule syntax.\nMore info: https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/tcp/routing/rules-and-priority/#rulesyntax\nDeprecated: Please do not use this field and rewrite the router rules to use the v3 syntax.";
+          description = "Syntax defines the router's rule syntax.\nMore info: https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/tcp/routing/rules-and-priority/#rulesyntax\n\nDeprecated: Please do not use this field and rewrite the router rules to use the v3 syntax.";
           type = (types.nullOr types.str);
         };
       };
@@ -834,7 +834,7 @@ let
           type = (types.either types.int types.str);
         };
         "proxyProtocol" = mkOption {
-          description = "ProxyProtocol defines the PROXY protocol configuration.\nMore info: https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/tcp/service/#proxy-protocol\nDeprecated: ProxyProtocol will not be supported in future APIVersions, please use ServersTransport to configure ProxyProtocol instead.";
+          description = "ProxyProtocol defines the PROXY protocol configuration.\nMore info: https://doc.traefik.io/traefik/v3.6/reference/routing-configuration/tcp/service/#proxy-protocol\n\nDeprecated: ProxyProtocol will not be supported in future APIVersions, please use ServersTransport to configure ProxyProtocol instead.";
           type = (
             types.nullOr (submoduleOf "traefik.io.v1alpha1.IngressRouteTCPSpecRoutesServicesProxyProtocol")
           );
@@ -844,7 +844,7 @@ let
           type = (types.nullOr types.str);
         };
         "terminationDelay" = mkOption {
-          description = "TerminationDelay defines the deadline that the proxy sets, after one of its connected peers indicates\nit has closed the writing capability of its connection, to close the reading capability as well,\nhence fully terminating the connection.\nIt is a duration in milliseconds, defaulting to 100.\nA negative value means an infinite deadline (i.e. the reading capability is never closed).\nDeprecated: TerminationDelay will not be supported in future APIVersions, please use ServersTransport to configure the TerminationDelay instead.";
+          description = "TerminationDelay defines the deadline that the proxy sets, after one of its connected peers indicates\nit has closed the writing capability of its connection, to close the reading capability as well,\nhence fully terminating the connection.\nIt is a duration in milliseconds, defaulting to 100.\nA negative value means an infinite deadline (i.e. the reading capability is never closed).\n\nDeprecated: TerminationDelay will not be supported in future APIVersions, please use ServersTransport to configure the TerminationDelay instead.";
           type = (types.nullOr types.int);
         };
         "tls" = mkOption {
