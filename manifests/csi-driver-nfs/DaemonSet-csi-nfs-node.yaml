@@ -44,6 +44,7 @@ spec:
             - --v=2
             - --csi-address=/csi/csi.sock
             - --kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)
+            - --http-endpoint=localhost:19809
           env:
             - name: DRIVER_REG_SOCK_PATH
               value: /var/lib/kubelet/plugins/csi-nfsplugin/csi.sock
@@ -53,7 +54,20 @@ spec:
                   fieldPath: spec.nodeName
           image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.15.0
           imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 2
+            httpGet:
+              host: localhost
+              path: /healthz
+              port: healthz
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            timeoutSeconds: 10
           name: node-driver-registrar
+          ports:
+            - containerPort: 19809
+              name: healthz
+              protocol: TCP
           resources:
             limits:
               memory: 100Mi
@@ -82,7 +96,7 @@ spec:
                   fieldPath: spec.nodeName
             - name: CSI_ENDPOINT
               value: unix:///csi/csi.sock
-          image: registry.k8s.io/sig-storage/nfsplugin:v4.12.1
+          image: registry.k8s.io/sig-storage/nfsplugin:v4.13.1
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5

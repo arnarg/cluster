@@ -18,7 +18,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cmd-params: 810be2fec9884e1353069bc20cfd98891dfcf4236e6377d642d18100defc2242
+        checksum/cmd-params: 38f2854b2fc42f48eede8f0348c3c57323794736ac3d144c3ccd10134d931bab
       labels:
         app.kubernetes.io/component: applicationset-controller
         app.kubernetes.io/instance: argocd
@@ -208,7 +208,7 @@ spec:
                   key: applicationsetcontroller.status.max.resources.count
                   name: argocd-cmd-params-cm
                   optional: true
-          image: quay.io/argoproj/argocd:v3.2.6
+          image: quay.io/argoproj/argocd:v3.3.2
           imagePullPolicy: IfNotPresent
           name: applicationset-controller
           ports:
