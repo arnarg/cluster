@@ -30,7 +30,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /healthz
-              port: 8081
+              port: http
           name: frontend
           ports:
             - containerPort: 8081
@@ -38,7 +38,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /
-              port: 8081
+              port: http
           securityContext:
             allowPrivilegeEscalation: false
           terminationMessagePolicy: FallbackToLogsOnError
