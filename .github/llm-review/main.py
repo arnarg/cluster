@@ -80,7 +80,7 @@ if __name__ == "__main__":
     desc_prompt = get_desc_prompt()
     desc = do_completion(
         api_key,
-        "moonshotai/Kimi-K2-Instruct",
+        "Qwen/Qwen3-Next-80B-A3B-Thinking",
         desc_prompt,
         diff,
     )
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     title_prompt = get_title_prompt()
     title = do_completion(
         api_key,
-        "deepseek-ai/DeepSeek-V3",
+        "openai/gpt-oss-20b",
         title_prompt,
         desc,
     )
