@@ -10,6 +10,12 @@ let
   namespace = "traefik";
 
   values = lib.attrsets.recursiveUpdate {
+    # Replace image with ghcr.io
+    image = {
+      registry = "ghcr.io";
+      repository = "traefik/traefik";
+    };
+
     # Create an ingress class.
     ingressClass = {
       enabled = true;

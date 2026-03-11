@@ -10,7 +10,8 @@ let
   namespace = "tailscale";
 
   values = lib.attrsets.recursiveUpdate {
-    # Default values
+    operatorConfig.image.repository = "ghcr.io/tailscale/k8s-operator";
+    proxyConfig.image.repository = "ghcr.io/tailscale/k8s-operator";
   } cfg.values;
 in
 {
@@ -30,7 +31,7 @@ in
 
     applications.tailscale-operator = {
       inherit namespace;
-      createNamespace = true; 
+      createNamespace = true;
 
       helm.releases.tailscale-operator = {
         inherit values;
