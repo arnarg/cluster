@@ -35,7 +35,8 @@ in
 
       helm.releases.tailscale-operator = {
         inherit values;
-        chart = charts.tailscale.tailscale-operator;
+        # TODO: look into going back to nixhelm's version
+        chart = charts.ts.tailscale-operator;
       };
 
       # Load tailscale credentials from 1password
