@@ -11,7 +11,7 @@ let
 
   values = lib.attrsets.recursiveUpdate {
     operatorConfig.image.repository = "ghcr.io/tailscale/k8s-operator";
-    proxyConfig.image.repository = "ghcr.io/tailscale/k8s-operator";
+    proxyConfig.image.repository = "ghcr.io/tailscale/tailscale";
   } cfg.values;
 in
 {
@@ -35,8 +35,7 @@ in
 
       helm.releases.tailscale-operator = {
         inherit values;
-        # TODO: look into going back to nixhelm's version
-        chart = charts.ts.tailscale-operator;
+        chart = charts.tailscale.tailscale-operator;
       };
 
       # Load tailscale credentials from 1password
