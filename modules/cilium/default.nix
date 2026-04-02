@@ -44,7 +44,7 @@ let
     # Enable Hubble UI.
     hubble = {
       relay.enabled = true;
-      ui.enabled = true;
+      ui.enabled = false;
       # This should be used so the rendered manifest
       # doesn't contain TLS secrets.
       tls.auto.method = "cronJob";
