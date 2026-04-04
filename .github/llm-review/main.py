@@ -80,7 +80,7 @@ if __name__ == "__main__":
     desc_prompt = get_desc_prompt()
     desc = do_completion(
         api_key,
-        "Qwen/Qwen3-Next-80B-A3B-Thinking",
+        "Qwen/Qwen3-Coder-480B-A35B-Instruct",
         desc_prompt,
         diff,
     )
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     title_prompt = get_title_prompt()
     title = do_completion(
         api_key,
-        "openai/gpt-oss-20b",
+        "deepseek-ai/DeepSeek-V3-0324",
         title_prompt,
         desc,
     )
