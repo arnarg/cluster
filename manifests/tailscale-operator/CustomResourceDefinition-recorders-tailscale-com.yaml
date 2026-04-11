@@ -65,6 +65,7 @@ spec:
                     Required if S3 storage is not set up, to ensure that recordings are accessible.
                   type: boolean
                 replicas:
+                  default: 1
                   description: Replicas specifies how many instances of tsrecorder to run. Defaults to 1.
                   format: int32
                   minimum: 0
@@ -1676,6 +1677,14 @@ spec:
                     pattern: ^tag:[a-zA-Z][a-zA-Z0-9-]*$
                     type: string
                   type: array
+                tailnet:
+                  description: |-
+                    Tailnet specifies the tailnet this Recorder should join. If blank, the default tailnet is used. When set, this
+                    name must match that of a valid Tailnet resource. This field is immutable and cannot be changed once set.
+                  type: string
+                  x-kubernetes-validations:
+                    - message: Recorder tailnet is immutable
+                      rule: self == oldSelf
               type: object
               x-kubernetes-validations:
                 - message: S3 storage must be used when deploying multiple Recorder replicas
