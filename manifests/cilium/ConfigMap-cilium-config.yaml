@@ -41,6 +41,8 @@ data:
   egress-gateway-reconciliation-trigger-interval: 1s
   enable-auto-protect-node-port-range: "true"
   enable-bpf-clock-probe: "false"
+  enable-drift-checker: "true"
+  enable-dynamic-config: "true"
   enable-endpoint-health-checking: "true"
   enable-endpoint-lockdown-on-policy-overflow: "false"
   enable-health-check-loadbalancer-ip: "false"
@@ -68,7 +70,6 @@ data:
   enable-service-topology: "false"
   enable-source-ip-verification: "true"
   enable-tcx: "true"
-  enable-tunnel-big-tcp: "false"
   enable-vtep: "false"
   enable-well-known-identities: "false"
   enable-xt-socket-fallback: "true"
