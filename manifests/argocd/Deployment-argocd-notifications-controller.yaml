@@ -20,7 +20,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cmd-params: 58f46152963c0a1e918372aef3ad2cebb969fdb7971ca915fd38b5fae7d9e3f1
+        checksum/cmd-params: 2bb2f2ccca8f3d231385c2ce360c6c2efdfacf039a5e4b361c931b83bb668a36
       labels:
         app.kubernetes.io/component: notifications-controller
         app.kubernetes.io/instance: argocd
@@ -81,7 +81,7 @@ spec:
                   key: notificationscontroller.repo.server.plaintext
                   name: argocd-cmd-params-cm
                   optional: true
-          image: quay.io/argoproj/argocd:v3.3.8
+          image: quay.io/argoproj/argocd:v3.3.9
           imagePullPolicy: IfNotPresent
           name: notifications-controller
           ports:
