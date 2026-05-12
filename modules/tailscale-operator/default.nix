@@ -219,7 +219,7 @@ in
 
     # Set traefik's service to use tailscale-operator
     networking.traefik.values.service = {
-      loadBalancerClass = "tailscale";
+      spec.loadBalancerClass = "tailscale";
       annotations = {
         "tailscale.com/hostname" = "k8s-ingress";
         "tailscale.com/tags" = "tag:web";
