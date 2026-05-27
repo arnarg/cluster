@@ -15,6 +15,8 @@
           host = "chat.${config.networking.domain}";
         };
 
+        image.useSlim = true;
+
         ollama.enabled = false;
 
         enableOpenaiApi = false;

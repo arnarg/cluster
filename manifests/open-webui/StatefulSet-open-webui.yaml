@@ -60,7 +60,7 @@ spec:
                 secretKeyRef:
                   key: databaseName
                   name: openwebui-creds
-          image: ghcr.io/open-webui/open-webui:0.9.5
+          image: ghcr.io/open-webui/open-webui:0.9.5-slim
           imagePullPolicy: IfNotPresent
           name: open-webui
           ports:
@@ -77,7 +77,7 @@ spec:
             - sh
             - -c
             - cp -R -n /app/backend/data/* /tmp/app-data/
-          image: ghcr.io/open-webui/open-webui:0.9.5
+          image: ghcr.io/open-webui/open-webui:0.9.5-slim
           imagePullPolicy: IfNotPresent
           name: copy-app-data
           volumeMounts:
