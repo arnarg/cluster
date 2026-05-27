@@ -70,6 +70,7 @@ spec:
           volumeMounts:
             - mountPath: /app/backend/data
               name: data
+              subPath: openwebui
       enableServiceLinks: false
       initContainers:
         - command:
@@ -82,6 +83,7 @@ spec:
           volumeMounts:
             - mountPath: /tmp/app-data
               name: data
+              subPath: openwebui
       serviceAccountName: open-webui-sa
       volumes:
         - name: data

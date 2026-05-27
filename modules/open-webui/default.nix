@@ -53,6 +53,12 @@
             };
           }
         ];
+
+        persistence = {
+          enabled = true;
+          storageClass = config.storage.csi.nfs.storageClassName;
+          subPath = "openwebui";
+        };
       };
     };
   };
