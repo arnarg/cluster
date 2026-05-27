@@ -59,6 +59,8 @@
           storageClass = config.storage.csi.nfs.storageClassName;
           subPath = "openwebui";
         };
+
+        pipelines.enabled = false;
       };
     };
   };
