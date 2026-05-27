@@ -4,13 +4,14 @@
     ./1password-connect
     ./argocd
     ./cilium
+    ./external
     ./k8s-gateway
     ./miniflux
-    ./traefik
     ./nfs
+    ./open-webui
     ./shiori
     ./tailscale-operator
-    ./external
+    ./traefik
 
     ./templates.nix
   ];
