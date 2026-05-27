@@ -8,7 +8,6 @@
     ./k8s-gateway
     ./miniflux
     ./nfs
-    ./open-webui
     ./shiori
     ./tailscale-operator
     ./traefik
