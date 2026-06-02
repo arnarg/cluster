@@ -80,7 +80,7 @@ jobs:
         id: review
         if: ${{ steps.commit.outputs.pushed == 'true' }}
         env:
-          HYPERBOLIC_API_KEY: ${{ secrets.HYPERBOLIC_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
           git diff origin/main ${{env.BRANCH}} -- manifests ':!manifests/.revision' \
             | python .github/llm-review/main.py

@@ -3,7 +3,7 @@ import sys
 import os
 import openai
 
-BASE_URL = "https://api.hyperbolic.xyz/v1"
+BASE_URL = "https://openrouter.ai/api/v1"
 
 
 def get_desc_prompt() -> str:
@@ -72,7 +72,7 @@ def print_result(title: str, description: str):
 
 
 if __name__ == "__main__":
-    api_key = os.environ["HYPERBOLIC_API_KEY"]
+    api_key = os.environ["OPENROUTER_API_KEY"]
 
     diff = sys.stdin.read()
 
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     desc_prompt = get_desc_prompt()
     desc = do_completion(
         api_key,
-        "Qwen/Qwen3-Coder-480B-A35B-Instruct",
+        "deepseek/deepseek-v4-flash",
         desc_prompt,
         diff,
     )
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     title_prompt = get_title_prompt()
     title = do_completion(
         api_key,
-        "deepseek-ai/DeepSeek-V3-0324",
+        "deepseek/deepseek-v4-flash",
         title_prompt,
         desc,
     )
