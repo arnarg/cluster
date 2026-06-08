@@ -2,6 +2,7 @@
   lib,
   config,
   charts,
+  generators,
   ...
 }:
 let
@@ -27,7 +28,13 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    nixidy.applicationImports = [ ./generated.nix ];
+    nixidy.applicationImports = [
+      (generators.fromChartCRDModule {
+        name = "tailscale";
+        chart = charts.tailscale.tailscale-operator;
+        kindFilter = [ "ProxyClass" ];
+      })
+    ];
 
     applications.tailscale-operator = {
       inherit namespace;

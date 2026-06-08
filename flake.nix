@@ -57,26 +57,6 @@
                 "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml"
               ];
             };
-            tailscale = nixidy.packages.${system}.generators.fromChartCRD {
-              name = "tailscale";
-              chart = nixhelm.chartsDerivations.${system}.tailscale.tailscale-operator;
-              crds = [ "ProxyClass" ];
-            };
-            onepassword = nixidy.packages.${system}.generators.fromChartCRD {
-              name = "onepassword";
-              chart = nixhelm.chartsDerivations.${system}."1password".connect;
-              crds = [ "OnePasswordItem" ];
-            };
-            traefik = nixidy.packages.${system}.generators.fromChartCRD {
-              name = "traefik";
-              chart = nixhelm.chartsDerivations.${system}.traefik.traefik;
-              crds = [
-                "IngressRoute"
-                "IngressRouteTCP"
-                "IngressRouteUDP"
-                "TraefikService"
-              ];
-            };
           };
         };
 
@@ -87,17 +67,8 @@
               (pkgs.writeShellScript "generate-modules" ''
                 set -eo pipefail
 
-                echo "generate onepassword"
-                cat ${self.packages.${system}.generators.onepassword} > modules/1password-connect/generated.nix
-
                 echo "generate cilium"
                 cat ${self.packages.${system}.generators.cilium} > modules/cilium/generated.nix
-
-                echo "generate tailscale"
-                cat ${self.packages.${system}.generators.tailscale} > modules/tailscale-operator/generated.nix
-
-                echo "generate traefik"
-                cat ${self.packages.${system}.generators.traefik} > modules/traefik/generated.nix
               '').outPath;
           };
 

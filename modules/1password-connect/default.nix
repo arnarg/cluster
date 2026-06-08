@@ -1,6 +1,7 @@
 {
   lib,
   charts,
+  generators,
   ...
 }:
 let
@@ -8,7 +9,11 @@ let
 in
 {
   nixidy.applicationImports = [
-    ./generated.nix
+    (generators.fromChartCRDModule {
+      name = "onepassword";
+      chart = charts."1password".connect;
+      kindFilter = [ "OnePasswordItem" ];
+    })
   ];
 
   templates.opSecret = {
