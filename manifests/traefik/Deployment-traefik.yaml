@@ -70,7 +70,7 @@ spec:
           envFrom:
             - secretRef:
                 name: acme-creds
-          image: ghcr.io/traefik/traefik:v3.7.1
+          image: ghcr.io/traefik/traefik:v3.7.4
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
