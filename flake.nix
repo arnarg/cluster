@@ -61,6 +61,13 @@
         };
 
         apps = {
+          updateCharts = {
+            type = "app";
+            program = pkgs.lib.getExe (
+              nixidy.packages.${system}.mkChartsUpdateScript (nixidy.packages.${system}.mkChartAttrs ./charts)
+            );
+          };
+
           generate = {
             type = "app";
             program =
