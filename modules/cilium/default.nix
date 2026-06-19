@@ -1,7 +1,9 @@
 {
+  pkgs,
   lib,
   config,
   charts,
+  generators,
   ...
 }:
 let
@@ -64,7 +66,16 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    nixidy.applicationImports = [ ./generated.nix ];
+    nixidy.applicationImports = [
+      (generators.fromCRDModule {
+        name = "cilium";
+        src = pkgs.fetchFromGitHub (lib.importJSON ./source.json);
+        crdFiles = [
+          "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml"
+          "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml"
+        ];
+      })
+    ];
 
     applications.cilium = {
       inherit namespace;

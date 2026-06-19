@@ -15,17 +15,17 @@ jobs:
     env:
       BRANCH: promote/env/prod
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: cachix/install-nix-action@v31
         with:
           extra_nix_config: |
             extra-experimental-features = nix-command flakes
 
-      - uses: DeterminateSystems/magic-nix-cache-action@v11
+      - uses: DeterminateSystems/magic-nix-cache-action@v14
 
       - name: Setup python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
           cache: 'pip'
@@ -39,9 +39,9 @@ jobs:
         run: |
           git checkout -B ${{env.BRANCH}}
 
-          nix flake lock --update-input nixhelm
+          nix flake update nixhelm
 
-      - uses: EndBug/add-and-commit@v9
+      - uses: EndBug/add-and-commit@v10
         id: commit-nixhelm
         with:
           default_author: github_actions
@@ -52,14 +52,14 @@ jobs:
       - shell: bash
         if: ${{ steps.commit-nixhelm.outputs.committed == 'true' }}
         run: |
-          # In case any crds changed in a helm chart update
-          nix run .#generate
+          # In case the cilium appVersion changed
+          nix run .#updateCiliumSrc
 
-      - uses: EndBug/add-and-commit@v9
+      - uses: EndBug/add-and-commit@v10
         if: ${{ steps.commit-nixhelm.outputs.committed == 'true' }}
         with:
           default_author: github_actions
-          message: "chore: generate resource options"
+          message: "chore: update cilium source.json"
           fetch: false
           push: false
 
@@ -68,7 +68,7 @@ jobs:
         with:
           environment: .#prod
 
-      - uses: EndBug/add-and-commit@v9
+      - uses: EndBug/add-and-commit@v10
         id: commit
         with:
           default_author: github_actions
@@ -79,6 +79,7 @@ jobs:
       - shell: bash
         id: review
         if: ${{ steps.commit.outputs.pushed == 'true' }}
+        continue-on-error: true
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |

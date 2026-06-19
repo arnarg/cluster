@@ -43,21 +43,6 @@
 
         packages = {
           nixidy = nixidy.packages.${system}.cli;
-          generators = {
-            cilium = nixidy.packages.${system}.generators.fromCRD {
-              name = "cilium";
-              src = pkgs.fetchFromGitHub {
-                owner = "cilium";
-                repo = "cilium";
-                rev = "v1.18.2";
-                hash = "sha256-FhXLLppugsdnMo9AiTvch44QtLcNUtj9w5wqE14fo+4=";
-              };
-              crds = [
-                "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumnetworkpolicies.yaml"
-                "pkg/k8s/apis/cilium.io/client/crds/v2/ciliumclusterwidenetworkpolicies.yaml"
-              ];
-            };
-          };
         };
 
         apps = {
@@ -68,15 +53,29 @@
             );
           };
 
-          generate = {
+          updateCiliumSrc = {
             type = "app";
             program =
-              (pkgs.writeShellScript "generate-modules" ''
-                set -eo pipefail
+              let
+                script = pkgs.writeShellScript "update-cilium-source" ''
+                  set -eo pipefail
 
-                echo "generate cilium"
-                cat ${self.packages.${system}.generators.cilium} > modules/cilium/generated.nix
-              '').outPath;
+                  echo "Fetching version from Chart.yaml"
+
+                  VERSION="$(cat ${
+                    nixhelm.chartsDerivations.${system}.cilium.cilium
+                  }/Chart.yaml | ${pkgs.yq-go}/bin/yq -r .appVersion)"
+
+                  echo "Got version v$VERSION"
+
+                  echo "Generating source.json"
+
+                  ${pkgs.nix-prefetch-github}/bin/nix-prefetch-github --rev v$VERSION cilium cilium --json > ./modules/cilium/source.json
+
+                  echo "Done!"
+                '';
+              in
+              script.outPath;
           };
 
           staticCheck = {
