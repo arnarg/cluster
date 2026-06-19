@@ -57,25 +57,29 @@
             type = "app";
             program =
               let
-                script = pkgs.writeShellScript "update-cilium-source" ''
-                  set -eo pipefail
+                script = pkgs.writeShellApplication {
+                  name = "update-cilium-source";
+                  runtimeInputs = with pkgs; [
+                    yq-go
+                    nix-prefetch-git
+                    nix-prefetch-github
+                  ];
+                  text = ''
+                    echo "Fetching version from Chart.yaml"
 
-                  echo "Fetching version from Chart.yaml"
+                    VERSION="$(cat ${nixhelm.chartsDerivations.${system}.cilium.cilium}/Chart.yaml | yq -r .appVersion)"
 
-                  VERSION="$(cat ${
-                    nixhelm.chartsDerivations.${system}.cilium.cilium
-                  }/Chart.yaml | ${pkgs.yq-go}/bin/yq -r .appVersion)"
+                    echo "Got version v$VERSION"
 
-                  echo "Got version v$VERSION"
+                    echo "Generating source.json"
 
-                  echo "Generating source.json"
+                    nix-prefetch-github --rev "v$VERSION" cilium cilium --json > ./modules/cilium/source.json
 
-                  ${pkgs.nix-prefetch-github}/bin/nix-prefetch-github --rev v$VERSION cilium cilium --json > ./modules/cilium/source.json
-
-                  echo "Done!"
-                '';
+                    echo "Done!"
+                  '';
+                };
               in
-              script.outPath;
+              pkgs.lib.getExe script;
           };
 
           staticCheck = {
