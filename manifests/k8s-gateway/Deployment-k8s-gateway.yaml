@@ -15,7 +15,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: 019434ebbda2a95778cb8e1d9b4b86c1dcad106047882b5f0d1dc0b7cab7ab95
+        checksum/config: 99efe163499c54411fcbaf1bdb054088a496193be6204082e89c00e0201ad79c
       labels:
         app.kubernetes.io/instance: k8s-gateway
         app.kubernetes.io/name: k8s-gateway
@@ -24,7 +24,7 @@ spec:
         - args:
             - -conf
             - /etc/coredns/Corefile
-          image: quay.io/oriedge/k8s_gateway:v0.4.0
+          image: ghcr.io/k8s-gateway/k8s_gateway:1.7.0
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5
@@ -58,6 +58,7 @@ spec:
           volumeMounts:
             - mountPath: /etc/coredns
               name: config-volume
+      securityContext: {}
       serviceAccountName: k8s-gateway
       volumes:
         - configMap:
