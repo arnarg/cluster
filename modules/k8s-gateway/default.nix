@@ -13,7 +13,7 @@ in
     createNamespace = true;
 
     helm.releases.k8s-gateway = {
-      chart = charts.ori-edge.k8s-gateway;
+      chart = charts.k8s-gateway.k8s-gateway;
 
       values = {
         inherit (config.networking) domain;
