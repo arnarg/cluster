@@ -48,6 +48,7 @@ data:
   enable-health-check-loadbalancer-ip: "false"
   enable-health-check-nodeport: "true"
   enable-health-checking: "true"
+  enable-host-firewall: "false"
   enable-hubble: "true"
   enable-ipv4: "true"
   enable-ipv4-big-tcp: "false"

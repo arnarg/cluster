@@ -5,7 +5,7 @@ metadata:
     app.kubernetes.io/name: hubble-generate-certs
     app.kubernetes.io/part-of: cilium
     k8s-app: hubble-generate-certs
-  name: hubble-generate-certs-e8b35ec50c
+  name: hubble-generate-certs-4a8b800e16
   namespace: kube-system
 spec:
   template:
@@ -48,7 +48,7 @@ spec:
                   - key encipherment
                   - client auth
                   validity: 8760h
-          image: quay.io/cilium/certgen:v0.4.5@sha256:f107522ed4dcea62f918b8eb836142875a9b3e3cb2b2d728dc680f76cdbde6cf
+          image: quay.io/cilium/certgen:v0.4.6@sha256:511cedee817713fdf72db7e32fffb4b90da7747661b95180064f18198877626c
           imagePullPolicy: IfNotPresent
           name: certgen
           securityContext:
