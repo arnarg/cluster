@@ -65,7 +65,7 @@ spec:
               value: localhost
             - name: KUBERNETES_SERVICE_PORT
               value: "6444"
-          image: quay.io/cilium/cilium-envoy:v1.36.9-1782267392-edeb3f2af56c37c407efa1f63f0b32f595399bbc@sha256:767101fb8a5e38f055778cb43b7aa8eed80450b37f8121effac3d9de9e06dc99
+          image: quay.io/cilium/cilium-envoy:v1.37.5-1782911245-7cffc778c923f68a77954a53b1a98d6b5353f004@sha256:583057dd4f7d54cd41efff3c413aa0b148ac201f522e2c3336851fa89c78b039
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 10
@@ -74,6 +74,7 @@ spec:
               path: /healthz
               port: 9878
               scheme: HTTP
+            initialDelaySeconds: 0
             periodSeconds: 30
             successThreshold: 1
             timeoutSeconds: 5
@@ -90,6 +91,7 @@ spec:
               path: /healthz
               port: 9878
               scheme: HTTP
+            initialDelaySeconds: 0
             periodSeconds: 30
             successThreshold: 1
             timeoutSeconds: 5
@@ -113,6 +115,7 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 2
             successThreshold: 1
+            timeoutSeconds: 5
           terminationMessagePolicy: FallbackToLogsOnError
           volumeMounts:
             - mountPath: /var/run/cilium/envoy/sockets
@@ -128,6 +131,7 @@ spec:
               mountPropagation: HostToContainer
               name: bpf-maps
       hostNetwork: true
+      hostUsers: true
       nodeSelector:
         kubernetes.io/os: linux
       priorityClassName: system-node-critical
