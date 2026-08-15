@@ -30,6 +30,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+            - name: OPERATOR_SERVICE_ACCOUNT_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.serviceAccountName
             - name: OPERATOR_LOGIN_SERVER
             - name: OPERATOR_INGRESS_CLASS_NAME
               value: tailscale
@@ -38,7 +42,7 @@ spec:
             - name: CLIENT_SECRET_FILE
               value: /oauth/client_secret
             - name: PROXY_IMAGE
-              value: ghcr.io/tailscale/tailscale:v1.98.9
+              value: ghcr.io/tailscale/tailscale:v1.102.2
             - name: PROXY_TAGS
               value: tag:k8s
             - name: APISERVER_PROXY
@@ -53,7 +57,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.uid
-          image: ghcr.io/tailscale/k8s-operator:v1.98.9
+          image: ghcr.io/tailscale/k8s-operator:v1.102.2
           imagePullPolicy: Always
           name: operator
           volumeMounts:

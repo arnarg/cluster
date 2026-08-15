@@ -21,6 +21,14 @@ rules:
       - watch
   - apiGroups:
       - ""
+    resourceNames:
+      - operator
+    resources:
+      - serviceaccounts/token
+    verbs:
+      - create
+  - apiGroups:
+      - ""
     resources:
       - pods
     verbs:
