@@ -119,11 +119,11 @@
         "uv2nix": "uv2nix"
       },
       "locked": {
-        "lastModified": 1787361202,
-        "narHash": "sha256-OMgqE+f2cEzQKRwr6cYFqd2WlbTUjr6WT9yN82Gh1GE=",
+        "lastModified": 1790567178,
+        "narHash": "sha256-E/A7N25T7E3gh5jNe8CGcnSgVEfeKLx9ikQMjD8zFBk=",
         "owner": "farcaller",
         "repo": "nixhelm",
-        "rev": "cd7ca4e5bea09e40cd607d9d9a5e5ddfa225976a",
+        "rev": "a12dd48ec0a280a3cf1228971b035b5b783e6006",
         "type": "github"
       },
       "original": {

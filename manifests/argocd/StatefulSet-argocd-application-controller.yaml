@@ -19,8 +19,8 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cm: ec622c49668b3612189eb872dbe77913bb00cde26305d332d03c67884cbab53a
-        checksum/cmd-params: d0477239ed2358dfb649902c178c882c3930650fe01522b7883554aedc8c5166
+        checksum/cm: c71b82b4e7823156a2e4f2998dd9b8bbc1ff8a822afaafbc37db7626166cf056
+        checksum/cmd-params: 7169a66dffe48e8cacc4d5fee2ffe558d692709d8ddaf19ef44fa89b031b0fe5
       labels:
         app.kubernetes.io/component: application-controller
         app.kubernetes.io/instance: argocd
@@ -42,6 +42,12 @@ spec:
             - /usr/local/bin/argocd-application-controller
             - --metrics-port=8082
           env:
+            - name: GRPC_ENABLE_TXT_SERVICE_CONFIG
+              valueFrom:
+                configMapKeyRef:
+                  key: controller.grpc.enable.txt.service.config
+                  name: argocd-cmd-params-cm
+                  optional: true
             - name: ARGOCD_CONTROLLER_REPLICAS
               value: "1"
             - name: ARGOCD_APPLICATION_CONTROLLER_NAME
@@ -324,7 +330,7 @@ spec:
                   optional: true
             - name: KUBECACHEDIR
               value: /tmp/kubecache
-          image: quay.io/argoproj/argocd:v3.5.1
+          image: quay.io/argoproj/argocd:v3.5.3
           imagePullPolicy: IfNotPresent
           name: application-controller
           ports:

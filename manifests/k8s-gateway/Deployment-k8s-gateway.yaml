@@ -15,7 +15,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: 99efe163499c54411fcbaf1bdb054088a496193be6204082e89c00e0201ad79c
+        checksum/config: 5f2e9432f1d4b964f2debb3a98206d28b7e4a1078e9aeda9f582803407369b16
       labels:
         app.kubernetes.io/instance: k8s-gateway
         app.kubernetes.io/name: k8s-gateway
@@ -24,7 +24,7 @@ spec:
         - args:
             - -conf
             - /etc/coredns/Corefile
-          image: ghcr.io/k8s-gateway/k8s_gateway:1.7.0
+          image: codeberg.org/k8s-gateway/k8s_gateway:1.8.3
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 5

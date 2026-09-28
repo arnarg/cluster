@@ -9,7 +9,7 @@ let
 
   namespace = "kube-system";
 
-  chart = charts.kubernetes-csi.csi-driver-nfs;
+  chart = charts.csi.csi-driver-nfs;
 
   # Parse default values in the chart
   values = lib.head (lib.kube.fromYAML (builtins.readFile "${chart}/values.yaml"));
