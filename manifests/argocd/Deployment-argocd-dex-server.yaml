@@ -100,7 +100,7 @@ spec:
       initContainers:
         - command:
             - /bin/cp
-            - -n
+            - -f
             - /usr/local/bin/argocd
             - /shared/argocd-dex
           image: quay.io/argoproj/argocd:v3.5.3
