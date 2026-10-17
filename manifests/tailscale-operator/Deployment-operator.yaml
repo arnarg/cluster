@@ -42,7 +42,7 @@ spec:
             - name: CLIENT_SECRET_FILE
               value: /oauth/client_secret
             - name: PROXY_IMAGE
-              value: ghcr.io/tailscale/tailscale:v1.102.4
+              value: ghcr.io/tailscale/tailscale:v1.104.1
             - name: PROXY_TAGS
               value: tag:k8s
             - name: APISERVER_PROXY
@@ -57,7 +57,9 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.uid
-          image: ghcr.io/tailscale/k8s-operator:v1.102.4
+            - name: OPERATOR_SHARED_ACME_ACCOUNT_KEY
+              value: "false"
+          image: ghcr.io/tailscale/k8s-operator:v1.104.1
           imagePullPolicy: Always
           name: operator
           volumeMounts:

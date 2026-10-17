@@ -81,7 +81,7 @@ spec:
                   key: notificationscontroller.repo.server.plaintext
                   name: argocd-cmd-params-cm
                   optional: true
-          image: quay.io/argoproj/argocd:v3.5.4
+          image: quay.io/argoproj/argocd:v3.5.5
           imagePullPolicy: IfNotPresent
           name: notifications-controller
           ports:
