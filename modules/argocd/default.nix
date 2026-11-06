@@ -34,6 +34,9 @@ let
     };
 
     global.networkPolicy.create = true;
+
+    # Let the built-in `view` ClusterRole read Argo CD resources.
+    createAggregateRoles = true;
   } cfg.values;
 in
 {

@@ -3,6 +3,7 @@
   imports = [
     ./1password-connect
     ./argocd
+    ./cluster-access
     ./cilium
     ./external
     ./k8s-gateway

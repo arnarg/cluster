@@ -89,6 +89,22 @@ in
       };
 
       resources = {
+        # Let the built-in `view` ClusterRole read Cilium resources (policies, endpoints, identities, nodes).
+        clusterRoles.cilium-aggregate-to-view = {
+          metadata.labels."rbac.authorization.k8s.io/aggregate-to-view" = "true";
+          rules = [
+            {
+              apiGroups = [ "cilium.io" ];
+              resources = [ "*" ];
+              verbs = [
+                "get"
+                "list"
+                "watch"
+              ];
+            }
+          ];
+        };
+
         ciliumNetworkPolicies = {
           # Allow hubble relay server egress to nodes
           allow-hubble-relay-server-egress.spec = {

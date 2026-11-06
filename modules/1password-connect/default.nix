@@ -63,6 +63,22 @@ in
     };
 
     resources = {
+      # Let the built-in `view` ClusterRole read OnePasswordItems (they only hold item paths).
+      clusterRoles.onepassword-aggregate-to-view = {
+        metadata.labels."rbac.authorization.k8s.io/aggregate-to-view" = "true";
+        rules = [
+          {
+            apiGroups = [ "onepassword.com" ];
+            resources = [ "*" ];
+            verbs = [
+              "get"
+              "list"
+              "watch"
+            ];
+          }
+        ];
+      };
+
       ciliumNetworkPolicies = {
         # Allow 1password-connect operator pod to access kube-apiserver
         allow-kube-apiserver-egress.spec = {

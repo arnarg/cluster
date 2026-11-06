@@ -49,6 +49,22 @@ in
       templates.opSecret.operator-oauth.itemName = "tailscale_oauth";
 
       resources = {
+        # Let the built-in `view` ClusterRole read Tailscale operator resources.
+        clusterRoles.tailscale-aggregate-to-view = {
+          metadata.labels."rbac.authorization.k8s.io/aggregate-to-view" = "true";
+          rules = [
+            {
+              apiGroups = [ "tailscale.com" ];
+              resources = [ "*" ];
+              verbs = [
+                "get"
+                "list"
+                "watch"
+              ];
+            }
+          ];
+        };
+
         # The tailscale namespace needs a privileged pod security
         # policy.
         namespaces."${namespace}" = {
