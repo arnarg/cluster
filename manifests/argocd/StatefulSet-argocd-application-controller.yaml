@@ -19,7 +19,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/cm: c71b82b4e7823156a2e4f2998dd9b8bbc1ff8a822afaafbc37db7626166cf056
+        checksum/cm: adab4b79b2c89b8c5899787ee6108d593acc30eb6deaf4377cfc8e045a6e8b89
         checksum/cmd-params: 7169a66dffe48e8cacc4d5fee2ffe558d692709d8ddaf19ef44fa89b031b0fe5
       labels:
         app.kubernetes.io/component: application-controller
@@ -124,6 +124,24 @@ spec:
                   key: controller.metrics.cache.expiration
                   name: argocd-cmd-params-cm
                   optional: true
+            - name: ARGOCD_APPLICATION_CONTROLLER_METRICS_APPLICATION_LABELS
+              valueFrom:
+                configMapKeyRef:
+                  key: controller.metrics.application.labels
+                  name: argocd-cmd-params-cm
+                  optional: true
+            - name: ARGOCD_APPLICATION_CONTROLLER_METRICS_APPLICATION_CONDITIONS
+              valueFrom:
+                configMapKeyRef:
+                  key: controller.metrics.application.conditions
+                  name: argocd-cmd-params-cm
+                  optional: true
+            - name: ARGOCD_APPLICATION_CONTROLLER_METRICS_CLUSTER_LABELS
+              valueFrom:
+                configMapKeyRef:
+                  key: controller.metrics.cluster.labels
+                  name: argocd-cmd-params-cm
+                  optional: true
             - name: ARGOCD_APPLICATION_CONTROLLER_SELF_HEAL_TIMEOUT_SECONDS
               valueFrom:
                 configMapKeyRef:
@@ -196,6 +214,18 @@ spec:
                   key: redis.server
                   name: argocd-cmd-params-cm
                   optional: true
+            - name: REDIS_SENTINEL_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  key: redis.sentinel.hosts
+                  name: argocd-cmd-params-cm
+                  optional: true
+            - name: REDIS_SENTINEL_MASTER
+              valueFrom:
+                configMapKeyRef:
+                  key: redis.sentinel.master
+                  name: argocd-cmd-params-cm
+                  optional: true
             - name: REDIS_COMPRESSION
               valueFrom:
                 configMapKeyRef:
@@ -206,6 +236,12 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   key: redis.db
+                  name: argocd-cmd-params-cm
+                  optional: true
+            - name: ARGOCD_REDIS_KEY_PREFIX
+              valueFrom:
+                configMapKeyRef:
+                  key: redis.key.prefix
                   name: argocd-cmd-params-cm
                   optional: true
             - name: REDIS_USERNAME
@@ -260,6 +296,12 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   key: otlp.attrs
+                  name: argocd-cmd-params-cm
+                  optional: true
+            - name: ARGOCD_APPLICATION_CONTROLLER_OTLP_SAMPLE_RATIO
+              valueFrom:
+                configMapKeyRef:
+                  key: otlp.sample.ratio
                   name: argocd-cmd-params-cm
                   optional: true
             - name: ARGOCD_APPLICATION_NAMESPACES
@@ -330,7 +372,7 @@ spec:
                   optional: true
             - name: KUBECACHEDIR
               value: /tmp/kubecache
-          image: quay.io/argoproj/argocd:v3.5.6
+          image: quay.io/argoproj/argocd:v3.6.1
           imagePullPolicy: IfNotPresent
           name: application-controller
           ports:
@@ -365,6 +407,8 @@ spec:
               name: argocd-cmd-params-cm
             - mountPath: /tmp
               name: argocd-application-controller-tmp
+            - mountPath: /app/config/tls
+              name: tls-certs
           workingDir: /home/argocd
       dnsPolicy: ClusterFirst
       nodeSelector:
@@ -394,3 +438,7 @@ spec:
             name: argocd-cmd-params-cm
             optional: true
           name: argocd-cmd-params-cm
+        - configMap:
+            name: argocd-tls-certs-cm
+            optional: true
+          name: tls-certs

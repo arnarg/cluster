@@ -2,7 +2,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.19.0
+    controller-gen.kubebuilder.io/version: v0.23.0
   name: traefikservices.traefik.io
 spec:
   group: traefik.io
@@ -21,7 +21,7 @@ spec:
             TraefikService object allows to:
             - Apply weight to Services on load-balancing
             - Mirror traffic on services
-            More info: https://doc.traefik.io/traefik/v3.7/reference/routing-configuration/kubernetes/crd/http/traefikservice/
+            More info: https://doc.traefik.io/traefik/v3.8/reference/routing-configuration/kubernetes/crd/http/traefikservice/
           properties:
             apiVersion:
               description: |-
@@ -222,7 +222,7 @@ spec:
                         sticky:
                           description: |-
                             Sticky defines the sticky sessions configuration.
-                            More info: https://doc.traefik.io/traefik/v3.7/reference/routing-configuration/http/load-balancing/service/#sticky-sessions
+                            More info: https://doc.traefik.io/traefik/v3.8/reference/routing-configuration/http/load-balancing/service/#sticky-sessions
                           properties:
                             cookie:
                               description: Cookie defines the sticky cookie configuration.
@@ -449,7 +449,7 @@ spec:
                         sticky:
                           description: |-
                             Sticky defines the sticky sessions configuration.
-                            More info: https://doc.traefik.io/traefik/v3.7/reference/routing-configuration/http/load-balancing/service/#sticky-sessions
+                            More info: https://doc.traefik.io/traefik/v3.8/reference/routing-configuration/http/load-balancing/service/#sticky-sessions
                           properties:
                             cookie:
                               description: Cookie defines the sticky cookie configuration.
@@ -686,7 +686,7 @@ spec:
                           sticky:
                             description: |-
                               Sticky defines the sticky sessions configuration.
-                              More info: https://doc.traefik.io/traefik/v3.7/reference/routing-configuration/http/load-balancing/service/#sticky-sessions
+                              More info: https://doc.traefik.io/traefik/v3.8/reference/routing-configuration/http/load-balancing/service/#sticky-sessions
                             properties:
                               cookie:
                                 description: Cookie defines the sticky cookie configuration.
@@ -1021,7 +1021,7 @@ spec:
                           sticky:
                             description: |-
                               Sticky defines the sticky sessions configuration.
-                              More info: https://doc.traefik.io/traefik/v3.7/reference/routing-configuration/http/load-balancing/service/#sticky-sessions
+                              More info: https://doc.traefik.io/traefik/v3.8/reference/routing-configuration/http/load-balancing/service/#sticky-sessions
                             properties:
                               cookie:
                                 description: Cookie defines the sticky cookie configuration.
@@ -1162,7 +1162,7 @@ spec:
                     sticky:
                       description: |-
                         Sticky defines the sticky sessions configuration.
-                        More info: https://doc.traefik.io/traefik/v3.7/reference/routing-configuration/http/load-balancing/service/#sticky-sessions
+                        More info: https://doc.traefik.io/traefik/v3.8/reference/routing-configuration/http/load-balancing/service/#sticky-sessions
                       properties:
                         cookie:
                           description: Cookie defines the sticky cookie configuration.
@@ -1219,6 +1219,14 @@ spec:
                         - leasttime
                         - RoundRobin
                       type: string
+                    streamBody:
+                      description: |-
+                        StreamBody defines whether the request body is streamed to the mirrors while the main service reads it,
+                        instead of being buffered in memory before reaching the main service.
+                        A mirror reading the body too slowly is aborted, so that it never slows the main request down.
+                        It has no effect when MirrorBody is false, and cannot be used with MaxBodySize.
+                        Default value is false.
+                      type: boolean
                     weight:
                       description: |-
                         Weight defines the weight and should only be specified when Name references a TraefikService object
@@ -1394,7 +1402,7 @@ spec:
                           sticky:
                             description: |-
                               Sticky defines the sticky sessions configuration.
-                              More info: https://doc.traefik.io/traefik/v3.7/reference/routing-configuration/http/load-balancing/service/#sticky-sessions
+                              More info: https://doc.traefik.io/traefik/v3.8/reference/routing-configuration/http/load-balancing/service/#sticky-sessions
                             properties:
                               cookie:
                                 description: Cookie defines the sticky cookie configuration.
@@ -1464,7 +1472,7 @@ spec:
                     sticky:
                       description: |-
                         Sticky defines whether sticky sessions are enabled.
-                        More info: https://doc.traefik.io/traefik/v3.7/reference/routing-configuration/kubernetes/crd/http/traefikservice/#stickiness-and-load-balancing
+                        More info: https://doc.traefik.io/traefik/v3.8/reference/routing-configuration/kubernetes/crd/http/traefikservice/#stickiness-and-load-balancing
                       properties:
                         cookie:
                           description: Cookie defines the sticky cookie configuration.
