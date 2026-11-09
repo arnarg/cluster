@@ -8,32 +8,26 @@ let
     "watch"
   ];
 
-  subjects = [
-    {
-      kind = "ServiceAccount";
-      name = "incident-debugger";
-      inherit namespace;
-    }
-  ];
-
   bindTo = role: {
     roleRef = {
       apiGroup = "rbac.authorization.k8s.io";
       kind = "ClusterRole";
       name = role;
     };
-    inherit subjects;
+    subjects = [
+      {
+        kind = "ServiceAccount";
+        name = "incident-debugger";
+        inherit namespace;
+      }
+    ];
   };
 in
 {
   # Read-only access to the cluster for debugging during incidents.
   # Every change must go through this GitOps repo, so nothing here
-  # grants write access, exec, ephemeral containers, the node proxy
-  # or Secrets. The one exception is port-forward to pods in
-  # `kube-system`, so Hubble can be queried through hubble-relay:
-  #   kubectl -n kube-system port-forward svc/hubble-relay 4245:80
-  #   hubble observe --server localhost:4245 ...
-  # Pod names aren't stable, so this can't be limited to the relay pod.
+  # grants write access, exec, port-forward, ephemeral containers,
+  # the node proxy or Secrets.
   #
   # Namespaced resources and custom resources come from the
   # built-in `view` ClusterRole. Apps owning CRDs add their
@@ -117,28 +111,6 @@ in
       clusterRoleBindings = {
         incident-debugger-view = bindTo "view";
         incident-debugger = bindTo "incident-debugger";
-      };
-
-      # Port-forward into kube-system only, for reaching hubble-relay.
-      roles.incident-debugger-port-forward = {
-        metadata.namespace = "kube-system";
-        rules = [
-          {
-            apiGroups = [ "" ];
-            resources = [ "pods/portforward" ];
-            verbs = [ "create" ];
-          }
-        ];
-      };
-
-      roleBindings.incident-debugger-port-forward = {
-        metadata.namespace = "kube-system";
-        roleRef = {
-          apiGroup = "rbac.authorization.k8s.io";
-          kind = "Role";
-          name = "incident-debugger-port-forward";
-        };
-        inherit subjects;
       };
     };
   };
