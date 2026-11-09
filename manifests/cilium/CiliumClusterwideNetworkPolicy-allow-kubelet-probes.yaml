@@ -1,0 +1,10 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: allow-kubelet-probes
+spec:
+  description: Allow ingress from the local node (kubelet health probes) to all Cilium managed endpoints.
+  endpointSelector: {}
+  ingress:
+    - fromEntities:
+        - host

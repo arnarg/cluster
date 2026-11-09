@@ -252,7 +252,9 @@ in
             ];
           };
 
-          # Allow all health checks
+          # Allow Cilium's own node-to-node connectivity checks. This only
+          # selects the cilium-health endpoint each agent creates, not pods,
+          # so it does not cover kubelet liveness/readiness probes.
           cilium-health-checks.spec = {
             endpointSelector.matchLabels."reserved:health" = "";
             ingress = [
@@ -263,6 +265,19 @@ in
             egress = [
               {
                 toEntities = [ "remote-node" ];
+              }
+            ];
+          };
+
+          # Allow kubelet probes to every pod. With policy enforcement set to
+          # "always", a pod that no ingress policy selects drops all ingress,
+          # including probes from its own node.
+          allow-kubelet-probes.spec = {
+            description = "Allow ingress from the local node (kubelet health probes) to all Cilium managed endpoints.";
+            endpointSelector = { };
+            ingress = [
+              {
+                fromEntities = [ "host" ];
               }
             ];
           };

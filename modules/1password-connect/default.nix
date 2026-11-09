@@ -161,10 +161,11 @@ in
                 }
               ];
             }
-            # Allow HTTPS to my.1password.com
+            # Allow HTTPS to the 1Password API and the notifier (b5n)
             {
               toFQDNs = [
                 { matchName = "my.1password.com"; }
+                { matchName = "b5n.1password.com"; }
               ];
               toPorts = [
                 {

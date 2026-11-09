@@ -18,6 +18,7 @@ spec:
               - matchPattern: '*'
     - toFQDNs:
         - matchName: my.1password.com
+        - matchName: b5n.1password.com
       toPorts:
         - ports:
             - port: "443"
