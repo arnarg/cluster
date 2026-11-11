@@ -16,6 +16,18 @@ in
     })
   ];
 
+  # These secrets are deployed manually
+  nixidy.validation.references.ignore = [
+    {
+      kind = "Secret";
+      name = "op-credentials";
+    }
+    {
+      kind = "Secret";
+      name = "onepassword-token";
+    }
+  ];
+
   templates.opSecret = {
     options = with lib; {
       vault = mkOption {

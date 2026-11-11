@@ -77,6 +77,14 @@ in
       })
     ];
 
+    # This secret gets generator by a Job
+    nixidy.validation.references.ignore = [
+      {
+        kind = "Secret";
+        name = "hubble-relay-client-certs";
+      }
+    ];
+
     applications.cilium = {
       inherit namespace;
 

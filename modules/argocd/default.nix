@@ -52,6 +52,14 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    # This secret gets generated on first run
+    nixidy.validation.references.ignore = [
+      {
+        kind = "Secret";
+        name = "argocd-redis";
+      }
+    ];
+
     applications.argocd = {
       inherit namespace;
 
