@@ -49,8 +49,10 @@ spec:
             - --entryPoints.web.http.redirections.entryPoint.to=:443
             - --entryPoints.web.http.redirections.entryPoint.scheme=https
             - --entryPoints.web.http.redirections.entryPoint.permanent=true
+            - --entryPoints.web.transport.lifeCycle.requestAcceptGraceTimeout=5s
             - --entryPoints.websecure.http.tls=true
             - --entryPoints.websecure.http.tls.certResolver=letsencrypt
+            - --entryPoints.websecure.transport.lifeCycle.requestAcceptGraceTimeout=5s
             - --log.level=INFO
             - --certificatesresolvers.letsencrypt.acme.dnsChallenge.provider=cloudflare
             - --certificatesresolvers.letsencrypt.acme.dnsChallenge.resolvers=anirban.ns.cloudflare.com:53,chin.ns.cloudflare.com:53
@@ -70,7 +72,7 @@ spec:
           envFrom:
             - secretRef:
                 name: acme-creds
-          image: ghcr.io/traefik/traefik:v3.7.17
+          image: ghcr.io/traefik/traefik:v3.7.18
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
