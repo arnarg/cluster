@@ -124,6 +124,9 @@ spec:
               name: dexconfig
       nodeSelector:
         kubernetes.io/os: linux
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       serviceAccountName: argocd-dex-server
       terminationGracePeriodSeconds: 30
       volumes:
