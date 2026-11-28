@@ -35,7 +35,7 @@ spec:
                     app.kubernetes.io/name: argocd-repo-server
                 topologyKey: kubernetes.io/hostname
               weight: 100
-      automountServiceAccountToken: true
+      automountServiceAccountToken: false
       containers:
         - args:
             - /usr/local/bin/argocd-repo-server
@@ -338,7 +338,7 @@ spec:
               value: /helm-working-dir
             - name: HELM_DATA_HOME
               value: /helm-working-dir
-          image: quay.io/argoproj/argocd:v3.6.2
+          image: quay.io/argoproj/argocd:v3.6.3
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
@@ -404,7 +404,7 @@ spec:
           command:
             - sh
             - -c
-          image: quay.io/argoproj/argocd:v3.6.2
+          image: quay.io/argoproj/argocd:v3.6.3
           imagePullPolicy: IfNotPresent
           name: copyutil
           resources: {}
